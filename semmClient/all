@@ -1,0 +1,2959 @@
+all files
+#include "menu.h"
+
+MENU *me[MENUES];
+ITEM **it[MENU_ENTRIES];
+
+extern WINDOW *winDisplay[4];
+extern uint8_t g_actScreen;
+
+void sendKeyToMenu(int key) {
+	menu_driver(me[g_actScreen], key);
+}
+
+int getActMenuItem() {
+	return item_index(current_item(me[g_actScreen]));
+}
+
+void refreshMenu() {
+	refresh();
+	wrefresh(winDisplay[0]);
+}
+
+void initMenu() {
+	it[0] = (ITEM **) calloc(5, sizeof(ITEM *));
+	it[0][0] = new_item("Zahlen", "");
+	it[0][1] = new_item("Buchstaben", "");
+	it[0][2] = new_item("Namen", "");
+	it[0][3] = new_item("Ende", "");
+	it[0][4] = 0;
+	me[0] = new_menu(it[0]);
+
+	it[1] = (ITEM **) calloc(5, sizeof(ITEM *));
+	it[1][0] = new_item("eins", "");
+	it[1][1] = new_item("zwei", "");
+	it[1][2] = new_item("drei", "");
+	it[1][3] = new_item("zurueck", "");
+	it[1][4] = 0;
+	me[1] = new_menu(it[1]);
+
+	it[2] = (ITEM **) calloc(5, sizeof(ITEM *));
+	it[2][0] = new_item("AAA", "");
+	it[2][1] = new_item("BBB", "");
+	it[2][2] = new_item("CCC", "");
+	it[2][3] = new_item("zurueck", "");
+	it[2][4] = 0;
+	me[2] = new_menu(it[2]);
+
+	it[3] = (ITEM **) calloc(6, sizeof(ITEM *));
+	it[3][0] = new_item("Stefan", "");
+	it[3][1] = new_item("Ela", "");
+	it[3][2] = new_item("Marcel", "");
+	it[3][3] = new_item("Martina", "");
+	it[3][4] = new_item("zurueck", "");
+	it[3][5] = 0;
+	me[3] = new_menu(it[3]);
+
+	g_actScreen = 0;
+	for (int i = 0; i < MENU_ENTRIES; i++) {
+		set_menu_win(me[i], winDisplay[0]);
+		set_menu_sub(me[i], derwin(winDisplay[0], 8,18,2,2));
+	}
+	setScreen(g_actScreen);
+}
+
+void setScreen(uint8_t number) {
+	unpost_menu(me[g_actScreen]);
+	g_actScreen = number;
+	wclear(winDisplay[0]);
+	post_menu(me[g_actScreen]);
+	wattron(winDisplay[0], COLOR_PAIR(1)| A_STANDOUT);
+	box(winDisplay[0],0,0);
+	wattroff(winDisplay[0], COLOR_PAIR(1)| A_STANDOUT);
+	refreshMenu();
+}
+
+/*
+ * cli.cpp
+ *
+ *  Created on: Sep 11, 2013
+ *      Author: reinhard
+ */
+
+#include "cli.h"
+#include "../src/Game.h"
+
+WINDOW *winMain;
+//WINDOW *winTopLeft;
+//WINDOW *winTopRight;
+WINDOW *winConsole;
+
+WINDOW* winDisplay[4];
+WINDOW* winPlayground;
+extern CliDisplay* g_cliDisplay[4];
+
+//pthread_mutex_t mutexCli = PTHREAD_MUTEX_INITIALIZER;
+boost::mutex mutexCli;
+
+
+void initUi() {
+//	debug("initUi\n");
+
+	atexit(quit);
+	winMain = initscr();
+
+	wresize(winMain, 75,200);
+	box(winMain,0,0);
+
+	start_color();
+
+	init_pair(8, COLOR_WHITE, COLOR_BLACK);   // Stefan
+	init_pair(4, COLOR_CYAN, COLOR_BLACK);    // Ela
+	init_pair(2, COLOR_MAGENTA, COLOR_BLACK); // Martina
+	init_pair(1, COLOR_BLUE, COLOR_BLACK);    // Marcel
+	init_pair(5, COLOR_BLACK, COLOR_WHITE); // console
+	init_pair(6, COLOR_YELLOW, COLOR_BLACK); // console
+
+
+	curs_set(0);
+	noecho();
+	cbreak();
+	keypad(stdscr, 1);
+
+	// prepare winMain
+//	pthread_mutex_lock(&mutexCli);
+	mutexCli.lock();
+	mvprintw( 4,8,"   SSSSSSSSSSSSSSS  EEEEEEEEEEEEEEEEEEEEEE MMMMMMMM               MMMMMMMM MMMMMMMM               MMMMMMMM      222222222222222          000000000        1111111           444444444  ");
+	mvprintw( 5,8," SS:::::::::::::::S E::::::::::::::::::::E M:::::::M             M:::::::M M:::::::M             M:::::::M     2:::::::::::::::22      00:::::::::00     1::::::1          4::::::::4  ");
+	mvprintw( 6,8,"S:::::SSSSSS::::::S E::::::::::::::::::::E M::::::::M           M::::::::M M::::::::M           M::::::::M     2::::::222222:::::2   00:::::::::::::00  1:::::::1         4:::::::::4  ");
+	mvprintw( 7,8,"S:::::S     SSSSSSS EE::::::EEEEEEEEE::::E M:::::::::M         M:::::::::M M:::::::::M         M:::::::::M     2222222     2:::::2  0:::::::000:::::::0 111:::::1        4::::44::::4  ");
+	mvprintw( 8,8,"S:::::S               E:::::E       EEEEEE M::::::::::M       M::::::::::M M::::::::::M       M::::::::::M                 2:::::2  0::::::0   0::::::0    1::::1       4::::4 4::::4  ");
+	mvprintw( 9,8,"S:::::S               E:::::E              M:::::::::::M     M:::::::::::M M:::::::::::M     M:::::::::::M                 2:::::2  0:::::0     0:::::0    1::::1      4::::4  4::::4  ");
+	mvprintw(10,8," S::::SSSS            E::::::EEEEEEEEEE    M:::::::M::::M   M::::M:::::::M M:::::::M::::M   M::::M:::::::M              2222::::2   0:::::0     0:::::0    1::::1     4::::4   4::::4  ");
+	mvprintw(11,8,"  SS::::::SSSSS       E:::::::::::::::E    M::::::M M::::M M::::M M::::::M M::::::M M::::M M::::M M::::::M         22222::::::22    0:::::0 000 0:::::0    1::::l    4::::444444::::444");
+	mvprintw(12,8,"    SSS::::::::SS     E:::::::::::::::E    M::::::M  M::::M::::M  M::::::M M::::::M  M::::M::::M  M::::::M       22::::::::222      0:::::0 000 0:::::0    1::::l    4::::::::::::::::4");
+	mvprintw(13,8,"       SSSSSS::::S    E::::::EEEEEEEEEE    M::::::M   M:::::::M   M::::::M M::::::M   M:::::::M   M::::::M      2:::::22222         0:::::0     0:::::0    1::::l    4444444444:::::444");
+	mvprintw(14,8,"            S:::::S   E:::::E              M::::::M    M:::::M    M::::::M M::::::M    M:::::M    M::::::M     2:::::2              0:::::0     0:::::0    1::::l              4::::4  ");
+	mvprintw(15,8,"            S:::::S   E:::::E       EEEEEE M::::::M     MMMMM     M::::::M M::::::M     MMMMM     M::::::M     2:::::2              0::::::0   0::::::0    1::::l              4::::4  ");
+	mvprintw(16,8,"SSSSSSS     S:::::S EE::::::EEEEEEEE:::::E M::::::M               M::::::M M::::::M               M::::::M     2:::::2       222222 0:::::::000:::::::0 111::::::111           4::::4  ");
+	mvprintw(17,8,"S::::::SSSSSS:::::S E::::::::::::::::::::E M::::::M               M::::::M M::::::M               M::::::M     2::::::2222222:::::2  00:::::::::::::00  1::::::::::1         44::::::44");
+	mvprintw(18,8,"S:::::::::::::::SS  E::::::::::::::::::::E M::::::M               M::::::M M::::::M               M::::::M     2::::::::::::::::::2    00:::::::::00    1::::::::::1         4::::::::4");
+	mvprintw(19,8," SSSSSSSSSSSSSSS    EEEEEEEEEEEEEEEEEEEEEE MMMMMMMM               MMMMMMMM MMMMMMMM               MMMMMMMM     22222222222222222222      000000000      111111111111         4444444444");
+
+	mvprintw(65,40, "                  CONTROL KEYS            ");
+	mvprintw(66,40, "                                          ");
+	mvprintw(67,40, "         Stefan   Ela   Martina   Marcel  ");
+	mvprintw(68,40, "     up    Q       W       E        R     ");
+	mvprintw(69,40, "  enter    A       S       D        F     ");
+	mvprintw(70,40, "   down    Y       X       C        V     ");
+
+	refresh();
+	winConsole = newwin(30,71,20,125);
+	wbkgd(winConsole, COLOR_PAIR(5)|A_DIM );
+	wrefresh(winConsole);
+	scrollok(winConsole, TRUE);
+	mutexCli.unlock();
+
+
+	winPlayground = newwin(37,69,25,25);
+	g_cliDisplay[3] = new CliDisplay(4,26,20,10,"Stefan", 8);
+	g_cliDisplay[2] = new CliDisplay(95,26,20,10,"Ela", 4);
+	g_cliDisplay[1] = new CliDisplay(95,50,20,10,"Martina", 2);
+	g_cliDisplay[0] = new CliDisplay(4,50,20,10,"Marcel", 1);
+
+//	debug("new Displays done\n");
+
+
+
+
+}
+
+void drawBigDot(WINDOW* win, int x, int y, int colorPairId){
+//	pthread_mutex_lock(&mutexPrintPG);
+	wattron(win, COLOR_PAIR(colorPairId));
+	mvwprintw(win, y-1, x-2, " --- ");
+	mvwprintw(win, y  , x-2, "|   |");
+	mvwprintw(win, y+1, x-2, " --- ");
+	wattroff(win, COLOR_PAIR(colorPairId));
+//	pthread_mutex_unlock(&mutexPrintPG);
+}
+
+void drawMeeple(WINDOW* win, int x, int y, int colorPairId){
+//	pthread_mutex_lock(&mutexPrintPG);
+	wattron(win, COLOR_PAIR(colorPairId));
+	mvwprintw(win, y  , x, "X");
+	wattroff(win, COLOR_PAIR(colorPairId));
+//	pthread_mutex_unlock(&mutexPrintPG);
+}
+
+
+void drawPlayground(field_s* playground) {
+	mutexCli.lock();
+
+	//print playground
+	//Stefan
+	drawBigDot(winPlayground,10, 3,8);
+	drawBigDot(winPlayground, 4, 6,8);
+	drawBigDot(winPlayground,10, 6,8);
+	drawBigDot(winPlayground,10,15,8);
+	drawBigDot(winPlayground,16,18,8);
+	drawBigDot(winPlayground,22,18,8);
+	drawBigDot(winPlayground,28,18,8);
+
+	//Ela
+	drawBigDot(winPlayground,58, 3,4);
+	drawBigDot(winPlayground,58, 6,4);
+	drawBigDot(winPlayground,64, 6,4);
+	drawBigDot(winPlayground,40, 6,4);
+	drawBigDot(winPlayground,34, 9,4);
+	drawBigDot(winPlayground,34,12,4);
+	drawBigDot(winPlayground,34,15,4);
+
+	//Martina
+	drawBigDot(winPlayground,64,30,2);
+	drawBigDot(winPlayground,58,30,2);
+	drawBigDot(winPlayground,58,33,2);
+	drawBigDot(winPlayground,58,21,2);
+	drawBigDot(winPlayground,52,18,2);
+	drawBigDot(winPlayground,46,18,2);
+	drawBigDot(winPlayground,40,18,2);
+
+	//Marcel
+	drawBigDot(winPlayground,10,33,1);
+	drawBigDot(winPlayground,10,30,1);
+	drawBigDot(winPlayground, 4,30,1);
+	drawBigDot(winPlayground,28,30,1);
+	drawBigDot(winPlayground,34,27,1);
+	drawBigDot(winPlayground,34,24,1);
+	drawBigDot(winPlayground,34,21,1);
+
+	//rest
+	drawBigDot(winPlayground,16,15,6);
+	drawBigDot(winPlayground,22,15,6);
+	drawBigDot(winPlayground,28,15,6);
+	drawBigDot(winPlayground,28,12,6);
+	drawBigDot(winPlayground,28, 9,6);
+	drawBigDot(winPlayground,28, 6,6);
+	drawBigDot(winPlayground,34, 6,6);
+	drawBigDot(winPlayground,40, 9,6);
+	drawBigDot(winPlayground,40,12,6);
+	drawBigDot(winPlayground,40,15,6);
+	drawBigDot(winPlayground,46,15,6);
+	drawBigDot(winPlayground,52,15,6);
+	drawBigDot(winPlayground,58,15,6);
+	drawBigDot(winPlayground,58,18,6);
+	drawBigDot(winPlayground,52,21,6);
+	drawBigDot(winPlayground,46,21,6);
+	drawBigDot(winPlayground,40,21,6);
+	drawBigDot(winPlayground,40,24,6);
+	drawBigDot(winPlayground,40,27,6);
+	drawBigDot(winPlayground,40,30,6);
+	drawBigDot(winPlayground,34,30,6);
+	drawBigDot(winPlayground,28,27,6);
+	drawBigDot(winPlayground,28,24,6);
+	drawBigDot(winPlayground,28,21,6);
+	drawBigDot(winPlayground,28,21,6);
+	drawBigDot(winPlayground,22,21,6);
+	drawBigDot(winPlayground,16,21,6);
+	drawBigDot(winPlayground,10,21,6);
+	drawBigDot(winPlayground,10,18,6);
+
+	for(int i = 0; i < 96; i++){
+		if(playground[i].figure != NULL) {
+			drawMeeple(winPlayground, (playground[i].x * 6) + 4, (playground[i].y * 3) + 3, playground[i].figure->color);
+		}
+	}
+
+	box(winPlayground,0,0);
+	wrefresh(winPlayground);
+	mutexCli.unlock();
+}
+
+
+
+void quit() {
+	endwin();
+	std::cout << "exit" << std::endl;
+}
+
+int debug(const char *fmt, ...) {
+	mutexCli.lock();
+
+	int ret, y;
+
+	y = getmaxy(winConsole);
+	va_list list;
+	va_start(list, fmt);
+
+	wmove(winConsole, y - 1, 1);
+	ret = vwprintw(winConsole, fmt, list);
+	wrefresh(winConsole);
+	fflush(stdout);
+	mutexCli.unlock();
+	return ret;
+}
+
+int printPG(const char *fmt, ...) {
+	return 0;
+}
+
+int clearPG() {
+	return 0;
+}
+
+#include "tools.h"
+
+
+
+
+
+static char * timestamp(int line, char *srcfile) {
+	time_t rawtime;
+	struct tm *timeinfo;
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	char *ts = (char*) malloc(64 * sizeof(char));
+	int n = sprintf(ts, "(%.2d:%.2d:%.2d %s:%i)", timeinfo->tm_hour,
+			timeinfo->tm_min, timeinfo->tm_sec, srcfile, line);
+	if (n > 64) {
+		ts = (char*) realloc(ts, n);
+		n = sprintf(ts, "(%.2d:%.2d:%.2d %s:%i)", timeinfo->tm_hour,
+				timeinfo->tm_min, timeinfo->tm_sec, srcfile, line);
+	}
+	if (n == -1) {
+		fprintf(stderr, "*** tools.c: %d: Fatal error ***\n", __LINE__);
+		exit(EXIT_FAILURE);
+	}
+
+	return ts;
+}
+
+int file_exists(const char *f) {
+	struct stat st;
+	if (!stat(f, &st))
+		return S_ISREG(st.st_mode);
+	return -1;
+}
+
+void msg(int die, int line, const char *srcfile, FILE *fp, const char *fmt,
+		...) {
+	char *bn = strdup(srcfile);
+	bn = basename(bn);
+	char *ts = timestamp(line, bn);
+	fprintf(fp, "%s ", ts);
+	free(ts);
+
+	va_list ap;
+	va_start(ap, fmt);
+	vfprintf(fp, fmt, ap);
+	va_end(ap);
+
+	if (die)
+		exit(EXIT_FAILURE);
+}
+
+
+/*
+ * CliDisplay.cpp
+ *
+ *  Created on: Sep 13, 2013
+ *      Author: reinhard
+ */
+
+#include "CliDisplay.h"
+
+CliDisplay::CliDisplay(int x, int y, int width, int height, const char* name, int colorPairId){
+	m_x = x;
+	m_y = y;
+	m_width = width;
+	m_height = height + 1;
+	m_win = newwin(m_height ,m_width, m_y ,m_x);
+	m_colorPairId = colorPairId;
+	m_actPicNumber = 1;
+	m_name = name;
+
+	initMenues();
+
+	mvwprintw(m_win, 0, 0 ,"%s", m_name);
+
+	wattron(m_win, COLOR_PAIR(m_colorPairId)| A_STANDOUT);
+	box( derwin(m_win, m_height-1, m_width ,1,0),0,0);
+	wattroff(m_win, COLOR_PAIR(m_colorPairId)| A_STANDOUT);
+
+	refreshDisplay();
+}
+
+CliDisplay::~CliDisplay() {
+	// TODO Auto-generated destructor stub
+}
+
+void CliDisplay::initMenues() {
+
+	m_pics[1] = new CliPicture("SEMM");
+	m_pics[1]->assignDisplay(m_win);
+
+	m_pics[2] = new CliPicture("Teilnahme");
+	m_pics[2]->addItem("teilnehmen");
+	m_pics[2]->assignDisplay(m_win);
+
+	m_pics[3]= new CliPicture("Starten");
+	m_pics[3]->addItem("Spiel beginnen");
+	m_pics[3]->addItem("abbrechen");
+	m_pics[3]->assignDisplay(m_win);
+
+	m_pics[4] = new CliPicture("Bitte warten...");
+	m_pics[4]->assignDisplay(m_win);
+
+	m_pics[5] = new CliPicture("Bitte Würfel");
+	m_pics[5]->addItem("OK");
+	m_pics[5]->assignDisplay(m_win);
+
+	m_pics[6] = new CliPicture("Würfelzahl 1");
+	m_pics[6]->assignDisplay(m_win);
+
+	m_pics[7] = new CliPicture("Würfelzahl 2");
+	m_pics[7]->assignDisplay(m_win);
+
+	m_pics[8] = new CliPicture("Würfelzahl 3");
+	m_pics[8]->assignDisplay(m_win);
+
+	m_pics[9] = new CliPicture("Würfelzahl 4");
+	m_pics[9]->assignDisplay(m_win);
+
+	m_pics[10] = new CliPicture("Würfelzahl 5");
+	m_pics[10]->assignDisplay(m_win);
+
+	m_pics[11] = new CliPicture("Würfelzahl 6");
+	m_pics[11]->assignDisplay(m_win);
+
+	m_pics[12] = new CliPicture("Spielfigur heraussetzten");
+	m_pics[12]->addItem("OK");
+	m_pics[12]->assignDisplay(m_win);
+
+	m_pics[15] = new CliPicture("Figur waehlen");
+	m_pics[15]->addItem("1");
+	m_pics[15]->addItem("2");
+	m_pics[15]->addItem("3");
+	m_pics[15]->assignDisplay(m_win);
+
+	m_pics[16] = new CliPicture("Spielfigur setzen");
+	m_pics[16]->addItem("OK");
+	m_pics[16]->assignDisplay(m_win);
+
+	m_pics[20] = new CliPicture("Ungültiger Spielzug");
+	m_pics[20]->assignDisplay(m_win);
+
+	m_pics[21] = new CliPicture("Gewonnen");
+	m_pics[21]->assignDisplay(m_win);
+
+	m_pics[25] = new CliPicture("Spiel abbrechen");
+	m_pics[25]->addItem("OK"); // Habe den OK button eingefügt, ist aber noch nicht entschieden ob das reinkommt in die Bilder
+	m_pics[25]->addItem("Nein"); // Habe den Nein button eingefügt, ist aber noch nicht entschieden ob das reinkommt in die Bilder
+	m_pics[25]->assignDisplay(m_win);
+
+	m_pics[26] = new CliPicture("Display\n  gesperrt");
+	m_pics[26]->assignDisplay(m_win);
+
+
+}
+
+void CliDisplay::callPicture(int picNumber) {
+	m_pics[m_actPicNumber]->unpostPicture(m_win);
+	m_actPicNumber = picNumber;
+//	wclear(m_win);
+
+	m_pics[m_actPicNumber]->postPicture(m_win);
+	mvwprintw(m_win, 0, 0 ,"%s", m_name);
+	wattron(m_win, COLOR_PAIR(m_colorPairId) | A_STANDOUT);
+	box( derwin(m_win, m_height-1, m_width ,1,0),0,0);
+	wattroff(m_win, COLOR_PAIR(m_colorPairId)| A_STANDOUT);
+
+	refreshDisplay();
+}
+
+void CliDisplay::sendKey(int key) {
+	m_pics[m_actPicNumber]->sendKey(key);
+	refreshDisplay();
+}
+
+
+
+void CliDisplay::refreshDisplay(){
+//	refresh();
+	wrefresh(m_win);
+}
+
+/*
+ * cli.h
+ *
+ *  Created on: Sep 11, 2013
+ *      Author: reinhard
+ */
+
+#ifndef CLI_H_
+#define CLI_H_
+
+#include <iostream>
+#include <ncurses.h>
+#include <stdlib.h>
+#include <cstdlib>
+#include <signal.h>
+#include <string.h>
+#include <pthread.h>
+#include <boost/thread/mutex.hpp>
+
+
+#include "../general/CliDisplay.h"
+//
+
+struct field_s;
+
+void initUi();
+void drawBigDot(WINDOW* win, int x, int y, int colorPairId);
+void drawMeeple(WINDOW* win, int x, int y, int colorPairId, char c);
+void drawPlayground(field_s* playground);
+void quit();
+
+int debug(const char *fmt, ...);
+int printPG(const char *fmt, ...);
+int clearPG();
+
+#endif /* CLI_H_ */
+/*
+ * menu.h
+ *
+ *  Created on: Sep 4, 2013
+ *      Author: reinhard
+ */
+
+#ifndef MENU_H_
+#define MENU_H_
+
+#include <inttypes.h>
+#include <ncurses.h>
+#include <menu.h>
+#include <stdlib.h>
+
+#include "tools.h"
+
+#define MENUES 10
+#define MENU_ENTRIES 10
+
+void sendKeyToMenu(int key);
+int getActMenuItem();
+void refreshMenu();
+void initMenu();
+void setScreen(uint8_t number);
+
+#endif /* MENU_H_ */
+
+/*
+ * CliPicture.h
+ *
+ *  Created on: Sep 13, 2013
+ *      Author: reinhard
+ */
+
+#ifndef CLIPICTURE_H_
+#define CLIPICTURE_H_
+
+#include <menu.h>
+#include <cstdlib>
+
+class CliPicture {
+public:
+	CliPicture(const char* name);
+	virtual ~CliPicture();
+
+	void addItem(const char* text);
+	void assignDisplay(WINDOW* win);
+	void postPicture(WINDOW* win);
+	void unpostPicture(WINDOW* win);
+	void sendKey(int key);
+	int getActMenuItem() { return item_index(current_item(m_me)) + 1; }
+
+	int count;
+
+private:
+	const char* m_name;
+	MENU *m_me;
+	ITEM **m_it;
+
+};
+
+#endif /* CLIPICTURE_H_ */
+#ifndef TOOLS_H_
+#define TOOLS_H_
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <stdarg.h>
+#include <linux/socket.h>
+#include <netinet/in.h>
+#include <signal.h>
+#include <libgen.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <errno.h>
+#include <math.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <iostream>
+#include <pthread.h>
+
+//#include "defs.h"
+
+#define __MSG(...) msg(0, __LINE__, __FILE__, stdout, __VA_ARGS__, NULL)
+#define __WNG(...) msg(0, __LINE__, __FILE__, stderr, __VA_ARGS__, NULL)
+#define __DIE(...) msg(1, __LINE__, __FILE__, stderr, __VA_ARGS__, NULL)
+
+int file_exists(const char *f);
+void msg(int die, int line, const char *srcfile, FILE *fp, const char *fmt,
+		...);
+
+
+
+
+#endif
+
+/*
+ * CliDisplay.h
+ *
+ *  Created on: Sep 13, 2013
+ *      Author: reinhard
+ */
+
+#ifndef CLIDISPLAY_H_
+#define CLIDISPLAY_H_
+
+#include <ncurses.h>
+#include <menu.h>
+#include "../general/CliPicture.h"
+#include "../general/cli.h"
+
+
+class CliDisplay {
+public:
+	CliDisplay(int x, int y, int width, int height, const char* name, int colorPairId);
+	virtual ~CliDisplay();
+
+	void refreshDisplay();
+	void callPicture(int picNumber);
+	void sendKey(int key);
+	int getActMenuItem() { return m_pics[m_actPicNumber]->getActMenuItem(); }
+
+private:
+	int m_x, m_y, m_width, m_height, m_colorPairId;
+	int m_actPicNumber;
+	const char* m_name;
+	WINDOW* m_win;
+	CliPicture* m_pics[34];
+
+	void initMenues();
+};
+
+#endif /* CLIDISPLAY_H_ */
+/*
+ * CliPicture.cpp
+ *
+ *  Created on: Sep 13, 2013
+ *      Author: reinhard
+ */
+
+#include "CliPicture.h"
+
+CliPicture::CliPicture(const char* name){
+	m_name = name;
+	m_it = (ITEM **) calloc(5, sizeof(ITEM *));
+
+	count = 0;
+	m_it[count] = 0;
+	m_me = new_menu(m_it);
+}
+
+CliPicture::~CliPicture() {
+	// TODO Auto-generated destructor stub
+}
+
+void CliPicture::addItem(const char* text) {
+	free_item(m_it[count]);
+	free_menu(m_me);
+	m_it[count++] = new_item(text, "");
+	m_it[count] = 0;
+	m_me = new_menu(m_it);
+}
+
+void CliPicture::assignDisplay(WINDOW* win) {
+	set_menu_win(m_me, win);
+	set_menu_sub(m_me, derwin(win, 5,17,5,2));
+}
+
+void CliPicture::postPicture(WINDOW* win) {
+
+	for(int i = 2; i < 10; i++)
+		mvwprintw(win, i, 1 ,"                  ");
+
+	mvwprintw(win, 3, 2 ,"%s", m_name);
+	post_menu(m_me);
+}
+
+void CliPicture::unpostPicture(WINDOW* win) {
+	unpost_menu(m_me);
+}
+
+void CliPicture::sendKey(int key) {
+	menu_driver(m_me, key);
+}
+#include "route.h"
+
+Route::Route(size_t x, size_t y)
+    : size(x*y),
+      sizeX(x),
+      nodes(new Node[size]) {
+
+    //initialize WayPoints with neighbours and distances
+    for(size_t i = 0; i < x; i++) {
+        for(size_t j = 0; j < y; j++) {
+            std::multimap<float, Node*>* n = new std::multimap<float, Node*>;
+            int actNum = (j*x) + i;
+            if(i >    0 ) n->insert(std::pair<float, Node*>(30.0f, &nodes[actNum - 1]));
+            if(i < (x-1)) n->insert(std::pair<float, Node*>(30.0f, &nodes[actNum + 1]));
+            if(j >    0 ) n->insert(std::pair<float, Node*>(30.0f, &nodes[actNum - x]));
+            if(j < (y-1)) n->insert(std::pair<float, Node*>(30.0f, &nodes[actNum + x]));
+
+            if(i >    0  && j >     0 ) n->insert(std::pair<float, Node*>(42.4f, &nodes[actNum - x-1]));
+            if(i < (x-1) && j >     0 ) n->insert(std::pair<float, Node*>(42.4f, &nodes[actNum - x+1]));
+            if(i >    0  && j < (y-1) ) n->insert(std::pair<float, Node*>(42.4f, &nodes[actNum + x-1]));
+            if(i < (x-1) && j < (y-1) ) n->insert(std::pair<float, Node*>(42.4f, &nodes[actNum + x+1]));
+            nodes[actNum].init(n, i, j);
+        }
+    }
+}
+
+Route::~Route() {
+	delete[] nodes;
+}
+
+void Route::appendBack(int x, int y, bool mag) {
+    m_list.push_back(WayPoint(x, y, mag));
+}
+
+void Route::appendFront(int x, int y, bool mag) {
+    m_list.insert(m_list.begin(), WayPoint(x, y, mag));
+}
+
+WayPoint& Route::getElement(int num) {
+    return m_list[num];
+}
+
+int Route::deleteElement(size_t num) {
+    if(num > m_list.size()) return -1;
+    m_list.erase(m_list.begin() + num);
+    return m_list.size();
+}
+
+void Route::optimize() {
+    if(this->getCount() < 2) return;
+
+    int a = 0, b = 1;
+    bool li, magEqual;
+
+    while(b < (this->getCount() -1)) {
+        magEqual = m_list[b].mag() == m_list[b+1].mag();
+        li = pointsOnLine(m_list[a], m_list[b], m_list[b+1]);
+        if(li && magEqual) {
+            this->deleteElement(b);
+        }
+        else {
+            b++;
+            a=b-1;
+        }
+    }
+}
+
+void Route::calcPath(size_t startX, size_t startY, size_t tarX, size_t tarY) {
+    size_t s = startY * sizeX + startX;
+    size_t t = tarY * sizeX + tarX;
+
+    //init
+    nodes[s].distance = 0;
+    nodes[s].blocked = false;
+    nodes[t].blocked = false;
+
+    //algorithm
+    for(size_t n = 0; n < (size-1); n++) {
+        for(size_t i = 0; i < size; i++) {
+            Node* u = &nodes[i];
+
+            std::multimap<float, Node*>::iterator n;
+            for(n = nodes[i].neighbor->begin(); n != nodes[i].neighbor->end(); ++n) {
+                Node* v = n->second;
+                float weightUV = n-> first;
+                if(u->distance + weightUV < v->distance && !v->blocked) {
+                    v->distance = u->distance + weightUV;
+                    v->predecessor = u;
+                }
+            }
+        }
+    }
+
+    //add waypoints to list
+    Node* act = &nodes[t];
+    appendFront(act->posX, act->posY, true);
+    while(act != &nodes[s]) {
+        act = act->predecessor;
+        appendFront(act->posX, act->posY, true);
+    }
+}
+
+void Route::block(size_t x, size_t y) {
+    //block special fields
+    size_t s = y * sizeX + x;
+    nodes[s].blocked = true;
+}
+
+bool Route::pointsOnLine(WayPoint &a, WayPoint &b, WayPoint &c) {
+    //return true if points are in a line
+    if(a.x() == b.x() && b.x() == c.x()) return true;
+    if(a.y() == b.y() && b.y() == c.y()) return true;
+
+    float temp = (a.x() - b.x());
+    if(temp == 0.0f) return false;
+    float m = (a.y() - b.y()) / temp;
+    float n = a.y() - (m*a.x());
+    return c.y() == (m * c.x() + n);
+}
+
+Node::Node()
+    : blocked(false),
+      distance(9999.0f),
+      predecessor(NULL) {
+
+}
+
+void Node::init(std::multimap<float, Node*>* n, int x, int y) {
+    neighbor = n;
+    posX = x;
+    posY = y;
+}
+#ifndef DEFS_H_
+#define DEFS_H_
+
+// general defines
+#define CLIENT_ID_LENGHT 16
+#define CMDBUF_MAX_CMD_LENGHT 20
+#define CMDBUF_SIZE 100
+#define CLIENT_NAME_MAX_LENGTH 20
+#define PLAYER_NAME_MAX_LENGTH 20
+
+// TCP/IP DEFINES
+// SC = server -> client
+// CS = client -> server
+#define TCP_PORT_GUI 6665
+#define TCP_MSG_LENGTH CMDBUF_SIZE
+#define TCP_CMD_CLOSE_CONNECTION_CS 60
+#define TCP_CMD_IDENTIFY_SC 65
+#define TCP_CMD_SET_PLAYER_NAME_CS 67
+#define TCP_CMD_ADD_CLIENT_CS 66
+#define TCP_CMD_SEND_PID_SC 68
+#define TCP_CMD_ACT_GAME_MODE_SC 70
+#define TCP_CMD_AVAILABLE_COLORS_SC 80
+#define TCP_CMD_SET_COLOR_CS 81
+#define TCP_CMD_DEL_COLOR_CS 82
+#define TCP_CMD_DEFINE_CLIENT_COLORS 91
+#define TCP_CMD_START_GAME_CS 95
+#define TCP_CMD_MOVE_SC 100
+#define TCP_CMD_DIE_DONE_CS 105
+#define TCP_CMD_SHOW_DIE_SC 106
+#define TCP_CMD_DICE_SC 110
+#define TCP_CMD_SELECT_FIGURE_CS 115
+
+// Display Commands
+#define DISPLAY_CMD_PUSH_ENTER 10
+
+// I²C
+#define I2C_DEV_NAME "/dev/i2c-0"
+#define I2C_POLLING_TIME_US 100000
+
+// GAME MODES
+#define GAME_MODE_SELECT_COLOR 0
+#define GAME_MODE_USER_NOT_AUTHORIZED 1
+#define GAME_MODE_GAME 20
+
+// GAME COLORS
+// 1 = color free
+#define GAME_COLOR_MARCEL 1
+#define GAME_COLOR_MARTINA 2
+#define GAME_COLOR_ELA 4
+#define GAME_COLOR_STEFAN 8
+
+// playground
+#define PLAYGROUND_ROWS 11
+#define PLAYGROUND_COLUMNS 11
+#define PLAYGROUND_FIELD_EMPTY 255
+
+// hardware devices
+#define DEV_XY_DRIVE 0
+#define DEV_RFID 1
+#define DEV_LED_RING 2
+#define DEV_LED_STRIPES 3
+
+// XY drive commands
+#define XY_DRIVE_CMD_MOVE 0
+#define XY_DRIVE_CMD_MAG 1
+#define XY_DRIVE_CMD_REF 2
+
+#define XY_DRIVE_MAX_SPEED 150
+#define XY_DRIVE_MAX_ACC 2
+#define XY_DRIVE_MAX_DEC 2
+#define XY_DRIVE_MIN_SERVO 45
+#define XY_DRIVE_MAX_SERVO 105
+
+// rfid commands
+#define RFID_CMD_READ 0
+
+
+// magnet
+#define MAG_OFF 0
+#define MAG_ON 1
+
+// LED ring commands
+#define LED_RING_CMD_SET 0
+
+//LED mode
+#define LED_MODE_OFF 0
+#define LED_MODE_ON 1
+#define LED_MODE_HB_FAST 2
+#define LED_MODE_HB_SLOW 3
+
+
+
+struct tcp_data {
+	int newsockfd;
+	//std::string name;
+
+	tcp_data() {
+		newsockfd = 0;
+	}
+	tcp_data(int newsock) {
+		newsockfd = newsock;
+	}
+};
+
+#endif
+#ifndef ROUTE_H
+#define ROUTE_H
+
+#include <vector>
+#include <map>
+#include <iostream>
+
+class Node
+{
+public:
+    Node();
+    void init(std::multimap<float, Node*>* n, int x, int y);
+
+    bool blocked;
+    float distance;
+    Node* predecessor;
+
+    std::multimap<float, Node*>* neighbor;
+    int posX, posY;
+};
+
+class WayPoint
+{
+public:
+    WayPoint()
+        : m_x(0), m_y(0), m_mag(false) { }
+    WayPoint(int x, int y, bool mag)
+        : m_x(x), m_y(y), m_mag(mag) { }
+
+    int x() { return m_x; }
+    int y() { return m_y; }
+    bool mag() { return m_mag; }
+
+private:
+    int m_x, m_y;
+    bool m_mag;
+};
+
+
+class Route
+{
+public:
+    Route(size_t x = 11, size_t y = 11);
+    ~Route();
+
+    void appendBack(int x, int y, bool mag);
+    void appendFront(int x, int y, bool mag);
+    int getCount() { return m_list.size(); }
+    WayPoint& getElement(int num);
+    int deleteElement(size_t num);
+    void optimize();
+    void calcPath(size_t startX, size_t startY, size_t tarX, size_t tarY);
+    void block(size_t x, size_t y);
+    bool pointsOnLine(WayPoint& a, WayPoint& b, WayPoint& c);
+
+    Node* getNodes() { return nodes; }
+    size_t getSize() { return size; }
+    size_t getSizeX() { return sizeX; }
+
+private:
+    std::vector<WayPoint> m_list;
+
+    size_t size, sizeX;
+    Node* nodes;
+};
+
+
+#endif // ROUTE_H
+/*
+ * Client.cpp
+ *
+ *  Created on: Apr 24, 2013
+ *      Author: reinhard
+ */
+
+#include "Client.h"
+
+Client::Client(int fd) :
+m_fd(fd) {
+	m_Id = 0;
+	m_game = NULL;
+	m_thread = NULL;
+}
+
+Client::~Client() {
+	// TODO check if nesessary
+}
+
+void Client::runCli() {
+	boost::thread threadTcpIpParse(boost::bind(&Client::m_receiveTcpIp, this));
+}
+
+void Client::m_receiveTcpIp() {
+	int nR = 0;
+	uint8_t inputBuf[TCP_MSG_LENGTH + 1];
+	uint8_t buf[TCP_MSG_LENGTH + 1];
+	debug("start reading data\n");
+//	FILE* a;
+
+	memset(&buf, 0 ,TCP_MSG_LENGTH);
+
+//	do {
+//		nR = read(m_fd, &input, 1);
+//		if (nR < 0) {
+//			if (errno != EBADF) debug("ERROR reading to TCP IP: %s", strerror(errno));
+//		}
+//		else if(nR > 0) {
+//			if(input == '\0') {
+//				debug("get %d chars \"%d\"\n",counter ,buf[1]);
+//				m_game->addCmd(buf,counter);
+//				counter = 1;
+//				buf[0] = 0;
+//				memset(&buf, 0 ,TCP_MSG_LENGTH);
+//			}
+//			else {
+//				buf[counter++] = input;
+//			}
+//		}
+//
+////	}while( nR > 0);
+//	}while( 1);
+
+	do {
+		memset(&inputBuf, 0 ,TCP_MSG_LENGTH);
+		nR = read(m_fd, &inputBuf[0], TCP_MSG_LENGTH);
+
+//		debug("got data (%d)\n",nR);
+//		for(int j = 0; j < nR; j++)
+//			debug("   %d\n",inputBuf[j]);
+
+		if (nR < 0) {
+			if (errno != EBADF) debug("ERROR reading to TCP IP: %s", strerror(errno));
+		}
+		else if(nR > 0) {
+			int a = 1;
+			for(int i = 0; i < nR; i++) {
+				buf[a++] = inputBuf[i];
+				if((inputBuf[i] == '\0') || i == (nR-1)) {
+					buf[0] = 0;
+					m_game->addCmd(buf, a-1);
+//					debug("client addCmd (%d)\n", buf[1]);
+//					for(int j = 0; j < (a); j++)
+//						debug("   %d\n",buf[j]);
+					a = 1;
+					memset(&buf, 0 ,TCP_MSG_LENGTH);
+				}
+			}
+		}
+	}while( nR > 0);
+//	}while( 1);
+
+
+//	do {
+//		memset(&buf, 0 ,TCP_MSG_LENGTH);
+//		nR = read(m_fd, &buf[1], TCP_MSG_LENGTH);
+//		if (nR < 0) {
+//			if (errno != EBADF) debug("ERROR reading to TCP IP: %s", strerror(errno));
+//		}
+//		else if(nR > 0) {
+//			debug("get %d chars \"%d\"\n",nR ,buf[1]);
+//			buf[0] = 0;
+//			m_game->addCmd(buf,nR);
+//		}
+//		/*else {
+//			buf[0] = m_Id;
+//			buf[1] = TCP_CMD_CLOSE_CONNECTION_CS;
+//			m_game->addCmd(buf,2);
+//		}*/
+//	} while(nR > 0);
+
+
+	debug("\nstop reading data\n");
+	close(m_fd);
+}
+
+void Client::sendAddClient(const char *name) {
+	m_mutex.lock();
+	//add this client to servers clientlist
+	uint8_t buf[20];
+	int nS = 0;
+
+	buf[0] = TCP_CMD_ADD_CLIENT_CS;
+	memcpy(&buf[1], name, 18);
+	nS = write(m_fd, &buf, 20);
+	debug("send %d chars \"ADD CLIENT\"(%s) to cid=%d\n"
+			,nS , name, m_Id);
+	m_mutex.unlock();
+}
+
+void Client::sendSetPlayerName(uint8_t pid, const char *name) {
+	m_mutex.lock();
+	//send the selected color to server
+	uint8_t buf[20];
+	int nS = 0;
+
+	buf[0] = TCP_CMD_SET_COLOR_CS;
+	memcpy(&buf[1], name, 18);
+	nS = write(m_fd, &buf, 20);
+	debug("send %d chars \"SET_PLAYER_NAME\"(%s) to pid=%d (cid=%d)\n"
+			,nS , name, pid, m_Id);
+	m_mutex.unlock();
+}
+
+void Client::sendSetColor(uint8_t color) {
+	m_mutex.lock();
+	//send the selected color to server
+	uint8_t buf[4];
+	int nS = 0;
+
+	buf[0] = TCP_CMD_SET_COLOR_CS;
+	buf[1] = color;
+	buf[2] = '\0';
+	nS = write(m_fd, &buf, 3);
+	debug("send %d chars \"SET_COLOR\"(%d) (cid=%d)\n"
+			,nS , color, m_Id);
+	m_mutex.unlock();
+}
+
+void Client::sendDelColor(uint8_t color) {
+	m_mutex.lock();
+	//send the color to delete to server
+	uint8_t buf[4];
+	int nS = 0;
+
+	buf[0] = TCP_CMD_DEL_COLOR_CS;
+	buf[1] = color;
+	buf[2] = '\0';
+	nS = write(m_fd, &buf, 3);
+	debug("send %d chars \"DEL_COLOR\"(%d) (cid=%d)\n"
+			,nS , color, m_Id);
+	m_mutex.unlock();
+}
+
+void Client::sendStartGame(uint8_t pid) {
+	m_mutex.lock();
+	//send 'start game' to server
+	uint8_t buf[2];
+	int nS = 0;
+
+	buf[0] = TCP_CMD_START_GAME_CS;
+	buf[1] = '\0';
+	nS = write(m_fd, &buf, 2);
+	debug("send %d chars \"START_GAME\"(%d) to pid=%d (cid=%d)\n"
+			,nS , TCP_CMD_START_GAME_CS, pid, m_Id);
+	m_mutex.unlock();
+}
+
+void Client::sendDieDone(uint8_t pid) {
+	m_mutex.lock();
+	//send 'die done' to server
+	uint8_t buf[2];
+	int nS = 0;
+
+	buf[0] = TCP_CMD_DIE_DONE_CS;
+	buf[1] = '\0';
+	nS = write(m_fd, &buf, 2);
+	debug("send %d chars \"DIE DONE\"(%d) to pid=%d (cid=%d)\n"
+			,nS , TCP_CMD_DIE_DONE_CS, pid, m_Id);
+	m_mutex.unlock();
+}
+
+void Client::sendSelectFigure(uint8_t pid, uint8_t field) {
+	m_mutex.lock();
+	//send selected figure to move
+	uint8_t buf[4];
+	int nS = 0;
+
+	buf[0] = TCP_CMD_SELECT_FIGURE_CS;
+	buf[1] = pid;
+	buf[2] = field;
+	buf[3] = '\0';
+	nS = write(m_fd, &buf, 4);
+	debug("send %d chars \"SELECT FIGURE\"(%d) to pid=%d (cid=%d)\n"
+			,nS , field, pid, m_Id);
+	m_mutex.unlock();
+}
+
+void Client::sendCmd(uint8_t cmd[], int length) {
+	m_mutex.lock();
+	int nS = 0;
+
+	nS = write(m_fd, cmd, length);
+	debug("send %d chars cid=%d\n" ,nS ,m_Id);
+	m_mutex.unlock();
+}
+#ifndef GAME_H_
+#define GAME_H_
+
+#include <boost/bind.hpp>
+#include <boost/thread.hpp>
+#include <stdio.h>
+#include <pthread.h>
+#include <vector>
+#include <map>
+
+#include "defs.h"
+#include "Client.h"
+#include "Player.h"
+#include "route.h"
+//#include "../hardware/Hardware.h"
+
+#include "../../../arduino/led_ring/i2c_defs.h"
+#include "../../../arduino/led_streifen/i2c_defs.h"
+#include "../../../arduino/rfid_reader_b/i2c_defs.h"
+#include "../../../arduino/xy_schlitten/src/i2c_defs.h"
+#include "../../../arduino/display/i2c_defs.h"
+
+#include "../hardware/LedRing.h"
+#include "../hardware/LedStripes.h"
+#include "../hardware/XYdrive.h"
+#include "../hardware/Display.h"
+#include "../general/tools.h"
+#include "../general/CliDisplay.h"
+//#include "../general/cli.h"
+
+class Client;
+class Player;
+
+
+//struct cmdBuffer_s{
+//	uint8_t cmd[CMDBUF_SIZE][CMDBUF_MAX_CMD_LENGHT];
+//	uint8_t in, out;
+//	boost::mutex mutex;
+//	boost::condition_variable_any condAdd, condRem;
+//};
+
+struct figure_s;
+
+struct field_s {
+	uint8_t x, y, no;
+	figure_s *figure;
+//	std::vector<field_s*> toPlayground;
+//	field_s *toGap;
+//	field_s *toHome;
+
+	void set(uint8_t _x, uint8_t _y) {
+		x = _x;
+		y = _y;
+//		toPlayground.push_back(pg);
+//		toGap = ga;
+//		toHome = ho;
+	}
+	field_s &operator=(const field_s& cmp) {
+		return *this;
+	}
+	bool operator!=(field_s* cmp) {
+		return !(this->no == cmp->no);
+	}
+};
+
+
+class Game {
+public:
+	Game();
+	virtual ~Game();
+	void addCmd(uint8_t cmd[], int length);
+	void start();
+
+	Client* getClient() {
+		return m_client;
+	}
+//	Hardware* getHardware() { return m_hardware; }
+
+	void setClient(Client* client) {
+		m_client = client;
+	}
+//	void setHardware(Hardware* hardware) { m_hardware= hardware; }
+	void setCliDisplay(int number, CliDisplay* CliDisplay)
+		{ m_display[number]->setCliDisplay(CliDisplay); }
+
+private:
+	uint8_t m_mode;
+	cmdBuffer_s m_cB;
+	Client *m_client;
+	int m_clientCounter;
+	uint8_t m_availColors;
+	uint8_t m_myColor;
+	uint8_t m_actPips;
+	uint8_t m_actPlayer;
+	field_s m_playground[96];
+	std::map<int, Player> m_playerMap;
+	tags_t m_tagsActPg, m_tagsActGame;
+
+
+//	Hardware *m_hardware;
+	XYdrive* m_XYdrive;
+	Display* m_display[4];
+
+	void m_worker();
+	bool m_addPlayer(uint8_t color);
+	void m_delPlayer(uint8_t color);
+	void m_printPlayground(int motorX = 0, int motorY = 0);
+	boost::mutex m_mutexPlayground;
+	field_s* m_findInPlayground(uint8_t x, uint8_t y);
+	void m_move(uint8_t from, uint8_t to);
+	void m_calculatePath(Route* r, uint8_t from, uint8_t to);
+	void m_initPlayground();
+	void m_printTags(tags_t* tags);
+};
+
+#endif /* GAME_H_ */
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
+
+#include <iostream>
+#include <cctype>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <ncurses.h>
+#include <signal.h>
+#include <sys/ioctl.h>
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <pthread.h>
+#include <cerrno>
+
+#include "defs.h"
+#include "Client.h"
+#include "Game.h"
+#include "../general/tools.h"
+#include "../general/menu.h"
+#include "../general/cli.h"
+
+pthread_t g_pthreadTcpConnect;
+Client* g_client;
+Game* g_game;
+uint8_t g_actScreen;
+CliDisplay* g_cliDisplay[4];
+
+int tcpConnect(const char* ip);
+
+int main(int argc, char *argv[]) {
+	if (argc == 1) {
+		printf(" not enough arguments\n");
+		printf(" usage: semmClient IP\n");
+		return 1;
+	} else {
+		int fd = 0;
+		int actItem = 0;
+		char ch;
+		uint8_t buf[4];
+		buf[0] = 0;
+		buf[1] = DISPLAY_CMD_PUSH_ENTER;
+
+		initUi();
+		refresh();
+
+		debug("********************\n");
+		debug("* SEMM Client 2014 *\n");
+		debug("********************\n");
+		fd = tcpConnect(argv[1]);
+		if (fd < 0) {
+			debug("failed to connect to %s\n", argv[1]);
+			return 1;
+		} else {
+			g_game = new Game;
+
+			for(int i = 0; i < 4; i++)
+				g_game->setCliDisplay(i, g_cliDisplay[i]);
+
+
+			debug("connected to %s\n", argv[1]);
+			g_game->start();
+			g_client = new Client(fd);
+			g_client->setGame(g_game);
+			g_game->setClient(g_client);
+			g_client->runCli();
+			g_client->sendAddClient("semmbox");
+
+			while ((ch = getch()) != 104) {
+				switch (ch) {
+				case 'y':
+					g_cliDisplay[3]->sendKey(REQ_DOWN_ITEM);
+					break;
+				case 'q':
+					g_cliDisplay[3]->sendKey(REQ_UP_ITEM);
+					break;
+				case 'x':
+					g_cliDisplay[2]->sendKey(REQ_DOWN_ITEM);
+					break;
+				case 'w':
+					g_cliDisplay[2]->sendKey(REQ_UP_ITEM);
+					break;
+				case 'c':
+					g_cliDisplay[1]->sendKey(REQ_DOWN_ITEM);
+					break;
+				case 'e':
+					g_cliDisplay[1]->sendKey(REQ_UP_ITEM);
+					break;
+				case 'v':
+					g_cliDisplay[0]->sendKey(REQ_DOWN_ITEM);
+					break;
+				case 'r':
+					g_cliDisplay[0]->sendKey(REQ_UP_ITEM);
+					break;
+
+				case 'f':
+					actItem = g_cliDisplay[0]->getActMenuItem();
+					debug("Display[0]item:->getActMenuItem() = %d\n",actItem);
+					if (actItem > 0) {
+						buf[2] = 0;
+						buf[3] = actItem;
+						g_game->addCmd(buf, 4);
+					}
+					break;
+				case 'd':
+					actItem = g_cliDisplay[1]->getActMenuItem();
+					debug("Display[1]item:->getActMenuItem() = %d\n",actItem);
+					if (actItem > 0) {
+						buf[2] = 1;
+						buf[3] = actItem;
+						g_game->addCmd(buf, 4);
+					}
+					break;
+				case 's':
+					actItem = g_cliDisplay[2]->getActMenuItem();
+					debug("Display[2]item:->getActMenuItem() = %d\n",actItem);
+					if (actItem > 0) {
+						buf[2] = 2;
+						buf[3] = actItem;
+						g_game->addCmd(buf, 4);
+					}
+					break;
+				case 'a':
+					actItem = g_cliDisplay[3]->getActMenuItem();
+					debug("Display[3]item:->getActMenuItem() = %d\n",actItem);
+					if (actItem > 0) {
+
+						buf[2] = 3;
+						buf[3] = actItem;
+						g_game->addCmd(buf, 4);
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+int tcpConnect(const char* ip) {
+	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	struct sockaddr_in serv_addr;
+	struct hostent *server = NULL;
+	if (sockfd < 0) {
+		perror("ERROR opening socket");
+		return -1;
+	}
+	server = gethostbyname(ip);
+	if (server == NULL) {
+		perror("ERROR, no such host\n");
+		return -1;
+	}
+	memset((char *) &serv_addr, 0, sizeof(serv_addr));
+	serv_addr.sin_family = AF_INET;
+	memcpy((char *) &serv_addr.sin_addr.s_addr, (char *) server->h_addr,
+	server->h_length);
+	serv_addr.sin_port = htons(6665);
+	debug("connecting to %s (%d.%d.%d.%d)\n", ip,
+			int( serv_addr.sin_addr.s_addr & 0x000000FF),
+			int((serv_addr.sin_addr.s_addr & 0x0000FF00) >> 8),
+			int((serv_addr.sin_addr.s_addr & 0x00FF0000) >> 16),
+			int((serv_addr.sin_addr.s_addr & 0xFF000000) >> 24));
+	if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr))
+			< 0) {
+		perror("ERROR connecting");
+		return -1;
+	}
+	return sockfd;
+}
+#include "Game.h"
+
+Game::Game() {
+	m_availColors = 0;
+	m_client = NULL;
+	m_mode = 1;
+	m_clientCounter = 0;
+	m_myColor = 0;
+	m_actPips = 0;
+	m_actPlayer = 0;
+
+	m_XYdrive = new XYdrive(I2C_XYS_ADDR, I2C_RFID_ADDR, I2C_LR_ADDR, I2C_LS_ADDR);
+	m_display[0] = new Display(I2C_DBEN_ADDR_0, 500);
+	m_display[1] = new Display(I2C_DBEN_ADDR_1, 500);
+	m_display[2] = new Display(I2C_DBEN_ADDR_2, 500);
+	m_display[3] = new Display(I2C_DBEN_ADDR_3, 500);
+}
+
+Game::~Game() {
+	delete m_XYdrive;
+	for (int i = 0; i <= 3; i++)
+		delete m_display[i];
+}
+
+void Game::start() {
+	m_mode = 1;
+	m_clientCounter = 0;
+	for( int i = 0; i < 4; i++)
+		m_display[i]->setPictures(I2C_DBEN_PIC_SEMM, false);
+	m_initPlayground();
+	boost::thread gameWorker(boost::bind(&Game::m_worker, this));
+}
+
+void Game::addCmd(uint8_t cmd[], int length) {
+	//	debug(" add cmd... (%d)\n",cmd[1]);
+
+	m_cB.mutex.lock();
+	while (((m_cB.in + 1) % CMDBUF_SIZE) == m_cB.out)  //while cmdBuffer is full
+		m_cB.condRem.wait(m_cB.mutex);
+	memcpy(&m_cB.cmd[m_cB.in][0], cmd, length);
+	++m_cB.in %= CMDBUF_SIZE;
+	m_cB.condAdd.notify_one();
+	m_cB.mutex.unlock();
+	//	debug(" ...done\n");
+}
+
+void Game::m_worker() {
+	std::map<int, Client*>::iterator itCli;
+	std::map<int, Player*>::iterator itPla;
+	int cid, color, cmd;
+	uint8_t buf[CMDBUF_MAX_CMD_LENGHT + 1];
+
+	//	debug("start GAME worker\n");
+
+	//	sleep(5);
+
+	while (m_mode) {
+		m_cB.mutex.lock();
+		while (m_cB.in == m_cB.out) // while cmdBffer is empty
+			m_cB.condAdd.wait(m_cB.mutex);
+
+		cid = m_cB.cmd[m_cB.out][0];
+		cmd = m_cB.cmd[m_cB.out][1];
+		color = m_cB.cmd[m_cB.out][2];
+		memcpy(&buf, &m_cB.cmd[m_cB.out][2], CMDBUF_MAX_CMD_LENGHT - 1);
+		//		debug("got cmd: %d from cid=%d\n", cmd, cid);
+		++m_cB.out %= CMDBUF_SIZE;
+		m_cB.condRem.notify_one();
+		m_cB.mutex.unlock();
+
+
+		switch (cmd) {
+
+		// display pushed enter
+		case DISPLAY_CMD_PUSH_ENTER: {
+			int gColor = (1<<color);
+			debug("got cmd from display[%d]\n", color);
+			switch (m_display[color]->getPicture()) {
+
+			case I2C_DBEN_PIC_ENTER:
+				m_display[color]->setPictures(I2C_DBEN_PIC_WAIT, false);
+				if(m_addPlayer(gColor)) {
+					debug("send \'setColor\' to server\n");
+					m_client->sendSetColor(gColor);
+					m_myColor |= gColor;
+					m_display[color]->setPictures(I2C_DBEN_PIC_START, true);
+				}
+				else
+					m_display[color]->setPictures(I2C_DBEN_PIC_ENTER, true);
+				break;
+
+			case I2C_DBEN_PIC_START:
+				if(buf[1] == 1)
+					m_client->sendStartGame(gColor);
+				if(buf[1] == 2) {
+					m_delPlayer(gColor);
+					m_client->sendDelColor(gColor);
+					m_myColor &= ~(gColor);
+					m_display[color]->setPictures(I2C_DBEN_PIC_ENTER, true);
+				}
+				break;
+			case I2C_DBEN_PIC_SET:
+				debug("  select figure\n");
+				//TODO
+				//				m_client->sendSelectFigure(gColor, m_XYdrive->getLastMoved());
+				m_display[color]->setPictures(I2C_DBEN_PIC_SELECT_FIGURE, false);
+
+
+				break;
+			case I2C_DBEN_PIC_DICE:
+				debug("  send show the dice to server\n");
+				m_client->sendDieDone(gColor);
+				break;
+
+			case I2C_DBEN_PIC_SELECT_FIGURE:
+				debug("  send moved figure to server\n");
+				m_client->sendSelectFigure(gColor, m_playerMap.at(gColor).getFigure(buf[1] -1)->field->no);
+				break;
+			}
+		}
+		break;
+
+		// goto select color mode
+		case (TCP_CMD_ACT_GAME_MODE_SC + GAME_MODE_SELECT_COLOR):
+					debug("goto \'select colormode\'\n");
+		m_mode = 2;
+		for( int i = 0; i < 4; i++) {
+			if(color & (1<<i))
+				m_display[i]->setPictures(I2C_DBEN_PIC_ENTER, true);
+			else
+				m_display[i]->setPictures(I2C_DBEN_PIC_DISABLED, false);
+		}
+		break;
+
+		// server disaccept connection
+		case (TCP_CMD_ACT_GAME_MODE_SC + GAME_MODE_USER_NOT_AUTHORIZED):
+					break;
+
+		// get available colors
+		case TCP_CMD_AVAILABLE_COLORS_SC: {
+
+			debug("got available colors=%d\tmode = %d\n", color, m_mode);
+			m_availColors = color;
+			if(m_mode == 2) {
+				for( int i = 0; i < 4; i++) {
+					if(m_display[i]->getPicture() != I2C_DBEN_PIC_START) {
+						if(color & (1<<i))
+							m_display[i]->setPictures(I2C_DBEN_PIC_ENTER, true);
+						else
+							m_display[i]->setPictures(I2C_DBEN_PIC_DISABLED, false);
+					}
+				}
+			}
+			//add or remove players that not belong to this unit
+			uint8_t tmpColor = ~m_availColors & 15;
+			debug("colors to be checked = %d (a %d, m %d)\n", tmpColor, m_availColors, m_myColor);
+			for(int i = 0; i < 4; i++) {
+				uint8_t n = (tmpColor & (1<<i));
+				if(n) {
+					if(m_playerMap.find(n) == m_playerMap.end()) {
+						debug(" -add %d\n", n);
+						m_addPlayer(n);
+					}
+				}
+				else {
+					if(m_playerMap.find(n) != m_playerMap.end()) {
+						debug(" -del %d\n", n);
+						m_delPlayer(n);
+					}
+				}
+			}
+			}
+			break;
+
+		// goto game Mode
+		case (TCP_CMD_ACT_GAME_MODE_SC + GAME_MODE_GAME):
+			m_mode = 3;
+			debug("goto game mode\n");
+			for( int i = 0; i < 4; i++)
+				m_display[i]->setPictures(I2C_DBEN_PIC_WAIT, false);
+//			m_XYdrive->scan(&m_tagsActPg);
+//			while(m_XYdrive->getIsMoving()) usleep(100000);
+//			m_printTags(&m_tagsActPg);
+		break;
+
+		// define client colors
+		case TCP_CMD_DEFINE_CLIENT_COLORS:
+			debug("set myColors = %d\n", color);
+			m_myColor = color;
+			for(int i = 0; i < 4; i++)
+				m_addPlayer(m_myColor & (1<<i));
+			break;
+
+		// move figure
+		case (TCP_CMD_MOVE_SC):
+			buf[0]--;
+			buf[1]--;
+			debug("move figure from %d to %d\n", buf[0], buf[1]);
+			m_move(buf[0], buf[1]);
+			debug("move done\n");
+		break;
+
+		// show dice
+		case (TCP_CMD_SHOW_DIE_SC):
+					if (m_actPlayer == m_myColor) {
+						debug("  you diced a %d, please select a figure to move\n", m_actPips);
+					} else {
+						debug("  %d diced a %d\n", m_actPlayer, m_actPips);
+					}
+
+		for(int i = 0; i < 4; i++)
+			m_display[i]->setPictures(I2C_DBEN_PIC_DICE_1 + m_actPips - 1, false);
+
+		if(buf[0]) {
+			sleep(2);
+			if(m_actPlayer & 1) m_display[0]->setPictures(I2C_DBEN_PIC_SET, true);
+			if(m_actPlayer & 2) m_display[1]->setPictures(I2C_DBEN_PIC_SET, true);
+			if(m_actPlayer & 4) m_display[2]->setPictures(I2C_DBEN_PIC_SET, true);
+			if(m_actPlayer & 8) m_display[3]->setPictures(I2C_DBEN_PIC_SET, true);
+		}
+
+
+
+		break;
+		// dice
+		case (TCP_CMD_DICE_SC):
+			m_actPlayer = buf[0];
+			m_actPips = buf[1];
+
+			debug("dice\n");
+
+			for(int i = 0; i < 4; i++)
+				m_display[i]->setPictures(I2C_DBEN_PIC_WAIT, false);
+			sleep(1);
+
+			if (m_actPlayer & m_myColor) {
+				debug("  it is your turn, you have to dice, please send %d %d to server\n",
+						TCP_CMD_DIE_DONE_CS, color);
+				//TODO do not like
+				if(m_actPlayer & 1) m_display[0]->setPictures(I2C_DBEN_PIC_DICE, true);
+				if(m_actPlayer & 2) m_display[1]->setPictures(I2C_DBEN_PIC_DICE, true);
+				if(m_actPlayer & 4) m_display[2]->setPictures(I2C_DBEN_PIC_DICE, true);
+				if(m_actPlayer & 8) m_display[3]->setPictures(I2C_DBEN_PIC_DICE, true);
+			}
+			else {
+				debug("  it is %ds turn\n", color);
+			}
+		break;
+
+		default:
+			debug("cmd unknown\n");
+			break;
+		}
+
+	}
+}
+
+bool Game::m_addPlayer(uint8_t color) {
+	uint8_t pg[3];
+	uint16_t tagNum[3];
+
+	switch(color) {
+	case 8: { //stefan
+		tagLine_t l0, l1;
+		m_XYdrive->scanLine( 0, &l0 );
+		m_XYdrive->scanLine( 1, &l1 );
+		while(m_XYdrive->getIsMoving()) usleep(100000);
+		pg[0] = 32; tagNum[0] =  l0.tag[ 1];
+		pg[1] = 33; tagNum[1] =  l1.tag[ 1];
+		pg[2] = 34; tagNum[2] =  l1.tag[ 0];
+	}
+	break;
+
+	case 4: { //ela
+		tagLine_t l9, l10;
+		m_XYdrive->scanLine( 9, &l9 );
+		m_XYdrive->scanLine(10, &l10);
+		while(m_XYdrive->getIsMoving()) usleep(100000);
+		pg[0] = 35; tagNum[0] =  l9.tag[ 0];
+		pg[1] = 36; tagNum[1] =  l9.tag[ 1];
+		pg[2] = 37; tagNum[2] = l10.tag[ 1];
+	}
+	break;
+
+	case 2: { //martina
+		tagLine_t l9, l10;
+		m_XYdrive->scanLine( 9, &l9 );
+		m_XYdrive->scanLine(10, &l10);
+		while(m_XYdrive->getIsMoving()) usleep(100000);
+		pg[0] = 38; tagNum[0] = l10.tag[ 9];
+		pg[1] = 39; tagNum[1] =  l9.tag[ 9];
+		pg[2] = 40; tagNum[2] =  l9.tag[10];
+	}
+	break;
+
+	case 1: { //marcel
+		tagLine_t l0, l1;
+		m_XYdrive->scanLine( 0, &l0 );
+		m_XYdrive->scanLine( 1, &l1 );
+		while(m_XYdrive->getIsMoving()) usleep(100000);
+		pg[0] = 41; tagNum[0] =  l1.tag[10];
+		pg[1] = 42; tagNum[1] =  l1.tag[ 9];
+		pg[2] = 43; tagNum[2] =  l0.tag[ 9];
+	}
+	break;
+
+	default:
+		return false;
+	}
+
+	//check if all tags are found
+	if(!tagNum[0] || !tagNum[1] || !tagNum[2] ) {
+		debug("can't find all figures for player %d\n", color);
+//		m_client->sendDelColor(color);
+		return 0;
+	}
+	m_mutexPlayground.lock();
+	debug("add player %d\n", color);
+
+	//create players
+	m_playerMap.insert(std::pair<int, Player>(color, Player()));
+
+	//assign figures to its fields
+	m_playerMap[color].setColor(color);
+	for(int i = 0; i < 3; i++) {
+		m_playerMap[color].getFigure(i)->field = &m_playground[pg[i]];
+		m_playground[pg[i]].figure = m_playerMap[color].getFigure(i);
+		m_playground[pg[i]].figure->color = color;
+	}
+
+	drawPlayground(m_playground);
+	m_mutexPlayground.unlock();
+	return true;
+}
+
+void Game::m_delPlayer(uint8_t color) {
+	uint8_t pg[3];
+
+	switch(color) {
+	case 8:  //stefan
+		pg[0] = 32;	pg[1] = 33;	pg[2] = 34;	break;
+	case 4:  //ela
+		pg[0] = 35;	pg[1] = 36;	pg[2] = 37;	break;
+	case 2:  //martina
+		pg[0] = 38;	pg[1] = 39;	pg[2] = 40;	break;
+	case 1:  //marcel
+		pg[0] = 41;	pg[1] = 42;	pg[2] = 43;	break;
+	default:
+		return ;
+	}
+
+	m_mutexPlayground.lock();
+	//delete figures from playground
+	for(int i = 0; i < 3; i++) {
+		m_playground[pg[i]].figure = NULL;
+	}
+	m_playerMap.erase(color);
+	debug(" done\n");
+
+	drawPlayground(m_playground);
+	debug("draw done\n");
+	m_mutexPlayground.unlock();
+}
+
+void Game::m_printPlayground(int motorX, int motorY) {
+	field_s *field;
+
+	clearPG();
+	for (int i = 0; i < motorX; i++)
+		printPG("  ");
+	printPG("  v\n");
+	for (int y = 0; y < PLAYGROUND_ROWS; y++) {
+		if (y == motorY)
+			printPG(">");
+		else
+			printPG(" ");
+		for (int x = 0; x < PLAYGROUND_COLUMNS; x++) {
+			field = m_findInPlayground(x, y);
+			if (field != NULL) {
+				if (field->figure == NULL) {
+					if (field->no < 56)
+						printPG(" .");
+					else
+						printPG("  ");
+
+				} else
+					printPG(" %d", field->figure->color);
+			} else {
+				printPG("  ");
+			}
+		}
+		printPG("\n");
+	}
+}
+
+field_s* Game::m_findInPlayground(uint8_t x, uint8_t y) {
+	for (int i = 0; i < 96; i++) {
+		if (m_playground[i].x == x && m_playground[i].y == y)
+			return &m_playground[i];
+	}
+	return NULL;
+}
+
+void Game::m_move(uint8_t from, uint8_t to) {
+	if (from == to) return;
+	m_mutexPlayground.lock();
+
+	Route r;
+	m_calculatePath(&r, from, to);
+
+	m_XYdrive->setLedRing(1, m_playground[from].figure->color);
+	for(int i = 0; i < r.getCount(); i++) {
+		WayPoint& wp = r.getElement(i);
+		m_XYdrive->magnet(wp.mag());
+		m_XYdrive->moveToXY(wp.x(), wp.y());
+	}
+	while(m_XYdrive->getIsMoving()) {
+		usleep(100000);
+	}
+	m_XYdrive->setLedRing(0, 0);
+
+	debug("move in m_playground\n");
+	m_playground[to].figure = m_playground[from].figure;
+	m_playground[to].figure->field = &m_playground[to];
+	m_playground[from].figure = NULL;
+
+	debug("draw m_playground\n");
+	drawPlayground(&m_playground[0]);
+	m_mutexPlayground.unlock();
+	sleep(3);
+	debug("draw done\n");
+}
+
+void Game::m_calculatePath(Route* r, uint8_t from, uint8_t to) {
+	//add actual positions of players to blocklist
+	for(int i = 1; i <= 8; i *= 2) {
+		if(m_playerMap.find(i) != m_playerMap.end()) {
+			for(int j = 0; j < 3; j++) {
+				size_t x = m_playerMap[i].getFigure(j)->field->x;
+				size_t y = m_playerMap[i].getFigure(j)->field->y;
+				r->block(x, y);
+			}
+		}
+	}
+
+	//calculate and optimize path
+	r->calcPath(m_playground[from].x, m_playground[from].y,
+			m_playground[to].x, m_playground[to].y);
+	r->optimize();
+
+	//move to start position if necessary
+	if(m_playground[from].x != m_XYdrive->getActX()
+			|| m_playground[from].y != m_XYdrive->getActY())
+		r->appendFront(m_playground[from].x, m_playground[from].y, false);
+}
+
+void Game::m_initPlayground() {
+	// assign fields to its coordinates
+	//m_playground.insert(std::pair<uint8_t, coordinate_s>(0, new coordinate_s(1,4)));
+
+	m_mutexPlayground.lock();
+
+	for (int i = 0; i < 96; i++) {
+		m_playground[i].no = i;
+		m_playground[i].figure = NULL;
+	}
+	//	void set(uint8_t _x, uint8_t _y, field_s *pg, field_s *ga, field_s *ho)
+	//playground
+	m_playground[ 0].set( 1,  4);
+	m_playground[ 1].set( 2,  4);
+	m_playground[ 2].set( 3,  4);
+	m_playground[ 3].set( 4,  4);
+	m_playground[ 4].set( 4,  3);
+	m_playground[ 5].set( 4,  2);
+	m_playground[ 6].set( 4,  1);
+	m_playground[ 7].set( 5,  1);
+	m_playground[ 8].set( 6,  1);
+	m_playground[ 9].set( 6,  2);
+	m_playground[10].set( 6,  3);
+	m_playground[11].set( 6,  4);
+	m_playground[12].set( 7,  4);
+	m_playground[13].set( 8,  4);
+	m_playground[14].set( 9,  4);
+	m_playground[15].set( 9,  5);
+	m_playground[16].set( 9,  6);
+	m_playground[17].set( 8,  6);
+	m_playground[18].set( 7,  6);
+	m_playground[19].set( 6,  6);
+	m_playground[20].set( 6,  7);
+	m_playground[21].set( 6,  8);
+	m_playground[22].set( 6,  9);
+	m_playground[23].set( 5,  9);
+	m_playground[24].set( 4,  9);
+	m_playground[25].set( 4,  8);
+	m_playground[26].set( 4,  7);
+	m_playground[27].set( 4,  6);
+	m_playground[28].set( 3,  6);
+	m_playground[29].set( 2,  6);
+	m_playground[30].set( 1,  6);
+	m_playground[31].set( 1,  5);
+	//start area
+	m_playground[32].set( 0,  1);
+	m_playground[33].set( 1,  1);
+	m_playground[34].set( 1,  0);
+	m_playground[35].set( 9,  0);
+	m_playground[36].set( 9,  1);
+	m_playground[37].set(10,  1);
+	m_playground[38].set(10,  9);
+	m_playground[33].set( 1,  1);
+	m_playground[34].set( 1,  0);
+	m_playground[35].set( 9,  0);
+	m_playground[36].set( 9,  1);
+	m_playground[37].set(10,  1);
+	m_playground[38].set(10,  9);
+	m_playground[39].set( 9,  9);
+	m_playground[40].set( 9, 10);
+	m_playground[41].set( 1, 10);
+	m_playground[42].set( 1,  9);
+	m_playground[43].set( 0,  9);
+	m_playground[39].set( 9,  9);
+	m_playground[40].set( 9, 10);
+	m_playground[41].set( 1, 10);
+	m_playground[42].set( 1,  9);
+	m_playground[43].set( 0,  9);
+	//end area
+	m_playground[44].set( 2,  5);
+	m_playground[45].set( 3,  5);
+	m_playground[46].set( 4,  5);
+	m_playground[47].set( 5,  2);
+	m_playground[48].set( 5,  3);
+	m_playground[49].set( 5,  4);
+	m_playground[50].set( 8,  5);
+	m_playground[51].set( 7,  5);
+	m_playground[52].set( 6,  5);
+	m_playground[53].set( 5,  8);
+	m_playground[54].set( 5,  7);
+	m_playground[55].set( 5,  6);
+	//gap area
+	m_playground[56].set( 1,  3);
+	m_playground[57].set( 2,  3);
+	m_playground[58].set( 3,  3);
+	m_playground[58].set( 3,  3);
+	m_playground[58].set( 3,  3);
+	m_playground[59].set( 3,  2);
+	m_playground[60].set( 3,  1);
+	m_playground[61].set( 3,  0);
+	m_playground[62].set( 4,  0);
+	m_playground[63].set( 5,  0);
+	m_playground[64].set( 6,  0);
+	m_playground[65].set( 7,  0);
+	m_playground[66].set( 7,  1);
+	m_playground[67].set( 7,  2);
+	m_playground[68].set( 7,  3);
+	m_playground[68].set( 7,  3);
+	m_playground[68].set( 7,  3);
+	m_playground[69].set( 8,  3);
+	m_playground[70].set( 9,  3);
+	m_playground[71].set(10,  3);
+	m_playground[72].set(10,  4);
+	m_playground[73].set(10,  5);
+	m_playground[74].set(10,  6);
+	m_playground[75].set(10,  7);
+	m_playground[76].set( 9,  7);
+	m_playground[77].set( 8,  7);
+	m_playground[78].set( 7,  7);
+	m_playground[78].set( 7,  7);
+	m_playground[78].set( 7,  7);
+	m_playground[79].set( 7,  8);
+	m_playground[80].set( 7,  9);
+	m_playground[81].set( 7, 10);
+	m_playground[82].set( 6, 10);
+	m_playground[83].set( 5, 10);
+	m_playground[84].set( 4, 10);
+	m_playground[85].set( 3, 10);
+	m_playground[86].set( 3,  9);
+	m_playground[87].set( 3,  8);
+	m_playground[88].set( 3,  7);
+	m_playground[88].set( 3,  7);
+	m_playground[88].set( 3,  7);
+	m_playground[89].set( 2,  7);
+	m_playground[90].set( 1,  7);
+	m_playground[91].set( 0,  7);
+	m_playground[92].set( 0,  6);
+	m_playground[93].set( 0,  5);
+	m_playground[94].set( 0,  4);
+	m_playground[95].set( 0,  3);
+
+	//	//create players
+	//	m_playerMap.insert(std::pair<int, Player*>(1, new Player));
+	//	m_playerMap.insert(std::pair<int, Player*>(2, new Player));
+	//	m_playerMap.insert(std::pair<int, Player*>(4, new Player));
+	//	m_playerMap.insert(std::pair<int, Player*>(8, new Player));
+	//
+	//	//assign figures to its fields
+	//	m_playerMap[1]->setColor(1);
+	//	m_playerMap[1]->getFigure(0)->field = &m_playground[41];
+	//	m_playerMap[1]->getFigure(1)->field = &m_playground[42];
+	//	m_playerMap[1]->getFigure(2)->field = &m_playground[43];
+	//	m_playground[41].figure = m_playerMap[1]->getFigure(0);
+	//	m_playground[42].figure = m_playerMap[1]->getFigure(1);
+	//	m_playground[43].figure = m_playerMap[1]->getFigure(2);
+	//	m_playground[41].figure->color = 1;
+	//	m_playground[42].figure->color = 1;
+	//	m_playground[43].figure->color = 1;
+	//
+	//	m_playerMap[2]->setColor(2);
+	//	m_playerMap[2]->getFigure(0)->field = &m_playground[38];
+	//	m_playerMap[2]->getFigure(1)->field = &m_playground[39];
+	//	m_playerMap[2]->getFigure(2)->field = &m_playground[40];
+	//	m_playground[38].figure = m_playerMap[2]->getFigure(0);
+	//	m_playground[39].figure = m_playerMap[2]->getFigure(1);
+	//	m_playground[40].figure = m_playerMap[2]->getFigure(2);
+	//	m_playground[38].figure->color = 2;
+	//	m_playground[39].figure->color = 2;
+	//	m_playground[40].figure->color = 2;
+	//
+	//	m_playerMap[4]->setColor(4);
+	//	m_playerMap[4]->getFigure(0)->field = &m_playground[35];
+	//	m_playerMap[4]->getFigure(1)->field = &m_playground[36];
+	//	m_playerMap[4]->getFigure(2)->field = &m_playground[37];
+	//	m_playground[35].figure = m_playerMap[4]->getFigure(0);
+	//	m_playground[36].figure = m_playerMap[4]->getFigure(1);
+	//	m_playground[37].figure = m_playerMap[4]->getFigure(2);
+	//	m_playground[35].figure->color = 4;
+	//	m_playground[36].figure->color = 4;
+	//	m_playground[37].figure->color = 4;
+	//
+	//	m_playerMap[8]->setColor(8);
+	//	m_playerMap[8]->getFigure(0)->field = &m_playground[32];
+	//	m_playerMap[8]->getFigure(1)->field = &m_playground[33];
+	//	m_playerMap[8]->getFigure(2)->field = &m_playground[34];
+	//	m_playground[32].figure = m_playerMap[8]->getFigure(0);
+	//	m_playground[33].figure = m_playerMap[8]->getFigure(1);
+	//	m_playground[34].figure = m_playerMap[8]->getFigure(2);
+	//	m_playground[32].figure->color = 8;
+	//	m_playground[33].figure->color = 8;
+	//	m_playground[34].figure->color = 8;
+
+	drawPlayground(&m_playground[0]);
+
+	m_mutexPlayground.unlock();
+}
+
+void Game::m_printTags(tags_t* tags) {
+	field_s* field;
+
+	debug("content of playground. tags on:\n");
+	for(int x = 0; x < 11; x++) {
+		for(int y = 0; y < 11; y++) {
+			if( tags->line[x].tag[y]) {
+				//				field = m_findInPlayground(x,y);
+				//				debug(" - (%d)\n",field->no);
+				debug(" - (%d/%d)\n",x, y);
+			}
+		}
+	}
+}
+/*
+ * Player.h
+ *
+ *  Created on: Apr 24, 2013
+ *      Author: reinhard
+ */
+
+#ifndef PLAYER_H_
+#define PLAYER_H_
+
+#include "Player.h"
+#include "Game.h"
+#include "../general/tools.h"
+
+class Game;
+struct field_s;
+
+struct figure_s {
+	uint8_t color;
+	field_s *field;
+	uint16_t tagNum;
+//	char sym;
+};
+
+class Player {
+public:
+	Player();
+
+	void sendSetPlayerName(const char *name);
+	void sendSetColor(int color);
+	void sendStartGame();
+	void sendDieDone();
+	void sendSelectFigure(uint8_t field);
+
+	figure_s *getFigure(uint8_t i) {
+		return &m_figures[i];
+	}
+
+	void setColor(uint8_t color) {
+		m_color = color;
+	}
+	void setGame(Game *game) {
+		m_game = game;
+	}
+
+private:
+	Game *m_game;
+	int m_color;
+	int m_id;
+	figure_s m_figures[3];
+};
+
+#endif /* PLAYER_H_ */
+#ifndef CLIENT_H_
+#define CLIENT_H_
+
+#include <pthread.h>
+#include <boost/asio.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
+
+#include "defs.h"
+#include "Game.h"
+#include "../general/tools.h"
+#include "../general/cli.h"
+
+class Game;
+
+class Client {
+public:
+	Client(int fd);
+	virtual ~Client();
+	void runCli();
+	void closeCli() {
+		close(m_fd);
+	}
+
+	void sendAddClient(const char *name);
+
+	void sendSetPlayerName(uint8_t pid, const char *name);
+	void sendSetColor(uint8_t color);
+	void sendDelColor(uint8_t color);
+	void sendStartGame(uint8_t pid);
+	void sendDieDone(uint8_t pid);
+	void sendSelectFigure(uint8_t pid, uint8_t field);
+
+	void sendCmd(uint8_t cmd[], int length);
+
+	char *getName(int client) {
+		return m_name;
+	}
+	int getFd() {
+		return m_fd;
+	}
+	int getId() {
+		return m_Id;
+	}
+
+	void setName(const char *id) {
+		strcpy(m_name, id);
+	}
+	void setFd(int fd) {
+		m_fd = fd;
+	}
+	void setGame(Game *game) {
+		m_game = game;
+	}
+	void setId(int id) {
+		m_Id = id;
+	}
+private:
+	char m_name[CLIENT_NAME_MAX_LENGTH];
+	boost::mutex m_mutex;
+	Game *m_game;
+	boost::thread *m_thread;
+	int m_Id;
+	int m_fd;
+
+	void m_receiveTcpIp();
+
+};
+
+#endif /* CLIENT_H_ */
+/*
+ * Player.cpp
+ *
+ *  Created on: Apr 24, 2013
+ *      Author: reinhard
+ */
+
+#include "Player.h"
+
+Player::Player() {
+	m_id = 0;
+	m_color = 0;
+	m_game = NULL;
+}
+
+void Player::sendSetPlayerName(const char *name) {
+	m_game->getClient()->sendSetPlayerName(m_id, name);
+}
+
+void Player::sendSetColor(int color) {
+	m_game->getClient()->sendSetColor(color);
+}
+
+void Player::sendStartGame() {
+	m_game->getClient()->sendStartGame(m_id);
+}
+
+void Player::sendDieDone() {
+	m_game->getClient()->sendDieDone(m_id);
+}
+
+void Player::sendSelectFigure(uint8_t field) {
+	m_game->getClient()->sendSelectFigure(m_id, field);
+}
+#ifndef LEDSTRIPES_H_
+#define LEDSTRIPES_H_
+
+#include "I2c.h"
+
+class LedStripes: protected I2c {
+public:
+	LedStripes(uint8_t i2cAddr);
+	virtual ~LedStripes();
+	int set(uint8_t mode, uint8_t color);
+	int setDemo(uint8_t demo);
+
+};
+
+#endif /* LEDSTRIPES_H_ */
+#include "LedRing.h"
+
+LedRing::LedRing(uint8_t i2cAddr) {
+	setI2cAddr(i2cAddr);
+	set(0, 0);
+}
+
+LedRing::~LedRing() {
+	set(0, 0);
+}
+
+int LedRing::set(uint8_t mode, uint8_t color) {
+	I2c::write(mode, &color, sizeof color);
+	return 0;
+}
+#ifndef I2C_H_
+#define I2C_H_
+
+#include <fcntl.h>
+#include <linux/i2c-dev.h>
+#include <sys/ioctl.h>
+#include <boost/thread.hpp>
+
+#include "../src/defs.h"
+#include "../general/tools.h"
+#include "../general/cli.h"
+//#define NO_I2C
+
+class I2c {
+public:
+	I2c();
+	virtual ~I2c();
+
+private:
+	void setCmd(uint8_t I2cCmd, int i2cAddr, int fd);
+	static int fd;
+	static int count;
+	static boost::mutex i2cMutex;
+	int open(const char* devName);
+	int close();
+
+protected:
+	uint8_t m_i2cAddr;
+
+	void setI2cAddr(uint8_t i2cAddr) {
+		m_i2cAddr = i2cAddr;
+	}
+
+	uint8_t getI2cAddr() { return m_i2cAddr; }
+
+	int read(void* data, uint8_t length);
+	int read(uint8_t i2cCmd, void* data, uint8_t length);
+	int write(void* data, uint8_t length);
+	int write(uint8_t i2cCmd, void* data, uint8_t length);
+};
+
+#endif
+#include "XYdrive.h"
+
+XYdrive::XYdrive(uint8_t i2cAddrXYdrive, uint8_t i2cAddrRfidReader,
+		uint8_t i2cAddrLedRing, uint8_t i2cAddrLedStripe) {
+	m_rfid = new Rfid(i2cAddrRfidReader);
+	m_ledRing = new LedRing(i2cAddrLedRing);
+	//	m_ledStripe = new LedStripes(i2cAddrLedStripe);
+	m_isMoving = false;
+	setI2cAddr(i2cAddrXYdrive);
+
+	boost::thread hardwareWorker(boost::bind(&XYdrive::m_worker, this));
+	m_mag = true;
+	magnet(false);
+	m_actX = 0; m_actY = 0;
+}
+
+XYdrive::~XYdrive() {
+	delete m_rfid;
+	delete m_ledRing;
+	delete m_ledStripe;
+}
+
+void XYdrive::m_moveTo(int x, int y) {
+	uint8_t buf[10];
+
+	buf[0] = DEV_XY_DRIVE;
+	buf[1] = XY_DRIVE_CMD_MOVE;
+	memcpy(&buf[2], &x, sizeof(x));
+	memcpy(&buf[6], &y, sizeof(y));
+
+	addCmd(buf, sizeof(buf));
+}
+
+void XYdrive::magnet(bool value) {
+	addCmd(3, DEV_XY_DRIVE, XY_DRIVE_CMD_MAG, (uint8_t) value);
+}
+
+void XYdrive::ref() {
+	addCmd(2, DEV_XY_DRIVE, XY_DRIVE_CMD_REF);
+}
+
+void XYdrive::moveToXY(uint8_t x, uint8_t y) {
+	m_actX = x; m_actY = y;
+	float x2 = ((10-x) * 172);
+	float y2 = ((10-y) * 172);
+	debug("move to (%d/%d)\n", x, y);
+	m_moveTo((int) x2, (int) y2);
+}
+
+void XYdrive::scan(tags_t* tags) {
+	for(int i = 0; i < 11; i++) {
+//		m_moveTo((int)(x * 172 + 270),0);
+//		readRfid(&(tags->line[10-x]), sizeof(tagLine_t));
+		scanLine(i, &(tags->line[10-i]));
+	}
+}
+
+void XYdrive::scanLine(uint8_t line, tagLine_t* tags) {
+	magnet(0);
+	m_moveTo((int)((10-line) * 172 + 200),0);
+	readRfid(tags, sizeof(tagLine_t));
+}
+
+void XYdrive::readRfid(void* scanDest, int length) {
+	uint8_t buf[6];
+
+	buf[0] = DEV_RFID;
+	buf[1] = RFID_CMD_READ;
+	memcpy(&buf[2], &scanDest, sizeof(scanDest));
+//	memcpy(&buf[6], &length, sizeof(length));
+
+	addCmd(buf, sizeof(buf));
+}
+void XYdrive::setLedRing(uint8_t mode, uint8_t color) {
+	addCmd(4, DEV_LED_RING, LED_RING_CMD_SET, (uint8_t) mode, (uint8_t) color);
+}
+
+bool XYdrive::getIsMoving() {
+	bool ret;
+
+	m_cB.mutex.lock() ;
+	ret = m_isMoving;
+	m_cB.mutex.unlock() ;
+
+	return ret;
+}
+
+void XYdrive::addCmd(uint8_t cmd[], int length) {
+	m_cB.mutex.lock() ;
+	while(((m_cB.in + 1) % CMDBUF_SIZE) == m_cB.out)  //while cmdBuffer is full
+		m_cB.condRem.wait(m_cB.mutex);
+	memcpy(&m_cB.cmd[m_cB.in][0], cmd, length);
+	++m_cB.in %= CMDBUF_SIZE;
+	m_cB.condAdd.notify_one();
+	m_cB.mutex.unlock();
+}
+
+void XYdrive::addCmd(uint8_t n, ...) {
+	va_list list;
+	uint8_t buf[CMDBUF_MAX_CMD_LENGHT];
+
+	va_start(list, n);
+	for(int i = 0; i < n; i++)
+		buf[i] = va_arg(list, int);
+	addCmd(buf,n);
+	va_end(list);
+}
+
+void XYdrive::m_worker() {
+	uint8_t buf[CMDBUF_MAX_CMD_LENGHT + 1];
+	uint8_t target, cmd;
+	debug("start XYdrive worker\n");
+
+	while(1) {
+		m_cB.mutex.lock();
+		while(m_cB.in == m_cB.out) {// while cmdBffer is empty
+			m_isMoving = false;
+			m_cB.condAdd.wait(m_cB.mutex);
+		}
+		m_isMoving = true;
+
+		target = m_cB.cmd[m_cB.out][0]; // copy actual element
+		cmd = m_cB.cmd[m_cB.out][1];
+		memcpy(&buf, &m_cB.cmd[m_cB.out][2], CMDBUF_MAX_CMD_LENGHT - 1);
+
+		++m_cB.out %= CMDBUF_SIZE; // next element
+		m_cB.condRem.notify_one();
+		m_cB.mutex.unlock();
+
+		switch(target) {
+		case DEV_XY_DRIVE: {
+			switch (cmd) {
+			case XY_DRIVE_CMD_MOVE: {
+				int x, y;
+				memcpy(&x, &buf[0], sizeof(x));
+				memcpy(&y, &buf[4], sizeof(y));
+//				debug("    - move to %d-%d\n", x,y);
+
+				char b[32];
+
+				sprintf(b, " %.2f %.2f", (float) x, (float) y);
+
+				write(I2C_XYS_SETPOINTS, b, sizeof(b));
+				memset(b, '\0', sizeof(b));
+				bool running = true;
+				while(running) {
+					usleep(250000);
+					read(I2C_XYS_RUNNING, b, sizeof(b));
+					running = atoi(&b[2]);
+				}
+				//				usleep(100000);
+			}
+			break;
+			case XY_DRIVE_CMD_MAG:
+				char b[32];
+				if(buf[0] == m_mag) break;
+				else {
+					m_mag = buf[0];
+					sprintf(b, " %.2d", m_mag);
+					write(I2C_XYS_SERVO, b, sizeof(b));
+					usleep(600000);
+				}
+				break;
+			}
+			break;
+		}
+		case DEV_RFID: {
+			switch (cmd) {
+			case RFID_CMD_READ: {
+				tagLine_t* scanDest;
+				memcpy(&scanDest, &buf[0], sizeof(scanDest));
+				m_rfid->readLine(scanDest);
+			}
+			break;
+			}
+			break;
+
+			default:
+				debug("    - device unknown\n");
+				break;
+		}
+		break;
+		case DEV_LED_RING: {
+			switch(cmd) {
+			case LED_RING_CMD_SET:
+				debug("LED RING set Color %d, %d\n", buf[1], buf[2]);
+				m_ledRing->set(buf[0], buf[1]);
+			}//
+		}
+		break;
+		case DEV_LED_STRIPES: {
+
+		}
+		}
+	}
+}
+
+#ifndef DISPLAY_H_
+#define DISPLAY_H_
+
+#include "I2c.h"
+#include "../general/CliDisplay.h"
+#include "../../../arduino/display/i2c_defs.h"
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread/thread.hpp>
+
+
+class Display: protected I2c {
+public:
+	Display(uint8_t i2cAddr, long msec);
+	virtual ~Display();
+	int setPictures(uint8_t number, bool readEnable);
+	int getPicture() { return m_actPicNumber; }
+	int setName(uint8_t player, const char* name);
+	char* getName(uint8_t player);
+	int getSelection() { return m_encoder; }
+	uint8_t getVersion();
+	void setCliDisplay(CliDisplay* cliDisplay) { m_cliDisplay = cliDisplay; }
+
+private:
+	CliDisplay* m_cliDisplay;
+	int m_actPicNumber;
+	long m_periode;
+	uint8_t m_encoder;
+	bool m_readEnable;
+	boost::asio::io_service m_io;
+	boost::asio::deadline_timer* m_timer;
+	boost::thread* m_handlerThread;
+	boost::asio::strand* m_strand;
+
+	void handler();
+};
+
+#endif /* DISPALY_H_ */
+#include "Rfid.h"
+
+Rfid::Rfid(uint8_t i2cAddr) {
+	setI2cAddr(i2cAddr);
+}
+
+Rfid::~Rfid() {
+	// TODO check if neessary
+}
+
+int Rfid::readLine(tagLine_t* buf) {
+	write(I2C_RFID_IREAD, NULL, 0);
+	usleep(1200000);
+	return read(I2C_RFID_TAGS, buf, sizeof(tagLine_t));
+}
+#include "I2c.h"
+
+int I2c::fd;
+int I2c::count;
+boost::mutex I2c::i2cMutex;
+
+I2c::I2c() {
+	m_i2cAddr = 0;
+
+	count++;
+}
+
+I2c::~I2c() {
+	count--;
+	if (!count)
+		close();
+}
+
+int I2c::open(const char* devName) {
+//	return 0;
+
+	i2cMutex.lock();
+	if((fd = ::open(devName, O_RDWR)) < 0) {
+		debug("I2C open error! %d\n", fd);
+	}
+	i2cMutex.unlock();
+	return 0;
+}
+
+int I2c::write(void* data, uint8_t length) {
+
+	int nW = 0;
+
+	if(!fd) open(I2C_DEV_NAME);
+	i2cMutex.lock();
+	if(ioctl(fd, I2C_SLAVE, m_i2cAddr) < 0)
+	debug("I2C set adress error!\n");
+
+	int tries = 0;
+
+	do {
+		nW = ::write(fd, data, length);
+		if(nW != length) {
+			debug("I2C write error!\n");
+			debug("  %s\n", (char*)data);
+			tries++;
+			usleep(10000);
+		}
+	}while(nW != length && tries < 5);
+	i2cMutex.unlock();
+	return nW;
+}
+
+int I2c::write(uint8_t i2cCmd, void* data, uint8_t length) {
+//	return 0;
+	uint8_t buf[length + 1];
+
+	buf[0] = i2cCmd;
+	memcpy(&buf[1], (uint8_t*) data, length);
+	return write(buf, length + 1);
+}
+
+int I2c::read(void* data, uint8_t length) {
+	int nR = 0;
+
+	if(!fd) open(I2C_DEV_NAME);
+	i2cMutex.lock();
+	if(ioctl(fd, I2C_SLAVE, m_i2cAddr) < 0)
+	debug("I2C set adress error!\n");
+	int tries = 0;
+	do {
+		nR = ::read(fd, data, length);
+		if(nR != length) {
+			debug("I2C read error!\n");
+			debug("  %s\n", (char*)data);
+			tries++;
+			usleep(10000);
+		}
+	} while(nR != length && tries < 5);
+	i2cMutex.unlock();
+	return nR;
+}
+
+int I2c::read(uint8_t i2cCmd, void* data, uint8_t length) {
+//	return 0;
+	write(&i2cCmd, 1);
+	usleep(10000);
+	read(data, length);
+	return 0;
+}
+
+int I2c::close() {
+	return 0;
+	i2cMutex.lock();
+	::close(fd);
+	i2cMutex.unlock();
+	return 0;
+}
+#include "LedStripes.h"
+
+LedStripes::LedStripes(uint8_t i2cAddr) {
+	setI2cAddr(i2cAddr);
+	set(0, 0);
+}
+
+LedStripes::~LedStripes() {
+	set(0, 0);
+}
+
+int LedStripes::set(uint8_t mode, uint8_t color) {
+	I2c::write(mode, &color, sizeof color);
+	return 0;
+}
+
+int LedStripes::setDemo(uint8_t demo) {
+	I2c::write(4, &demo, sizeof demo);
+	return 0;
+}
+
+#ifndef RFID_H_
+#define RFID_H_
+
+#include "I2c.h"
+#include "XYdrive.h"
+#include "../../../arduino/rfid_reader_b/i2c_defs.h"
+
+#define RFID_TIME_US_READ 1200000
+
+class tagLine_t {
+public:
+	tagLine_t() { for(int i = 0; i < 11; i++) tag[i] = 0; }
+	uint16_t tag[11];
+};
+
+class tags_t {
+public:
+	tagLine_t line[11];
+};
+
+class Rfid: protected I2c {
+public:
+	Rfid(uint8_t i2cAddr);
+	virtual ~Rfid();
+
+	int readLine(tagLine_t* buf);
+};
+
+#endif /* RFID_H_ */
+#ifndef LEDRING_H_
+#define LEDRING_H_
+
+#include "I2c.h"
+
+class LedRing: protected I2c {
+public:
+	LedRing(uint8_t i2cAddr);
+	virtual ~LedRing();
+	int set(uint8_t mode, uint8_t color);
+
+};
+
+#endif /* LEDRING_H_ */
+#ifndef XYDRIVE_H_
+#define XYDRIVE_H_
+
+#include "I2c.h"
+#include "../general/cli.h"
+#include "../hardware/Rfid.h"
+#include "../hardware/LedRing.h"
+#include "../hardware/LedStripes.h"
+#include "../src/defs.h"
+#include "../../../arduino/xy_schlitten/src/i2c_defs.h"
+#include <boost/thread.hpp>
+#include <cstring>
+
+struct cmdBuffer_s{
+	uint8_t cmd[CMDBUF_SIZE][CMDBUF_MAX_CMD_LENGHT];
+	uint8_t in, out;
+	boost::mutex mutex;
+	boost::condition_variable_any condAdd, condRem;
+};
+
+class Rfid;
+class tags_t;
+class tagLine_t;
+
+class XYdrive : protected I2c{
+public:
+	XYdrive(uint8_t i2cAddrXYdrive, uint8_t i2cAddrRfidReader,
+			uint8_t i2cAddrLedRing, uint8_t i2cAddrLedStripe);
+	virtual ~XYdrive();
+	void magnet(bool value);
+	void ref();
+	void moveToXY(uint8_t x, uint8_t y);
+	void scan(tags_t* tags);
+	void scanLine(uint8_t line, tagLine_t* tags);
+	void readRfid(void* scanDest, int length);
+	void setLedRing(uint8_t mode, uint8_t color);
+	bool getIsMoving();
+	uint8_t getActX() { return m_actX; }
+	uint8_t getActY() { return m_actY; }
+
+private:
+	cmdBuffer_s m_cB;
+	Rfid* m_rfid;
+	LedRing* m_ledRing;
+	LedStripes* m_ledStripe;
+	volatile bool m_isMoving;
+	uint8_t m_actX, m_actY;
+
+	void m_worker();
+	void addCmd(uint8_t cmd[], int length);
+	void addCmd(uint8_t cmd, ...);
+	void m_moveTo(int x, int y);
+
+	bool m_mag;
+
+
+};
+
+#endif /* XYDRIVE_H_ */
+#include "Display.h"
+#include "../src/Game.h"
+
+
+extern Game* g_game;
+
+
+Display::Display(uint8_t i2cAddr, long msec) {
+	setI2cAddr(i2cAddr);
+	m_periode = msec;
+	m_readEnable = false;
+	m_encoder = 0;
+	m_strand = new boost::asio::strand(m_io);
+	m_timer = new boost::asio::deadline_timer(m_io, boost::posix_time::milliseconds(m_periode));
+	m_timer->async_wait(m_strand->wrap(boost::bind(&Display::handler, this)));
+	m_handlerThread = new boost::thread (boost::bind(&boost::asio::io_service::run, &m_io));
+}
+
+Display::~Display() {
+
+}
+
+int Display::setPictures(uint8_t number, bool readEnable) {
+	m_readEnable = readEnable;
+
+	if(m_actPicNumber == number) return 0;
+
+	m_actPicNumber = number;
+	if(getI2cAddr() != 0x50 && getI2cAddr() != 0x51) {
+		//I2c::write(I2C_DBEN_PICTURE, &number, sizeof number); //TODO remove if statement
+	}
+	if(m_cliDisplay != NULL) m_cliDisplay->callPicture(number);
+
+	return 0;
+}
+
+int Display::setName(uint8_t player, const char* name) {
+	return 0;
+}
+
+char* Display::getName(uint8_t player) {
+	return 0;
+}
+
+uint8_t Display::getVersion() {
+	uint8_t version;
+
+	I2c::read(I2C_DBEN_VERSION, &version, sizeof version);
+	return version;
+}
+
+void Display::handler() {
+	if(m_readEnable) {
+		if(getI2cAddr() != 0x50 && getI2cAddr() != 0x51) {
+			//I2c::read(I2C_DBEN_BUTTON, &m_encoder, sizeof(m_encoder));
+//			debug("  read encoder from display %d = %d\n", getI2cAddr(), m_encoder);
+		}
+
+		if(m_encoder) {
+			uint8_t buf[4];
+
+			m_readEnable = false;
+
+			//			debug("     write cmd\n");
+
+			buf[0] = 0;
+			buf[1] = DISPLAY_CMD_PUSH_ENTER;
+			buf[2] = getI2cAddr() - 0x50;
+			buf[3] = m_encoder;
+
+			g_game->addCmd(buf, 4);
+		}
+	}
+    m_timer->expires_at(m_timer->expires_at() + boost::posix_time::milliseconds(m_periode));
+	m_timer->async_wait(boost::bind(&Display::handler, this));
+}

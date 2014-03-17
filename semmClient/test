@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "all files" > all
+for f in `find -name "*.cpp" -o -name "*.h"`; do
+  echo "File -> $f"
+  cat $f >> all
+done
