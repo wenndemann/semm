@@ -15,8 +15,8 @@
 //#include "../hardware/Hardware.h"
 
 #include "../../../arduino/led_ring/i2c_defs.h"
-#include "../../../arduino/led_streifen/i2c_defs.h"
-#include "../../../arduino/rfid_reader_b/i2c_defs.h"
+#include "../../../arduino/led_stripe/i2c_defs.h"
+#include "../../../arduino/rfid_reader/i2c_defs.h"
 #include "../../../arduino/xy_schlitten/src/i2c_defs.h"
 #include "../../../arduino/display/i2c_defs.h"
 

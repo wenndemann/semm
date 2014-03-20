@@ -3,7 +3,7 @@
 
 #include "I2c.h"
 #include "XYdrive.h"
-#include "../../../arduino/rfid_reader_b/i2c_defs.h"
+#include "../../../arduino/rfid_reader/i2c_defs.h"
 
 #define RFID_TIME_US_READ 1200000
 

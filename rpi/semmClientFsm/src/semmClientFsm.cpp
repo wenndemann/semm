@@ -8,6 +8,7 @@
 
 // global includes
 #include <iostream>
+#include <string>
 
 // local includes
 #include "fsm/mainFsm.h"
@@ -45,11 +46,11 @@ void test()
         p.stop();
     }
 
-int main() {
+int main(int argc, char *argv[]) {
 	cout << "bla" << endl; // prints bla
 	test();
 
-	Game* g = new Game();
+	Game* g = new Game(string(argv[0]));
 	delete g;
 
 	return 0;
