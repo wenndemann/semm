@@ -6,10 +6,12 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-
+// global includes
 #include <iostream>
 
+// local includes
 #include "fsm/mainFsm.h"
+#include "game/Game.h"
 
 using namespace std;
 
@@ -46,5 +48,9 @@ void test()
 int main() {
 	cout << "bla" << endl; // prints bla
 	test();
+
+	Game* g = new Game();
+	delete g;
+
 	return 0;
 }

@@ -38,7 +38,7 @@
 //#include <pthread.h>
 //#include <math.h>
 
-//#include <boost/thread.hpp>
+#include <boost/thread.hpp>
 #include <boost/bind.hpp>
 
 #include "Client.h"
@@ -52,9 +52,8 @@
 #define SEMM_NUM_THREADS 8
 
 //* global variables section
-pthread_t* pthreadTcpIpListen;
-std::map<int, Client*> g_clientMap;
-Game* game; ///< global instance of Game
+//pthread_t* pthreadTcpIpListen;
+//std::map<int, Client*> g_clientMap;
 
 //* prototype section
 void* tcpIpListen(void* g);
@@ -72,6 +71,7 @@ void* tcpIpListen(void* g);
  */
 int main(int argc, char** argv)
 {
+	Game* game; ///< global instance of Game
 	boost::thread* tcpIpThread;
 
 	srand (time(NULL));
