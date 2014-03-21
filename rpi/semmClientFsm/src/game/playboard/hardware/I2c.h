@@ -9,7 +9,7 @@
 #include <sys/ioctl.h>
 
 // local includes
-#include "../defs.h"
+#include "../../../defs.h"
 //#define NO_I2C
 
 class I2c {

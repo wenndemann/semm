@@ -11,21 +11,22 @@
 
 // global includes
 #include <boost/shared_ptr.hpp>
-#include <vector>
+#include <map>
 
 // local includes
-#include "../hardware/Display.h"
-#include "../hardware/LedRing.h"
-#include "../hardware/LedStripes.h"
-#include "../hardware/Rfid.h"
-#include "../hardware/XYdrive.h"
+#include "hardware/Display.h"
+#include "hardware/LedRing.h"
+#include "hardware/LedStripes.h"
+#include "hardware/Rfid.h"
+#include "hardware/XYdrive.h"
+#include "../Player.h"
 
 class Playboard {
 
+	//Hardware
 	typedef boost::shared_ptr<Display> DisplayPtr;
-	typedef std::vector<DisplayPtr> DisplayVector;
-	typedef DisplayVector::iterator DisplayVectorIt;
-
+	typedef std::map<int, DisplayPtr> DisplayMap;
+	typedef DisplayMap::iterator DisplayMapIt;
 	typedef boost::shared_ptr<LedRing> LedRingPtr;
 	typedef boost::shared_ptr<LedStripes> LedStripesPtr;
 	typedef boost::shared_ptr<Rfid> RfidPtr;
@@ -36,7 +37,8 @@ public:
 	virtual ~Playboard();
 
 private:
-	std::vector<DisplayPtr> _displays;
+	// Hardware
+	DisplayMap _displays;
 	LedRingPtr _ledRing;
 	LedStripesPtr _ledStripe;
 	RfidPtr _rfid;

@@ -1,9 +1,9 @@
 #ifndef RFID_H_
 #define RFID_H_
 
+// locale includes
 #include "I2c.h"
-#include "XYdrive.h"
-#include "../../../../arduino/rfid_reader/i2c_defs.h"
+#include "../../../../../../arduino/rfid_reader/i2c_defs.h"
 
 #define RFID_TIME_US_READ 1200000
 

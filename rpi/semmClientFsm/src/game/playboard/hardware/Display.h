@@ -10,7 +10,7 @@
 
 // local includes
 #include "I2c.h"
-#include "../../../../arduino/display/i2c_defs.h"
+#include "../../../../../../arduino/display/i2c_defs.h"
 
 class Display: protected I2c {
 

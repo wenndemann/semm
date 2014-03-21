@@ -2,7 +2,7 @@
 #define LEDSTRIPES_H_
 
 #include "I2c.h"
-#include "../../../../arduino/led_stripe/i2c_defs.h"
+#include "../../../../../../arduino/led_stripe/i2c_defs.h"
 
 class LedStripes: protected I2c {
 public:
