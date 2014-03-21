@@ -17,12 +17,13 @@ class Meeple;
 class Field {
 public:
 	Field();
-	Field(uint8_t x, uint8_t y, uint8_t no, Meeple* m);
+	Field(uint8_t x, uint8_t y, uint8_t no);
 	virtual ~Field();
 
-	uint8_t x() { return _x; }
-	uint8_t y() { return _y; }
-	uint8_t no() { return _no; }
+	uint8_t x() const { return _x; }
+	uint8_t y() const { return _y; }
+	uint8_t no() const { return _no; }
+	Meeple* meeple() const { return _meeple; }
 	void x(uint8_t x) { _x = x; }
 	void y(uint8_t y) { _y = y; }
 	void no(uint8_t no) { _no = no; }

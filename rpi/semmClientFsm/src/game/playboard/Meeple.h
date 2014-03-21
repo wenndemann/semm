@@ -19,9 +19,9 @@ public:
 	Meeple();
 	virtual ~Meeple();
 
-	uint8_t color() { return _color; }
-	Field* field() { return _field; }
-	uint16_t tagId() { return _tagId; }
+	uint8_t color() const { return _color; }
+	Field* field() const { return _field; }
+	uint16_t tagId() const { return _tagId; }
 	void color(uint8_t c) { _color = c; }
 	void field(Field* f) { _field = f; }
 	void tagId(uint16_t t) { _tagId = t; }

@@ -7,6 +7,10 @@
 
 class LedRing: protected I2c {
 public:
+	enum {
+		OFF = 0, ON = 1, BLINK = 2
+	};
+
 	LedRing(uint8_t i2cAddr);
 	virtual ~LedRing();
 	int set(uint8_t mode, uint8_t color);

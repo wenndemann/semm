@@ -10,20 +10,22 @@
 
 
 // global includes
+#include <boost/thread/lock_guard.hpp>
+#include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
 #include <map>
 
 // local includes
+#include "../Player.h"
+#include "Field.h"
 #include "hardware/Display.h"
 #include "hardware/LedRing.h"
 #include "hardware/LedStripes.h"
 #include "hardware/Rfid.h"
 #include "hardware/XYdrive.h"
-#include "../Player.h"
+#include "Meeple.h"
 
 class Playboard {
-
-	//Hardware
 	typedef boost::shared_ptr<Display> DisplayPtr;
 	typedef std::map<int, DisplayPtr> DisplayMap;
 	typedef DisplayMap::iterator DisplayMapIt;
@@ -31,18 +33,27 @@ class Playboard {
 	typedef boost::shared_ptr<LedStripes> LedStripesPtr;
 	typedef boost::shared_ptr<Rfid> RfidPtr;
 	typedef boost::shared_ptr<XYdrive> XYDrivePtr;
+	typedef boost::shared_ptr<Field> FieldPtr;
+	typedef std::map<uint8_t, FieldPtr> FieldMap;
+	typedef FieldMap::iterator FieldMapIt;
 
 public:
 	Playboard();
 	virtual ~Playboard();
 
+	void moveMeeple(const Meeple& m, const Field& to);
+	void moveMeeple(uint8_t from, uint8_t to);
+	uint16_t readId(const Field& f);
+
 private:
-	// Hardware
 	DisplayMap _displays;
 	LedRingPtr _ledRing;
 	LedStripesPtr _ledStripe;
 	RfidPtr _rfid;
 	XYDrivePtr _XYDrive;
+
+	FieldMap _fields;
+	boost::mutex _mutexXYDrive;
 };
 
 #endif /* PLAYBOARD_H_ */

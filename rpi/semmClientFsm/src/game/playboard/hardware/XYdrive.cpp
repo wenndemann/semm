@@ -12,21 +12,26 @@ XYdrive::~XYdrive() {
 }
 
 void XYdrive::moveMagnet(bool value) {
-	char b[32];
 	if (value == _magPos) return;
-	else {
-		_magPos = value;
-		sprintf(b, " %.2d", _magPos);
-		write(I2C_XYS_SERVO, b, sizeof(b));
-		usleep(600000);
-	}
+
+	char b[32];
+	_magPos = value;
+	sprintf(b, " %.2d", _magPos);
+	write(I2C_XYS_SERVO, b, sizeof(b));
+	usleep(600000);
 }
 
 void XYdrive::moveCarriage(uint8_t x, uint8_t y) {
+	if(x == _x && y == _y) return;
+
 	char b[32];
 	bool running = true;
+	_x = x; _y = y;
 
-	sprintf(b, " %.2f %.2f", (float) x, (float) y);
+	float x2 = ((10-_x) * 172);
+	float y2 = ((10-_y) * 172);
+
+	sprintf(b, " %.2f %.2f", x2, y2);
 	write(I2C_XYS_SETPOINTS, b, sizeof(b));
 
 	memset(b, '\0', sizeof(b));

@@ -9,8 +9,8 @@
 #define TCPIP_H_
 
 // global includes
-#include <boost/thread/mutex.hpp>
 #include <boost/thread/lock_guard.hpp>
+#include <boost/thread/mutex.hpp>
 #include <cstring>
 #include <iostream>
 #include <netdb.h>

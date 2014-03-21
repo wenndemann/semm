@@ -6,6 +6,10 @@
 
 class LedStripes: protected I2c {
 public:
+	enum {
+		OFF = 0, ON = 1, BLINK_SLOW = 2, BLINK_FAST = 3
+	};
+
 	LedStripes(uint8_t i2cAddr);
 	virtual ~LedStripes();
 	int set(uint8_t mode, uint8_t color);

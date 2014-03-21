@@ -16,11 +16,11 @@ Field::Field() :
 
 }
 
-Field::Field(uint8_t x, uint8_t y, uint8_t no, Meeple* m) :
+Field::Field(uint8_t x, uint8_t y, uint8_t no) :
 	_x(x),
 	_y(y),
 	_no(no),
-	_meeple(m)
+	_meeple(0)
 {
 
 }
