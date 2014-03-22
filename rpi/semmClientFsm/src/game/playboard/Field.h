@@ -10,11 +10,14 @@
 
 // global includes
 #include <inttypes.h>
+#include <boost/shared_ptr.hpp>
 
 //forward declarations
 class Meeple;
 
 class Field {
+typedef boost::shared_ptr<Meeple> MeeplePtr;
+
 public:
 	Field();
 	Field(uint8_t x, uint8_t y, uint8_t no);
@@ -23,14 +26,15 @@ public:
 	uint8_t x() const { return _x; }
 	uint8_t y() const { return _y; }
 	uint8_t no() const { return _no; }
-	Meeple* meeple() const { return _meeple; }
+	MeeplePtr meeple() const { return _meeple; }
 	void x(uint8_t x) { _x = x; }
 	void y(uint8_t y) { _y = y; }
 	void no(uint8_t no) { _no = no; }
+	void meeple(MeeplePtr m) { _meeple = m; }
 
 private:
 	uint8_t _x, _y, _no;
-	Meeple* _meeple;
+	MeeplePtr _meeple;
 
 	void set(uint8_t x, uint8_t y) {
 		_x = x;

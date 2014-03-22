@@ -183,12 +183,19 @@ void Playboard::moveMeeple(uint8_t from, uint8_t to) {
 
 	//turn LedStripe off
 	_ledStripe->set(LedStripes::OFF, 0);
+
+	//lower magnet
+	_XYDrive->moveMagnet(false);
+
+	//move meeple
+	_fields[to]->meeple(_fields[from]->meeple());
+	_fields[to]->meeple()->field(_fields[to]);
+	_fields[from]->meeple();
 }
 
 uint16_t Playboard::readId(const Field& f) {
 	boost::lock_guard<boost::mutex> gard(_mutexXYDrive);
 	_XYDrive->moveMagnet(false);
-	_XYDrive->moveCarriage((int)((10-f.no()) * 172 + 250),
-			_XYDrive->y());
-//	readRfid(tags, sizeof(tagLine_t));
+	_XYDrive->moveCarriage((int)((10-f.x()) * 172 + 250));
+	return _rfid->readTag(f.y());
 }

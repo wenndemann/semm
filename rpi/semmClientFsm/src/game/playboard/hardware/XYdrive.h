@@ -15,6 +15,7 @@ public:
 
 	void moveMagnet(bool value);
 	void moveCarriage(uint8_t x, uint8_t y);
+	void moveCarriage(uint8_t x);
 
 	uint8_t x() const { return _x; }
 	uint8_t y() const { return _y; }
