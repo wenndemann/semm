@@ -14,7 +14,7 @@ Display::Display(uint8_t i2cAddr, long msec) {
 	m_strand = new boost::asio::strand(m_io);
 	m_timer = new boost::asio::deadline_timer(m_io, boost::posix_time::milliseconds(m_periode));
 	m_timer->async_wait(m_strand->wrap(boost::bind(&Display::handler, this)));
-	m_handlerThread = new boost::thread (boost::bind(&boost::asio::io_service::run, &m_io));
+	m_handlerThread = new boost::thread(boost::bind(&boost::asio::io_service::run, &m_io));
 	setPictures(I2C_DBEN_PIC_SEMM);
 }
 

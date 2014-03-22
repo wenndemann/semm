@@ -9,6 +9,27 @@
 #define GUARDS_H_
 
 // guard conditions
+struct check_scm
+{
+	template<class EVT, class FSM, class SourceState, class TargetState>
+	bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt)
+	{
+		return true;
+		//return ( fsm.gamePtr->mode( ) == Game::Mode::SelectColor );
+	}
+};
+
+struct check_gm
+{
+	template<class EVT, class FSM, class SourceState, class TargetState>
+	bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt)
+	{
+		return false;
+		//return ( fsm.gamePtr->mode( ) == Game::Mode::Gaming );
+	}
+};
+
+/*
 struct DummyGuard {
 	template<class EVT, class FSM, class SourceState, class TargetState>
 	bool operator()(EVT const& evt, FSM& fsm, SourceState& src,
@@ -33,5 +54,6 @@ struct always_true {
 		return true;
 	}
 };
+*/
 
 #endif /* GUARDS_H_ */

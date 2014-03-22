@@ -35,7 +35,6 @@ public:
 private:
 	PlayboardPtr _playboard;
 	TcpIpPtr _tcpIp;
-	PlayerMap _players;
 };
 
 #endif /* GAME_H_ */

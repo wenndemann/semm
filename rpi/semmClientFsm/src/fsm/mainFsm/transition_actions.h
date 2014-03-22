@@ -11,6 +11,8 @@
 // transition actions
 // as the functors are generic on events, fsm and source/target state,
 // you can reuse them in another machine if you wish
+
+/*
 struct TestFct {
 	template<class EVT, class FSM, class SourceState, class TargetState>
 	void operator()(EVT const&, FSM&, SourceState&, TargetState&) {
@@ -72,5 +74,6 @@ struct stopped_again {
 		cout << "player::stopped_again" << endl;
 	}
 };
+*/
 
 #endif /* TRANSITION_ACTIONS_H_ */
