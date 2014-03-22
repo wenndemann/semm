@@ -49,6 +49,8 @@ public:
 	void moveMeeple(uint8_t from, uint8_t to);
 	uint16_t readId(const Field& f);
 
+	bool _addPlayer();
+
 private:
 	DisplayMap _displays;
 	LedRingPtr _ledRing;

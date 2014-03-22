@@ -41,3 +41,7 @@ void XYdrive::moveCarriage(uint8_t x, uint8_t y) {
 		running = atoi(&b[2]);
 	}
 }
+
+void XYdrive::moveCarriage(uint8_t x) {
+	moveCarriage(x, _y);
+}

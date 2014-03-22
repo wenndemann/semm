@@ -10,25 +10,28 @@
 
 // global includes
 #include <inttypes.h>
+#include <boost/shared_ptr.hpp>
 
 //forward declarations
 class Field;
 
 class Meeple {
+typedef boost::shared_ptr<Field> FieldPtr;
+
 public:
 	Meeple();
 	virtual ~Meeple();
 
 	uint8_t color() const { return _color; }
-	Field* field() const { return _field; }
+	FieldPtr field() const { return _field; }
 	uint16_t tagId() const { return _tagId; }
 	void color(uint8_t c) { _color = c; }
-	void field(Field* f) { _field = f; }
+	void field(FieldPtr f) { _field = f; }
 	void tagId(uint16_t t) { _tagId = t; }
 
 private:
 	uint8_t _color;
-	Field* _field;
+	FieldPtr _field;
 	uint16_t _tagId;
 };
 

@@ -16,6 +16,7 @@
 #include "../defs.h"
 #include "../tcp_ip/TcpIp.h"
 #include "playboard/Playboard.h"
+#include "../fsm/mainFsm.h"
 
 class Game {
 
@@ -26,16 +27,27 @@ class Game {
 	typedef std::map<int, PlayerPtr> PlayerMap;
 	typedef PlayerMap::iterator PlayerMapIt;
 
+	typedef boost::shared_ptr<gameFSM> GameFSMPtr;
 public:
+	enum Mode{
+		Init = 1,
+		SelectColor = 2,
+		Gaming = 3,
+		GameOver = 4
+	};
+
 	Game(const std::string& ip);
 	virtual ~Game();
 
-	bool m_addPlayer(uint8_t color);
+	Mode mode() { return _mode;}
 
 private:
 	PlayboardPtr _playboard;
 	TcpIpPtr _tcpIp;
 	PlayerMap _players;
+	GameFSMPtr _fsm;
+
+	Mode _mode;
 };
 
 #endif /* GAME_H_ */
