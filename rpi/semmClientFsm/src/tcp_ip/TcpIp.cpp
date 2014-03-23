@@ -11,10 +11,10 @@
 
 using namespace std;
 
-TcpIp::TcpIp( boost::shared_ptr< Game > gamePtr )
+TcpIp::TcpIp( )
 : _connected(false)
+, _running(false)
 , _fd(0)
-, _gamePtr(gamePtr)
 {
 
 }
@@ -57,9 +57,13 @@ bool TcpIp::connect(const std::string& ip) {
 	_fd = sockfd;
 	_connected = true;
 
-	_thread.reset( new boost::thread( boost::bind(&TcpIp::worker, this) ) );
-
 	return true;
+}
+
+void TcpIp::start( boost::shared_ptr< Game > gamePtr )
+{
+	_gamePtr = gamePtr;
+	_thread.reset( new boost::thread( boost::bind(&TcpIp::worker, this) ) );
 }
 
 void TcpIp::worker( )
@@ -71,6 +75,7 @@ void TcpIp::worker( )
 
 	memset(&buf, 0 ,TCP_MSG_LENGTH);
 
+	_running = true;
 	do {
 		memset(&inputBuf, 0 ,TCP_MSG_LENGTH);
 		nR = read(_fd, &inputBuf[0], TCP_MSG_LENGTH);
@@ -88,6 +93,7 @@ void TcpIp::worker( )
 			_gamePtr->parseCmd(inputBuf, nR); // TODO
 		}
 	}while( nR > 0);
+	_running = false;
 
 	std::cout << "stop reading data" << std::endl;
 	close(_fd);
@@ -97,9 +103,10 @@ void TcpIp::sendAddClient(const string& name) {
 	//add this client to servers clientlist
 	uint8_t buf[20];
 	buf[0] = TCP_CMD_ADD_CLIENT_CS;
-	memcpy(&buf[1], &name, 18);
+	memcpy(&buf[1], name.c_str(), 18);
+	buf[name.length( ) + 1] = '\0';
 	writeToSocket(buf, 20);
-	cout << "send command \"ADD CLIENT\" to server" << endl;
+	cout << "send command \"ADD CLIENT\" " << name << " to server" << endl;
 }
 
 void TcpIp::sendSetColor(uint8_t color) {

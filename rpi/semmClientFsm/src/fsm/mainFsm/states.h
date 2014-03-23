@@ -21,6 +21,11 @@ struct Init : public msm::front::state<>
 		Playboard::DisplayMapIt it = displayMap.begin( );
 		for ( ; it != displayMap.end( ); ++it )
 		{	it->second->setPictures( I2C_DBEN_PIC_SEMM );	}
+
+		fsm._tcpIp->start( fsm._gamePtr );
+		while( !fsm._tcpIp->running( ) )
+		{ boost::this_thread::sleep( boost::posix_time::milliseconds( 50 ) ); }
+		fsm._tcpIp->sendAddClient( "SemmBox" );
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM&) {

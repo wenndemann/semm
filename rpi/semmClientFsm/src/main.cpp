@@ -16,22 +16,21 @@
 
 // local includes
 #include "fsm/mainFsm.h"
+#include "tcp_ip/TcpIp.h"
 
 using namespace std;
 
-void test()
+void test( const std::string ipaddr )
 {
-	//fsm::SsmsVecPtr ssms( new fsm::SsmsVec( {
-	//		boost::shared_ptr< fsm::selectColorFSM >( new fsm::selectColorFSM( 1 ) ),
-	//		boost::shared_ptr< fsm::selectColorFSM >( new fsm::selectColorFSM( 2 ) ),
-	//		boost::shared_ptr< fsm::selectColorFSM >( new fsm::selectColorFSM( 4 ) ),
-	//		boost::shared_ptr< fsm::selectColorFSM >( new fsm::selectColorFSM( 8 ) )
-	//} ) );
-
-	fsm::gameFSM p;
+	TcpIp t;
+	if ( !t.connect( ipaddr ) )
+		return;
 
 	std::cout << "start fsm" << std::endl;
-	p.start();
+
+	fsm::gameFSM p( &t );
+	p.start( );
+
 	p.process_event(fsm::initGame());
 	p.process_event(fsm::initColors());
 	p.process_event(fsm::clientColors());
@@ -47,7 +46,13 @@ void test()
 
 int main(int argc, char *argv[])
 {
-	test();
+	if ( argc < 2 )
+	{
+		std::cout << "Not enough arguments!" << std::endl;
+		return 1;
+	}
+
+	test( std::string( argv[ 1 ] ) );
 
 	//Game* g = new Game(string(argv[0]));
 	//delete g;

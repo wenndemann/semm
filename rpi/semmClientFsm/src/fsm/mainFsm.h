@@ -35,6 +35,9 @@ using namespace msm::front::euml;
 // Game
 #include "../game/Game.h"
 
+// TcpIp
+#include "../tcp_ip/TcpIp.h"
+
 // events
 #include "mainFsm/events.h"
 
@@ -46,6 +49,8 @@ namespace fsm // Concrete FSM implementation
 	// front-end: define the FSM structure
     struct GameFSM_ : public msm::front::state_machine_def<GameFSM_>
     {
+    	GameFSM_( TcpIp* tcpIp ) : _tcpIp( tcpIp ){ }
+
     	template <class Event,class FSM>
     	void on_entry(Event const&, FSM& fsm)
     	{
@@ -83,6 +88,7 @@ namespace fsm // Concrete FSM implementation
                 << " on event " << typeid(e).name() << std::endl;
         }
 
+        TcpIp* _tcpIp;
         boost::shared_ptr< Game > _gamePtr;
         SsmsVecPtr _ssms;
     };

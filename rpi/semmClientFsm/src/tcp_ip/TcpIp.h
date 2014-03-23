@@ -26,10 +26,12 @@ class Game;
 
 class TcpIp {
 public:
-	TcpIp( boost::shared_ptr< Game > gamePtr );
+	TcpIp( );
 	virtual ~TcpIp();
 
 	bool connect(const std::string& ip);
+	void start( boost::shared_ptr< Game > gamePtr );
+	bool running( ){ return _running; }
 
 	void sendAddClient(const std::string& clientName);
 	void sendSetColor(uint8_t color);
@@ -41,6 +43,7 @@ public:
 
 private:
 	bool _connected;
+	bool _running;
 	int _fd;
 	boost::shared_ptr< Game > _gamePtr;
 	boost::mutex _mutexForFd;
