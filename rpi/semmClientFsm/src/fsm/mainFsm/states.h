@@ -76,8 +76,11 @@ struct SelectColorMode : public msm::front::state<>
 
 		for ( boost::uint32_t i = 0; i < fsm._ssms->size( ); i++ )
 		{
-			fsm._ssms->at( i )->start( );
-			fsm._ssms->at( i )->process_event( fsm::scmInitialize( ) );
+			if ( fsm._ssms->at( i ) )
+			{
+				fsm._ssms->at( i )->start( );
+				//fsm._ssms->at( i )->process_event( fsm::scmInitialize( ) );
+			}
 		}
 
 	}
@@ -88,24 +91,41 @@ struct SelectColorMode : public msm::front::state<>
 		for ( boost::uint32_t i = 0; i < fsm._ssms->size( ); i++ )
 		{
 			fsm._ssms->at( i )->stop( );
-			fsm._ssms->at( i ).reset( );
+			//fsm._ssms->at( i ).reset( );
 		}
 	}
 };
 
-struct GmWaitForPlayGround : public msm::front::state<>
+struct GmMoveDone : public msm::front::state<>
 {
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
 	void on_entry(Event const&, FSM&) {
-		std::cout << "-> GmWaitForPlayGround" << std::endl;
+		std::cout << "-> GmMoveDone" << std::endl;
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM&) {
-		std::cout << "<- GmWaitForPlayGround" << std::endl;
+		std::cout << "<- GmMoveDone" << std::endl;
 	}
 };
 
+struct GmMoveMeeple : public msm::front::state<>
+{
+	// every (optional) entry/exit methods get the event passed.
+	template<class Event, class FSM>
+	void on_entry(Event const& ev, FSM& fsm) {
+		std::cout << "-> GmMoveMeeple" << std::endl;
+
+
+		fsm._gamePtr->playboard( )->moveMeeple( ev._from, ev._to );
+
+		fsm.process_event( fsm::evMoveDone( ) );
+	}
+	template<class Event, class FSM>
+	void on_exit(Event const&, FSM&) {
+		std::cout << "<- GmMoveMeeple" << std::endl;
+	}
+};
 
 
 /*
@@ -161,6 +181,7 @@ struct Paused: public msm::front::state<> {
 */
 // the initial state of the player SM. Must be defined
 typedef Init initial_state;
+typedef int activate_deferred_events;
 
 
 #endif /* STATES_H_ */

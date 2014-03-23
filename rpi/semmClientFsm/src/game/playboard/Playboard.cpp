@@ -78,55 +78,6 @@ Playboard::Playboard( fsm::gameFSM* gameFsmPtr ) :
 		{ 53, FieldPtr(new Field(  5,  8, 53)) },
 		{ 54, FieldPtr(new Field(  5,  7, 54)) },
 		{ 55, FieldPtr(new Field(  5,  6, 55)) }
-//		//gap area
-//		{ 56, FieldPtr(new Field(  1,  3, 56)) },
-//		{ 57, FieldPtr(new Field(  2,  3, 57)) },
-//		{ 58, FieldPtr(new Field(  3,  3, 58)) },
-//		{ 58, FieldPtr(new Field(  3,  3, 58)) },
-//		{ 58, FieldPtr(new Field(  3,  3, 58)) },
-//		{ 59, FieldPtr(new Field(  3,  2, 59)) },
-//		{ 60, FieldPtr(new Field(  3,  1, 60)) },
-//		{ 61, FieldPtr(new Field(  3,  0, 61)) },
-//		{ 62, FieldPtr(new Field(  4,  0, 62)) },
-//		{ 63, FieldPtr(new Field(  5,  0, 63)) },
-//		{ 64, FieldPtr(new Field(  6,  0, 64)) },
-//		{ 65, FieldPtr(new Field(  7,  0, 65)) },
-//		{ 66, FieldPtr(new Field(  7,  1, 66)) },
-//		{ 67, FieldPtr(new Field(  7,  2, 67)) },
-//		{ 68, FieldPtr(new Field(  7,  3, 68)) },
-//		{ 68, FieldPtr(new Field(  7,  3, 68)) },
-//		{ 68, FieldPtr(new Field(  7,  3, 68)) },
-//		{ 69, FieldPtr(new Field(  8,  3, 69)) },
-//		{ 70, FieldPtr(new Field(  9,  3, 70)) },
-//		{ 71, FieldPtr(new Field( 10,  3, 71)) },
-//		{ 72, FieldPtr(new Field( 10,  4, 72)) },
-//		{ 73, FieldPtr(new Field( 10,  5, 73)) },
-//		{ 74, FieldPtr(new Field( 10,  6, 74)) },
-//		{ 75, FieldPtr(new Field( 10,  7, 75)) },
-//		{ 76, FieldPtr(new Field(  9,  7, 76)) },
-//		{ 77, FieldPtr(new Field(  8,  7, 77)) },
-//		{ 78, FieldPtr(new Field(  7,  7, 78)) },
-//		{ 78, FieldPtr(new Field(  7,  7, 78)) },
-//		{ 78, FieldPtr(new Field(  7,  7, 78)) },
-//		{ 79, FieldPtr(new Field(  7,  8, 79)) },
-//		{ 80, FieldPtr(new Field(  7,  9, 80)) },
-//		{ 81, FieldPtr(new Field(  7, 10, 81)) },
-//		{ 82, FieldPtr(new Field(  6, 10, 82)) },
-//		{ 83, FieldPtr(new Field(  5, 10, 83)) },
-//		{ 84, FieldPtr(new Field(  4, 10, 84)) },
-//		{ 85, FieldPtr(new Field(  3, 10, 85)) },
-//		{ 86, FieldPtr(new Field(  3,  9, 86)) },
-//		{ 87, FieldPtr(new Field(  3,  8, 87)) },
-//		{ 88, FieldPtr(new Field(  3,  7, 88)) },
-//		{ 88, FieldPtr(new Field(  3,  7, 88)) },
-//		{ 88, FieldPtr(new Field(  3,  7, 88)) },
-//		{ 89, FieldPtr(new Field(  2,  7, 89)) },
-//		{ 90, FieldPtr(new Field(  1,  7, 90)) },
-//		{ 91, FieldPtr(new Field(  0,  7, 91)) },
-//		{ 92, FieldPtr(new Field(  0,  6, 92)) },
-//		{ 93, FieldPtr(new Field(  0,  5, 93)) },
-//		{ 94, FieldPtr(new Field(  0,  4, 94)) },
-//		{ 95, FieldPtr(new Field(  0,  3, 95)) }
 	})
 {
 
@@ -138,6 +89,34 @@ Playboard::~Playboard() {
 
 }
 
+bool Playboard::addPlayer( int32_t colorId) {
+	_players[colorId] = PlayerPtr(new Player(colorId));
+
+	std::vector< uint16_t > tags( 3 );
+	for (uint32_t i = 0; i < tags.size( ); i++) {
+
+		uint32_t fieldId = _players[colorId]->getStartAreaPos(i);
+
+		tags[ i ] = readId( fieldId );
+
+		if ( tags[ i ] == 0 )
+		{
+			_players.erase(_players.find(colorId));
+			return false;
+		}
+	}
+	_players[colorId]->addMeeples( tags );
+	return true;
+}
+
+bool Playboard::delPlayer( int32_t colorId )
+{
+	PlayerMapIt it = _players.find( colorId );
+	if ( it != _players.end( ) )
+	{
+		_players.erase( it );
+	}
+}
 
 //void Playboard::moveMeeple(const Meeple& m, const Field& to) {
 void Playboard::moveMeeple(uint8_t from, uint8_t to) {
@@ -145,13 +124,19 @@ void Playboard::moveMeeple(uint8_t from, uint8_t to) {
 
 	if(from == to) return;
 
+	MeeplePtr meeple = getMeepleFromFieldId( from );
+	if ( !meeple )
+		return;
+
+	uint8_t color = static_cast<uint8_t>(getColorFromFieldId(from));
+
 	//calculate path
 	Route r;
 	// add actual positions of meeples to block list
 	for(PlayerMapIt pIt = _players.begin(); pIt != _players.end(); ++pIt) {
 		MeepleVec& m = pIt->second->meeples();
 		for(MeepleVecIt mIt = m.begin(); mIt != m.end(); ++mIt)
-			r.block((*mIt)->field()->x(), (*mIt)->field()->y());
+			r.block( _fields[(*mIt)->fieldId()]->x(), _fields[(*mIt)->fieldId()]->y());
 	}
 	//calculate and optimize path to target position
 	r.calcPath(_fields[from]->x(), _fields[from]->y(),
@@ -164,39 +149,60 @@ void Playboard::moveMeeple(uint8_t from, uint8_t to) {
 
 	// set LEDs
 	if(to >= 32 && to <= 43) { // if someone is kicked out
-		_ledRing->set(LedRing::BLINK,
-				_fields[to]->meeple()->color());
-		_ledStripe->set(LedStripes::BLINK_FAST,
-				_fields[to]->meeple()->color());
+		_ledRing->set(LedRing::BLINK, color);
+		_ledStripe->set(LedStripes::BLINK_FAST, color);
 	} else {
-		_ledRing->set(LedRing::ON,
-				_fields[to]->meeple()->color());
-		_ledStripe->set(LedStripes::ON,
-				_fields[to]->meeple()->color());
+		_ledRing->set(LedRing::ON, color);
+		_ledStripe->set(LedStripes::ON, color);
 	}
 
 	// move along path
 	WaypointVec& wayPts = r.getList();
 	for(WaypointVecIt it = wayPts.begin(); it != wayPts.end(); ++it) {
-		_XYDrive->moveMagnet(it->mag());
-		_XYDrive->moveCarriage(it->x(), it->y());
+		_XYDrive->liftMagnet(it->mag());
+		_XYDrive->moveMagnet(it->x(), it->y());
 	}
 
 	//turn LedStripe off
-	_ledStripe->set(LedStripes::OFF, 0);
+	_ledStripe->set(LedStripes::OFF, color);
+	_ledRing->set(LedRing::OFF, color);
 
 	//lower magnet
-	_XYDrive->moveMagnet(false);
+	_XYDrive->liftMagnet(false);
 
 	//move meeple
-	_fields[to]->meeple(_fields[from]->meeple());
-	_fields[to]->meeple()->field(_fields[to]);
-	_fields[from]->meeple();
+	meeple->fieldId( to );
 }
 
-uint16_t Playboard::readId(const Field& f) {
+uint16_t Playboard::readId(uint32_t fieldId) {
 	boost::lock_guard<boost::mutex> gard(_mutexXYDrive);
-	_XYDrive->moveMagnet(false);
-	_XYDrive->moveCarriage((int)((10-f.x()) * 172 + 250));
-	return _rfid->readTag(f.y());
+	uint8_t color = static_cast<uint8_t>(getColorFromFieldId(fieldId));
+	_ledStripe->set(LedStripes::ON, color);
+	uint8_t x = _fields[fieldId]->x();
+	uint8_t y = _fields[fieldId]->y();
+	_XYDrive->liftMagnet(false);
+	_XYDrive->moveCarriage(x);//static_cast<uint8_t>((10-static_cast<int32_t>(x)) * 172 + 250));
+	_ledStripe->set(LedStripes::OFF, color);
+	return _rfid->readTag(y);
+}
+
+int32_t Playboard::getColorFromFieldId( int32_t fieldId) {
+	for(PlayerMapIt pIt = _players.begin(); pIt != _players.end(); ++pIt) {
+		MeepleVec& m = pIt->second->meeples();
+		for(MeepleVecIt mIt = m.begin(); mIt != m.end(); ++mIt) {
+			if ( (*mIt)->fieldId() == fieldId)
+				return pIt->second->color();
+		}
+	}
+	return -1;
+}
+MeeplePtr Playboard::getMeepleFromFieldId( int32_t fieldId) {
+	for(PlayerMapIt pIt = _players.begin(); pIt != _players.end(); ++pIt) {
+		MeepleVec& m = pIt->second->meeples();
+		for(MeepleVecIt mIt = m.begin(); mIt != m.end(); ++mIt) {
+			if ( (*mIt)->fieldId() == fieldId)
+				return *mIt;
+		}
+	}
+	return MeeplePtr();
 }

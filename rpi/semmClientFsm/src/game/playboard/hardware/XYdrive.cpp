@@ -1,17 +1,22 @@
 #include "XYdrive.h"
 
-XYdrive::XYdrive(uint8_t i2cAddrXYdrive) {
+using namespace std;
+
+XYdrive::XYdrive(uint8_t i2cAddrXYdrive)
+: _x(0)
+, _y(0)
+{
 	setI2cAddr(i2cAddrXYdrive);
 
 	_magPos = true;
-	moveMagnet(false);
+	liftMagnet(false);
 }
 
 XYdrive::~XYdrive() {
 
 }
 
-void XYdrive::moveMagnet(bool value) {
+void XYdrive::liftMagnet(bool value) {
 	if (value == _magPos) return;
 
 	char b[32];
@@ -21,15 +26,28 @@ void XYdrive::moveMagnet(bool value) {
 	usleep(600000);
 }
 
-void XYdrive::moveCarriage(uint8_t x, uint8_t y) {
+void XYdrive::moveMagnet(uint8_t x, uint8_t y)
+{
+	move( x, y, 0 );
+}
+
+void XYdrive::moveCarriage(uint8_t x)
+{
+	move( x, _y, 250 );
+}
+
+void XYdrive::move( uint8_t x, uint8_t y, int32_t offset )
+{
 	if(x == _x && y == _y) return;
+
+	cout << "move to " << static_cast<int32_t>(x) << " / " << static_cast<int32_t>(y) << endl;
 
 	char b[32];
 	bool running = true;
 	_x = x; _y = y;
 
-	float x2 = ((10-_x) * 172);
-	float y2 = ((10-_y) * 172);
+	float x2 = static_cast<float>((10-static_cast<int32_t>(_x)) * 172 + offset + 25);
+	float y2 = static_cast<float>((10-static_cast<int32_t>(_y)) * 172 );
 
 	sprintf(b, " %.2f %.2f", x2, y2);
 	write(I2C_XYS_SETPOINTS, b, sizeof(b));
@@ -40,8 +58,4 @@ void XYdrive::moveCarriage(uint8_t x, uint8_t y) {
 		read(I2C_XYS_RUNNING, b, sizeof(b));
 		running = atoi(&b[2]);
 	}
-}
-
-void XYdrive::moveCarriage(uint8_t x) {
-	moveCarriage(x, _y);
 }

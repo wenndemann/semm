@@ -12,27 +12,20 @@
 #include <inttypes.h>
 #include <boost/shared_ptr.hpp>
 
-//forward declarations
-class Field;
-
 class Meeple {
-typedef boost::shared_ptr<Field> FieldPtr;
 
 public:
-	Meeple();
+	Meeple( uint16_t, int32_t );
 	virtual ~Meeple();
 
-	uint8_t color() const { return _color; }
-	FieldPtr field() const { return _field; }
-	uint16_t tagId() const { return _tagId; }
-	void color(uint8_t c) { _color = c; }
-	void field(FieldPtr f) { _field = f; }
-	void tagId(uint16_t t) { _tagId = t; }
+	uint16_t tag() const { return _tag; }
+	void tag(uint16_t t) { _tag = t; }
+	int32_t fieldId() const { return _fieldId; }
+	void fieldId(int32_t f) { _fieldId = f; }
 
 private:
-	uint8_t _color;
-	FieldPtr _field;
-	uint16_t _tagId;
+	uint16_t _tag;
+	int32_t _fieldId;
 };
 
 #endif /* MEEPLE_H_ */

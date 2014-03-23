@@ -25,9 +25,16 @@ namespace fsm
 	struct open_close { };
 	*/
 
-	struct initGame { initGame( ){ FSM_EVENT_COUT( "initGame" ); } };
-	struct initColors { initColors( ){ FSM_EVENT_COUT( "initColors" ); } };
-	struct clientColors { clientColors( ){ FSM_EVENT_COUT( "clientColors" ); } };
+	struct evInitGame { evInitGame( ){ FSM_EVENT_COUT( "evInitGame" ); } };
+	struct evInitColors { evInitColors( ){ FSM_EVENT_COUT( "evInitColors" ); } };
+	struct evClientColors { evClientColors( ){ FSM_EVENT_COUT( "evClientColors" ); } };
+	struct evMove{ evMove( uint8_t from, uint8_t to )
+	: _from( from ), _to( to )
+	{
+		FSM_EVENT_COUT( "evMove"); }
+		uint8_t _from, _to;
+	};
+	struct evMoveDone { evMoveDone( ){ FSM_EVENT_COUT( "evMoveDone" ); } };
 
 	// A "complicated" event type that carries some data.
 	/*

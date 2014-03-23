@@ -34,19 +34,19 @@ namespace fsm
 
 class Playboard {
 public:
-	typedef boost::shared_ptr<Display> DisplayPtr;
-	typedef std::map<int32_t, DisplayPtr> DisplayMap;
-	typedef DisplayMap::iterator DisplayMapIt;
-	typedef boost::shared_ptr<LedRing> LedRingPtr;
-	typedef boost::shared_ptr<LedStripes> LedStripesPtr;
-	typedef boost::shared_ptr<Rfid> RfidPtr;
-	typedef boost::shared_ptr<XYdrive> XYDrivePtr;
-	typedef boost::shared_ptr<Field> FieldPtr;
-	typedef std::map<uint8_t, FieldPtr> FieldMap;
-	typedef FieldMap::iterator FieldMapIt;
-	typedef boost::shared_ptr<Player> PlayerPtr;
-	typedef std::map<int32_t, PlayerPtr> PlayerMap;
-	typedef PlayerMap::iterator PlayerMapIt;
+	typedef boost::shared_ptr<Display> 		DisplayPtr;
+	typedef std::map<int32_t, DisplayPtr> 	DisplayMap;
+	typedef DisplayMap::iterator 			DisplayMapIt;
+	typedef boost::shared_ptr<LedRing> 		LedRingPtr;
+	typedef boost::shared_ptr<LedStripes> 	LedStripesPtr;
+	typedef boost::shared_ptr<Rfid> 		RfidPtr;
+	typedef boost::shared_ptr<XYdrive> 		XYDrivePtr;
+	typedef boost::shared_ptr<Field> 		FieldPtr;
+	typedef std::map<uint8_t, FieldPtr> 	FieldMap;
+	typedef FieldMap::iterator 				FieldMapIt;
+	typedef boost::shared_ptr<Player> 		PlayerPtr;
+	typedef std::map<int32_t, PlayerPtr> 	PlayerMap;
+	typedef PlayerMap::iterator 			PlayerMapIt;
 
 public:
 	Playboard( boost::msm::back::state_machine< fsm::GameFSM_ >* gameFsmPtr );
@@ -54,9 +54,10 @@ public:
 
 	void moveMeeple(const Meeple& m, const Field& to);
 	void moveMeeple(uint8_t from, uint8_t to);
-	uint16_t readId(const Field& f);
+	uint16_t readId(uint32_t fieldId);
 
-	bool _addPlayer();
+	bool addPlayer( int32_t );
+	bool delPlayer( int32_t );
 
 	DisplayPtr display( int32_t id )
 	{
@@ -65,7 +66,9 @@ public:
 
 		return DisplayPtr( );
 	}
-	DisplayMap displays( ){ return _displays; }
+	DisplayMap& displays( ){ return _displays; }
+
+	XYDrivePtr drive( ){ return _XYDrive; }
 
 private:
 	DisplayMap _displays;
@@ -77,6 +80,9 @@ private:
 	FieldMap _fields;
 	PlayerMap _players;
 	boost::mutex _mutexXYDrive;
+
+	int32_t getColorFromFieldId( int32_t fieldId);
+	MeeplePtr getMeepleFromFieldId( int32_t fieldId);
 };
 
 #endif /* PLAYBOARD_H_ */

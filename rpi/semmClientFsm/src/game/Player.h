@@ -22,13 +22,18 @@ typedef MeepleVec::iterator MeepleVecIt;
 
 class Player {
 public:
-	Player();
+	Player(int32_t colorId);
 	virtual ~Player();
 
+	void addMeeples( std::vector< uint16_t > tags );
 	MeepleVec& meeples() { return _meeples; }
+	int32_t getStartAreaPos(int32_t i);
+	int32_t color() { return _color; }
 
 private:
+	int32_t _color;
 	MeepleVec _meeples;
+	std::vector<int32_t> _startAreaPos;
 };
 
 #endif /* PLAYER_H_ */

@@ -13,14 +13,16 @@ public:
 	XYdrive(uint8_t i2cAddrXYdrive);
 	virtual ~XYdrive();
 
-	void moveMagnet(bool value);
-	void moveCarriage(uint8_t x, uint8_t y);
+	void liftMagnet(bool value);
+	void moveMagnet(uint8_t x, uint8_t y);
 	void moveCarriage(uint8_t x);
 
 	uint8_t x() const { return _x; }
 	uint8_t y() const { return _y; }
 
 private:
+	void move( uint8_t x, uint8_t y, int32_t offset );
+
 	bool _magPos;
 	uint8_t _x, _y;
 };

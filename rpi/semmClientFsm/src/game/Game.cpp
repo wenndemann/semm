@@ -29,30 +29,40 @@ void Game::parseCmd( uint8_t* buf, int32_t nR )
 	switch(buf[0]) {
 	case TCP_CMD_MODE_SELECT_COLOR_SC:
 		_mode = Mode::SelectColor;
-		_mainFSM->process_event(fsm::initGame());
+		_mainFSM->process_event(fsm::evInitGame());
 		break;
 
 	case TCP_CMD_USER_NOT_AUTHORIZED_SC:
-
 		break;
 
 	case TCP_CMD_AVAILABLE_COLORS_SC:
 		_availColors = static_cast<int32_t> (buf[1]);
-		_mainFSM->process_event(fsm::initColors());
+
+		if ( ! _mainFSM->_ssms->at( 0 ) )
+			_mainFSM->process_event(fsm::evInitColors());
+
+		for ( fsm::SsmsVec::iterator it = _mainFSM->_ssms->begin( ); it != _mainFSM->_ssms->end( ); ++it )
+		{
+			if ( *it )
+			{
+				std::cout << "Sending an Event to " << (*it)->_color_id << std::endl;
+				(*it)->process_event( fsm::scmEvColors( ) );
+			}
+		}
 		break;
 
 	case TCP_CMD_MODE_GAME:
 		_mode = Mode::Gaming;
-		_mainFSM->process_event(fsm::initGame());
+		_mainFSM->process_event(fsm::evInitGame());
 		break;
 
 	case TCP_CMD_DEFINE_CLIENT_COLORS:
 		_clientColors = static_cast<int32_t> (buf[1]);
-		_mainFSM->process_event(fsm::clientColors());
+		_mainFSM->process_event(fsm::evClientColors());
 		break;
 
 	case TCP_CMD_MOVE_SC:
-
+		_mainFSM->process_event(fsm::evMove( buf[1]-1, buf[2]-1 ));
 		break;
 
 	case TCP_CMD_SHOW_DIE_SC:

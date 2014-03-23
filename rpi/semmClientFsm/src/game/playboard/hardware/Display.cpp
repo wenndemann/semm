@@ -64,7 +64,14 @@ void Display::handler() {
 		if ( m_encoder == 1 )
 		{
 			if ( _subFSM )
-				_subFSM->process_event( fsm::scmEnter( ) );
+				_subFSM->process_event( fsm::scmEvEnter( ) );
+			//else
+				//_mainFSM->process_event( fsm::GEILES_ENTER_EVENT( ) );
+		}
+		if ( m_encoder == 2 )
+		{
+			if ( _subFSM )
+				_subFSM->process_event( fsm::scmEvCancel( ) );
 			//else
 				//_mainFSM->process_event( fsm::GEILES_ENTER_EVENT( ) );
 		}

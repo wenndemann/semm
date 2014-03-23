@@ -12,13 +12,20 @@
 struct transition_table : mpl::vector<
 
 	//    Start                     Event         Next                      Action        Guard
-	//  +-------------------------+--------------+-------------------------+-------------+-----------------+
-	Row < Init                    , initGame     , WaitForAvailColors      , none        , none            >,
-	//  +-------------------------+--------------+-------------------------+-------------+-----------------+
-	Row < WaitForAvailColors      , initColors   , WaitForClientColors     , none        , none            >,
-	//  +-------------------------+--------------+-------------------------+-------------+-----------------+
-	Row < WaitForClientColors     , clientColors , SelectColorMode         , none        , check_scm       >,
-	Row < WaitForClientColors     , clientColors , GmWaitForPlayGround     , none        , check_gm        >
+	//  +-------------------------+--------------+-------------------------+-------------+-------------+
+	Row < Init                    , evInitGame     , WaitForAvailColors      , none        , none      >,
+	//  +-------------------------+--------------+-------------------------+-------------+-------------+
+	Row < WaitForAvailColors      , evInitColors   , WaitForClientColors     , none        , none      >,
+	//  +-------------------------+--------------+-------------------------+-------------+-------------+
+	Row < WaitForClientColors     , evClientColors , SelectColorMode         , none        , none      >,
+	//  +-------------------------+--------------+-------------------------+-------------+-------------+
+	Row < SelectColorMode         , evInitGame     , GmMoveDone              , delSsms     , none      >,
+	Row < SelectColorMode         , evMove         , none                    , Defer       , none      >,
+	//  +-------------------------+--------------+-------------------------+-------------+-------------+
+	Row < GmMoveDone              , evMove         , GmMoveMeeple            , none        , none      >,
+	//  +-------------------------+--------------+-------------------------+-------------+-------------+
+	Row < GmMoveMeeple            , evMoveDone     , GmMoveDone              , none        , none      >,
+	Row < GmMoveMeeple            , evMove         , none                    , Defer       , none      >
 
 	/*
 	//    Start     Event         Next      Action                      Guard

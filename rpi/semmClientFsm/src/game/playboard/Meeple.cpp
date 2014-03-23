@@ -7,7 +7,10 @@
 
 #include "Meeple.h"
 
-Meeple::Meeple() {
+Meeple::Meeple( uint16_t tag, int32_t fieldId )
+: _tag( tag )
+, _fieldId( fieldId )
+{
 	// TODO Auto-generated constructor stub
 
 }

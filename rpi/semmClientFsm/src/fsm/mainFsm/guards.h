@@ -11,24 +11,6 @@
 #include "../../game/Game.h"
 
 // guard conditions
-struct check_scm
-{
-	template<class EVT, class FSM, class SourceState, class TargetState>
-	bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt)
-	{
-		return ( fsm._gamePtr->mode( ) == Game::Mode::SelectColor );
-	}
-};
-
-struct check_gm
-{
-	template<class EVT, class FSM, class SourceState, class TargetState>
-	bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt)
-	{
-		return ( fsm._gamePtr->mode( ) == Game::Gaming );
-	}
-};
-
 /*
 struct DummyGuard {
 	template<class EVT, class FSM, class SourceState, class TargetState>

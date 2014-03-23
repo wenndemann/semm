@@ -42,7 +42,11 @@ public:
 	virtual ~Game();
 
 	Mode mode() { return _mode;}
+	const int32_t availableColors( ) { return _availColors; }
+	const int32_t clientColors( ) { return _clientColors; }
+
 	PlayboardPtr playboard( ){ return _playboard; }
+	boost::msm::back::state_machine< fsm::GameFSM_ >* mainFSM( ) { return _mainFSM; }
 
 	void parseCmd( uint8_t* buf, int32_t nR );
 

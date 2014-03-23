@@ -31,10 +31,6 @@ void test( const std::string ipaddr )
 	fsm::gameFSM p( &t );
 	p.start( );
 
-//	p.process_event(fsm::initGame());
-//	p.process_event(fsm::initColors());
-//	p.process_event(fsm::clientColors());
-
 	while( 1 )
 	{
 		boost::this_thread::sleep( boost::posix_time::milliseconds( 50 ) );
