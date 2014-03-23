@@ -16,8 +16,7 @@ struct check_scm
 	template<class EVT, class FSM, class SourceState, class TargetState>
 	bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt)
 	{
-		return true;
-		//return ( fsm._gamePtr->mode( ) == Game::Mode::SelectColor );
+		return ( fsm._gamePtr->mode( ) == Game::Mode::SelectColor );
 	}
 };
 

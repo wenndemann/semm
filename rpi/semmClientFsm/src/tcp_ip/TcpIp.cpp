@@ -35,7 +35,7 @@ bool TcpIp::connect(const std::string& ip) {
 	}
 	server = gethostbyname(ip.c_str());
 	if (server == NULL) {
-		cout << "ERROR, no such host\n" << endl;
+		cout << "ERROR, no such host" << endl;
 		return false;
 	}
 	memset((char *) &serv_addr, 0, sizeof(serv_addr));
@@ -71,7 +71,7 @@ void TcpIp::worker( )
 	int32_t nR = 0;
 	uint8_t inputBuf[TCP_MSG_LENGTH + 1];
 	uint8_t buf[TCP_MSG_LENGTH + 1];
-	std::cout << "start reading data\n" << std::endl;
+	std::cout << "start reading data" << std::endl;
 
 	memset(&buf, 0 ,TCP_MSG_LENGTH);
 
@@ -85,7 +85,7 @@ void TcpIp::worker( )
 		}
 		else if(nR > 0) {
 			std::stringstream ss;
-			for ( int32_t i = 0; i < nR; i++ )
+			for ( int32_t i = 0; i < (nR-1); i++ )
 			{
 				ss << static_cast<int32_t>( inputBuf[ i ] ) << " ";
 			}

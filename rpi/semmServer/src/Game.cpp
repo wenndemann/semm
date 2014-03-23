@@ -11,6 +11,7 @@
  *  first release
  */
 
+
 #include "Game.h"
 
 
@@ -158,17 +159,19 @@ void Game::m_worker() {
 					m_clientMap[cid]->sendSelectColorMode();
 					sleep(1);
 					m_clientMap[cid]->sendAvailableColors(m_availColor);
+					usleep(250000);
+					m_clientMap[cid]->sendDefineClientColors();
 				}
 
 				//if 'game' mode
 				if(m_mode == 3) {
 					printf("client bla\n");
 					m_clientMap[cid]->sendGameMode();
-					usleep(1000000);
+					sleep(1);
+					m_clientMap[cid]->sendAvailableColors(m_availColor);
+					usleep(250000);
 					m_clientMap[cid]->sendDefineClientColors();
-					usleep(1000000);
-//					m_clientMap[cid]->sendAvailableColors(m_availColor);
-//					usleep(250000);
+					usleep(250000);
 					m_sendPlayground(cid);
 					usleep(250000);
 					m_clientMap[cid]->sendDice(m_actPlayer, m_actPips);

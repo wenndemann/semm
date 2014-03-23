@@ -19,10 +19,12 @@
 #define TCP_CMD_SET_PLAYER_NAME_CS 67
 #define TCP_CMD_ADD_CLIENT_CS 66
 #define TCP_CMD_SEND_PID_SC 68
-#define TCP_CMD_ACT_GAME_MODE_SC 70
+#define TCP_CMD_MODE_SELECT_COLOR_SC 70
+#define TCP_CMD_USER_NOT_AUTHORIZED_SC 71
 #define TCP_CMD_AVAILABLE_COLORS_SC 80
 #define TCP_CMD_SET_COLOR_CS 81
 #define TCP_CMD_DEL_COLOR_CS 82
+#define TCP_CMD_MODE_GAME 90
 #define TCP_CMD_DEFINE_CLIENT_COLORS 91
 #define TCP_CMD_START_GAME_CS 95
 #define TCP_CMD_MOVE_SC 100
@@ -40,11 +42,6 @@
 // I²C
 #define I2C_DEV_NAME "/dev/i2c-0"
 #define I2C_POLLING_TIME_US 100000
-
-// GAME MODES
-#define GAME_MODE_SELECT_COLOR 0
-#define GAME_MODE_USER_NOT_AUTHORIZED 1
-#define GAME_MODE_GAME 20
 
 // GAME COLORS
 // 1 = color free
@@ -92,6 +89,12 @@
 #define LED_MODE_HB_FAST 2
 #define LED_MODE_HB_SLOW 3
 
+// manipulate cout
+#define cout cout << std::string(__FILE__).substr( \
+		std::string(__FILE__).find_last_of("/") + 1, \
+		std::string(__FILE__).length( ) - \
+		std::string(__FILE__).find_last_of("/") + 1) \
+		<< "\t" << __LINE__ << ":\t"
 
 
 struct tcp_data {

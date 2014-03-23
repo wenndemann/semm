@@ -51,6 +51,8 @@ private:
 	boost::msm::back::state_machine< fsm::GameFSM_ >* _mainFSM;
 
 	Mode _mode;
+	int32_t _availColors;
+	int32_t _clientColors;
 };
 
 #endif /* GAME_H_ */
