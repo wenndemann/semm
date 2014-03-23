@@ -1,7 +1,5 @@
 #include "I2c.h"
 
-#define cout cout << "I2C: "
-
 using namespace std;
 
 int I2c::fd;

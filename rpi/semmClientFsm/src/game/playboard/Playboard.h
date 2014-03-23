@@ -26,30 +26,46 @@
 #include "Meeple.h"
 #include "route.h"
 
+#include <boost/msm/back/state_machine.hpp>
+namespace fsm
+{
+	class GameFSM_;
+}
+
 class Playboard {
-typedef boost::shared_ptr<Display> DisplayPtr;
-typedef std::map<int, DisplayPtr> DisplayMap;
-typedef DisplayMap::iterator DisplayMapIt;
-typedef boost::shared_ptr<LedRing> LedRingPtr;
-typedef boost::shared_ptr<LedStripes> LedStripesPtr;
-typedef boost::shared_ptr<Rfid> RfidPtr;
-typedef boost::shared_ptr<XYdrive> XYDrivePtr;
-typedef boost::shared_ptr<Field> FieldPtr;
-typedef std::map<uint8_t, FieldPtr> FieldMap;
-typedef FieldMap::iterator FieldMapIt;
-typedef boost::shared_ptr<Player> PlayerPtr;
-typedef std::map<int, PlayerPtr> PlayerMap;
-typedef PlayerMap::iterator PlayerMapIt;
+public:
+	typedef boost::shared_ptr<Display> DisplayPtr;
+	typedef std::map<int32_t, DisplayPtr> DisplayMap;
+	typedef DisplayMap::iterator DisplayMapIt;
+	typedef boost::shared_ptr<LedRing> LedRingPtr;
+	typedef boost::shared_ptr<LedStripes> LedStripesPtr;
+	typedef boost::shared_ptr<Rfid> RfidPtr;
+	typedef boost::shared_ptr<XYdrive> XYDrivePtr;
+	typedef boost::shared_ptr<Field> FieldPtr;
+	typedef std::map<uint8_t, FieldPtr> FieldMap;
+	typedef FieldMap::iterator FieldMapIt;
+	typedef boost::shared_ptr<Player> PlayerPtr;
+	typedef std::map<int32_t, PlayerPtr> PlayerMap;
+	typedef PlayerMap::iterator PlayerMapIt;
 
 public:
-	Playboard();
-	virtual ~Playboard();
+	Playboard( boost::msm::back::state_machine< fsm::GameFSM_ >* gameFsmPtr );
+	virtual ~Playboard( );
 
 	void moveMeeple(const Meeple& m, const Field& to);
 	void moveMeeple(uint8_t from, uint8_t to);
 	uint16_t readId(const Field& f);
 
 	bool _addPlayer();
+
+	DisplayPtr display( int32_t id )
+	{
+		if ( _displays.find( id ) != _displays.end( ) )
+			return _displays.at( id );
+
+		return DisplayPtr( );
+	}
+	DisplayMap displays( ){ return _displays; }
 
 private:
 	DisplayMap _displays;

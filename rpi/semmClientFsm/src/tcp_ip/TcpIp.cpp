@@ -7,13 +7,14 @@
 
 #include "TcpIp.h"
 
-#define cout cout << "TcpIp: "
+#include "../game/Game.h"
 
 using namespace std;
 
-TcpIp::TcpIp() :
-	_connected(false),
-	_fd(0)
+TcpIp::TcpIp( boost::shared_ptr< Game > gamePtr )
+: _connected(false)
+, _fd(0)
+, _gamePtr(gamePtr)
 {
 
 }
@@ -55,7 +56,41 @@ bool TcpIp::connect(const std::string& ip) {
 	}
 	_fd = sockfd;
 	_connected = true;
+
+	_thread.reset( new boost::thread( boost::bind(&TcpIp::worker, this) ) );
+
 	return true;
+}
+
+void TcpIp::worker( )
+{
+	int32_t nR = 0;
+	uint8_t inputBuf[TCP_MSG_LENGTH + 1];
+	uint8_t buf[TCP_MSG_LENGTH + 1];
+	std::cout << "start reading data\n" << std::endl;
+
+	memset(&buf, 0 ,TCP_MSG_LENGTH);
+
+	do {
+		memset(&inputBuf, 0 ,TCP_MSG_LENGTH);
+		nR = read(_fd, &inputBuf[0], TCP_MSG_LENGTH);
+
+		if (nR < 0) {
+			if (errno != EBADF) std::cout << "ERROR reading to TCP IP: " << strerror(errno) << std::endl;
+		}
+		else if(nR > 0) {
+			std::stringstream ss;
+			for ( int32_t i = 0; i < nR; i++ )
+			{
+				ss << static_cast<int32_t>( inputBuf[ i ] ) << " ";
+			}
+			std::cout << ss.str( ) << std::endl;
+			_gamePtr->parseCmd(inputBuf, nR); // TODO
+		}
+	}while( nR > 0);
+
+	std::cout << "stop reading data" << std::endl;
+	close(_fd);
 }
 
 void TcpIp::sendAddClient(const string& name) {

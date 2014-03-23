@@ -1,11 +1,13 @@
 #include "Display.h"
 
-#define cout cout << "Display: "
+#include "../../../fsm/mainFsm.h"
 
 using namespace std;
 
-
-Display::Display(uint8_t i2cAddr, long msec) {
+Display::Display(uint8_t i2cAddr, long msec, fsm::gameFSM* gameFsmPtr)
+: _mainFSM( gameFsmPtr )
+{
+	std::cout << "    creating display " << static_cast<int32_t>(i2cAddr-80) << std::endl;
 	setI2cAddr(i2cAddr);
 	m_periode = msec;
 	m_readEnable = false;
@@ -15,11 +17,15 @@ Display::Display(uint8_t i2cAddr, long msec) {
 	m_timer = new boost::asio::deadline_timer(m_io, boost::posix_time::milliseconds(m_periode));
 	m_timer->async_wait(m_strand->wrap(boost::bind(&Display::handler, this)));
 	m_handlerThread = new boost::thread(boost::bind(&boost::asio::io_service::run, &m_io));
-	setPictures(I2C_DBEN_PIC_SEMM);
 }
 
 Display::~Display() {
 
+}
+
+void Display::init( )
+{
+	_subFSM = _mainFSM->_ssms->at( static_cast<int32_t>(getI2cAddr())-80 );
 }
 
 int Display::setPictures(uint8_t number) {
@@ -29,7 +35,7 @@ int Display::setPictures(uint8_t number) {
 	m_actPicNumber = number;
 	I2c::write(I2C_DBEN_PICTURE, &number, sizeof number);
 	//if(m_cliDisplay != NULL) m_cliDisplay->callPicture(number);
-	cout << "set display " << getI2cAddr() << " to pic " << number << endl;
+	cout << "set display " << pow(2,static_cast<int32_t>(getI2cAddr())-80) << " to pic " << static_cast<int32_t>(number) << endl;
 	return 0;
 }
 
@@ -55,23 +61,15 @@ void Display::handler() {
 //		debug("display read error, n = %d\n",n);
 	}
 	if(m_encoder < 255 && m_encoder > 0) {
-//		debug("display %d = %d\n", getI2cAddr(), m_encoder);
-		uint8_t buf[5];
-		m_readEnable = false;
-		buf[0] = 0;
-		buf[1] = DISPLAY_CMD_PUSH_ENTER;
-		buf[2] = getI2cAddr() - 0x50;
-		buf[3] = m_actPicNumber;
-		buf[4] = m_encoder;
-//		g_game->addCmd(buf, sizeof(buf));
-		if(m_actPicNumber == I2C_DBEN_PIC_ENTER)
-			setPictures(I2C_DBEN_PIC_WAIT);
+		if ( m_encoder == 1 )
+		{
+			if ( _subFSM )
+				_subFSM->process_event( fsm::scmEnter( ) );
+			//else
+				//_mainFSM->process_event( fsm::GEILES_ENTER_EVENT( ) );
+		}
 	} else if(m_encoder == 255) {
-		uint8_t buf[3];
-		buf[0] = 0;
-		buf[1] = DISPLAY_CMD_CANCEL_GAME;
-		buf[2] = getI2cAddr() - 0x50;
-//		g_game->addCmd(buf, sizeof(buf));
+
 	}
 
 	m_timer->expires_at(m_timer->expires_at() + boost::posix_time::milliseconds(m_periode));

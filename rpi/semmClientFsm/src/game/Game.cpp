@@ -7,18 +7,21 @@
 
 #include "Game.h"
 
-#define cout cout << "Game: "
+#include "../fsm/mainFsm.h"
 
 using namespace std;
 
-Game::Game(const string& ip) :
-	_playboard(new Playboard()),
-	_tcpIp(new TcpIp())
+Game::Game( fsm::gameFSM* gameFsmPtr )
+: _mainFSM( gameFsmPtr )
+, _playboard( new Playboard( gameFsmPtr ) )
 {
-	_tcpIp->connect(ip);
 }
 
 Game::~Game() {
 
 }
 
+void Game::parseCmd( uint8_t* buf, int32_t nR )
+{
+
+}

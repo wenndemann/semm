@@ -6,13 +6,14 @@
  */
 
 #include "Playboard.h"
+#include "../../fsm/mainFsm.h"
 
-Playboard::Playboard() :
+Playboard::Playboard( fsm::gameFSM* gameFsmPtr ) :
 	_displays({
-		{1, DisplayPtr(new Display(I2C_DBEN_ADDR_0, Display::updateInterval))},
-		{2, DisplayPtr(new Display(I2C_DBEN_ADDR_1, Display::updateInterval))},
-		{4, DisplayPtr(new Display(I2C_DBEN_ADDR_2, Display::updateInterval))},
-		{8, DisplayPtr(new Display(I2C_DBEN_ADDR_3, Display::updateInterval))}
+		{1, DisplayPtr(new Display(I2C_DBEN_ADDR_0, Display::updateInterval, gameFsmPtr))},
+		{2, DisplayPtr(new Display(I2C_DBEN_ADDR_1, Display::updateInterval, gameFsmPtr))},
+		{4, DisplayPtr(new Display(I2C_DBEN_ADDR_2, Display::updateInterval, gameFsmPtr))},
+		{8, DisplayPtr(new Display(I2C_DBEN_ADDR_3, Display::updateInterval, gameFsmPtr))}
 	}),
  	_ledRing(new LedRing(I2C_LR_ADDR)),
 	_ledStripe(new LedStripes(I2C_LS_ADDR)),

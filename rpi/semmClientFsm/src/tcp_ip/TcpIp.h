@@ -11,6 +11,7 @@
 // global includes
 #include <boost/thread/lock_guard.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread.hpp>
 #include <cstring>
 #include <iostream>
 #include <netdb.h>
@@ -21,9 +22,11 @@
 // local includes
 #include "../defs.h"
 
+class Game;
+
 class TcpIp {
 public:
-	TcpIp();
+	TcpIp( boost::shared_ptr< Game > gamePtr );
 	virtual ~TcpIp();
 
 	bool connect(const std::string& ip);
@@ -39,9 +42,12 @@ public:
 private:
 	bool _connected;
 	int _fd;
+	boost::shared_ptr< Game > _gamePtr;
 	boost::mutex _mutexForFd;
+	boost::shared_ptr< boost::thread > _thread;
 	static const int _port = 6665;
 
+	void worker( );
 	int writeToSocket(uint8_t* buf, int length);
 };
 

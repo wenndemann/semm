@@ -8,6 +8,8 @@
 #ifndef GUARDS_H_
 #define GUARDS_H_
 
+#include "../../game/Game.h"
+
 // guard conditions
 struct check_scm
 {
@@ -15,7 +17,7 @@ struct check_scm
 	bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt)
 	{
 		return true;
-		//return ( fsm.gamePtr->mode( ) == Game::Mode::SelectColor );
+		//return ( fsm._gamePtr->mode( ) == Game::Mode::SelectColor );
 	}
 };
 
@@ -24,8 +26,7 @@ struct check_gm
 	template<class EVT, class FSM, class SourceState, class TargetState>
 	bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt)
 	{
-		return false;
-		//return ( fsm.gamePtr->mode( ) == Game::Mode::Gaming );
+		return ( fsm._gamePtr->mode( ) == Game::Gaming );
 	}
 };
 
