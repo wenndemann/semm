@@ -1,6 +1,8 @@
 #ifndef MAINFSM_H_
 #define MAINFSM_H_
 
+#include "../defs.h"
+
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -17,14 +19,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-// manipulate cout
-#define cout cout << std::string(__FILE__).substr( \
-		std::string(__FILE__).find_last_of("/") + 1, \
-		std::string(__FILE__).length( ) - \
-		std::string(__FILE__).find_last_of("/") + 1) \
-		<< "\t" << __LINE__ << ":\t"
-
-using namespace std;
+//using namespace std;
 namespace msm = boost::msm;
 namespace mpl = boost::mpl;
 using namespace msm::front;

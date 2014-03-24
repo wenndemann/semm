@@ -159,7 +159,6 @@ struct GmMoveMeeple : public msm::front::state<>
 	void on_entry(Event const& ev, FSM& fsm) {
 		std::cout << "-> GmMoveMeeple" << std::endl;
 
-
 		fsm._gamePtr->playboard( )->moveMeeple( ev._from, ev._to );
 
 		fsm.process_event( fsm::evMoveDone( ) );

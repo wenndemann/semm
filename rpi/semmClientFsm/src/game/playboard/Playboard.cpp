@@ -115,7 +115,9 @@ bool Playboard::delPlayer( int32_t colorId )
 	if ( it != _players.end( ) )
 	{
 		_players.erase( it );
+		return true;
 	}
+	return false;
 }
 
 //void Playboard::moveMeeple(const Meeple& m, const Field& to) {

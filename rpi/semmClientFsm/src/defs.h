@@ -1,6 +1,13 @@
 #ifndef DEFS_H_
 #define DEFS_H_
 
+//#include <iostream>
+
+#define FUSION_MAX_VECTOR_SIZE 20
+#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
+#define BOOST_MPL_LIMIT_VECTOR_SIZE 30
+#define BOOST_MPL_LIMIT_MAP_SIZE 30
+
 // general defines
 #define CLIENT_ID_LENGHT 16
 #define CMDBUF_MAX_CMD_LENGHT 20
@@ -90,13 +97,18 @@
 #define LED_MODE_HB_SLOW 3
 
 // manipulate cout
+
+#ifdef cout
+#undef cout
+#endif
+using namespace std;
 #define cout cout << std::string(__FILE__).substr( \
 		std::string(__FILE__).find_last_of("/") + 1, \
 		std::string(__FILE__).length( ) - \
 		std::string(__FILE__).find_last_of("/") + 1) \
 		<< "\t" << __LINE__ << ":\t"
 
-
+/*
 struct tcp_data {
 	int newsockfd;
 	//std::string name;
@@ -108,5 +120,5 @@ struct tcp_data {
 		newsockfd = newsock;
 	}
 };
-
+*/
 #endif

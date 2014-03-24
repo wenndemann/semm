@@ -1,16 +1,17 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 
+// local includes
+#include "I2c.h"
+#include "../../../../../../arduino/display/i2c_defs.h"
+#include "../../../defs.h"
+
 // global includes
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
 #include <iostream>
-
-// local includes
-#include "I2c.h"
-#include "../../../../../../arduino/display/i2c_defs.h"
 
 #include <boost/msm/back/state_machine.hpp>
 namespace fsm

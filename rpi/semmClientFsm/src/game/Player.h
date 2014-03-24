@@ -8,13 +8,12 @@
 #ifndef PLAYER_H_
 #define PLAYER_H_
 
-// global includes
-#include <boost/shared_ptr.hpp>
-#include <vector>
-
 // locale includes
 #include "playboard/Meeple.h"
 
+// global includes
+#include <boost/shared_ptr.hpp>
+#include <vector>
 
 typedef boost::shared_ptr<Meeple> MeeplePtr;
 typedef std::vector<MeeplePtr> MeepleVec;

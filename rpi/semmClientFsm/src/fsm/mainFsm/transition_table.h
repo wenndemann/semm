@@ -19,7 +19,7 @@ struct transition_table : mpl::vector<
 	Row < WaitForClientColors     , evClientColors , SelectColorMode           , none        , none      >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------+
 	Row < SelectColorMode         , evInitGame     , GmMoveDone                , delSsms     , none      >,
-//	Row < SelectColorMode         , evMove         , none                      , Defer       , none      >,
+	Row < SelectColorMode         , evMove         , none                      , Defer       , none      >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------+
 	Row < GmMoveDone              , evMove         , GmMoveMeeple              , none        , none      >,
 	Row < GmMoveDone              , evDice         , GmDice                    , none        , none      >,
@@ -33,7 +33,7 @@ struct transition_table : mpl::vector<
 	Row < GmShowDie               , evMoveDone     , GmMoveDone                , none        , none      >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------+
 	Row < GmMoveMeeple            , evMoveDone     , GmMoveDone                , none        , none      >,
-//	Row < GmMoveMeeple            , evMove         , none                      , Defer       , none      >,
+	Row < GmMoveMeeple            , evMove         , none                      , Defer       , none      >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------+
 	Row < GmCheckMovedMeeple      , evMeepleOK     , GmSendMovedMeeple         , none        , none      >,
 	Row < GmCheckMovedMeeple      , evMeepleNotOK  , GmShowDie                 , none        , none      >,
@@ -46,7 +46,7 @@ struct transition_table : mpl::vector<
 	Row < GmSearchForMeeple       , evMeepleOK     , GmFoundMeeple             , none        , none      >,
 	Row < GmSearchForMeeple       , evMeepleNotOK  , GmMoveMeeplesByHand       , none        , none      >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------+
-//	Row < GmMoveMeeplesByHand     , evEnter        , GmReconfigureMeepleIDs    , none        , none      >,
+	Row < GmMoveMeeplesByHand     , evEnter        , GmReconfigureMeepleIDs    , none        , none      >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------+
 	Row < GmReconfigureMeepleIDs  , evMoveDone     , GmMoveDone                , none        , none      >
 > {};

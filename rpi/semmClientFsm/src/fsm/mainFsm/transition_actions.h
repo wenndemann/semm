@@ -16,7 +16,7 @@
 struct delSsms {
 	template<class EVT, class FSM, class SourceState, class TargetState>
 	void operator()(EVT const&, FSM& fsm, SourceState&, TargetState&) {
-		cout << "transition with event:" << typeid(EVT).name() << endl;
+		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
 
 		for ( boost::uint32_t i = 0; i < fsm._ssms->size( ); i++ )
 		{
@@ -28,7 +28,7 @@ struct delSsms {
 struct TestFct {
 	template<class EVT, class FSM, class SourceState, class TargetState>
 	void operator()(EVT const&, FSM&, SourceState&, TargetState&) {
-		cout << "transition with event:" << typeid(EVT).name() << endl;
+		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
 	}
 };
 */

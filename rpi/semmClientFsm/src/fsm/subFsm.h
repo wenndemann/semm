@@ -8,6 +8,8 @@
 #ifndef SELECTCOLORFSM_H_
 #define SELECTCOLORFSM_H_
 
+#include "../defs.h"
+
 #include <vector>
 #include <iostream>
 // back-end
@@ -24,7 +26,7 @@
 
 #include "../game/Game.h"
 
-using namespace std;
+//using namespace std;
 namespace msm = boost::msm;
 namespace mpl = boost::mpl;
 using namespace msm::front;
@@ -222,7 +224,7 @@ namespace fsm // Concrete FSM implementation
 		struct deleteColor {
 			template<class EVT, class FSM, class SourceState, class TargetState>
 			void operator()(EVT const&, FSM& fsm, SourceState&, TargetState&) {
-				cout << "transition with event:" << typeid(EVT).name() << " " << fsm._color_id << endl;
+				std::cout << "transition with event:" << typeid(EVT).name() << " " << fsm._color_id << std::endl;
 
 				fsm._gamePtr->mainFSM( )->_tcpIp->sendDelColor( static_cast<uint8_t>(fsm._color_id) );
 				fsm._gamePtr->playboard( )->delPlayer( fsm._color_id );

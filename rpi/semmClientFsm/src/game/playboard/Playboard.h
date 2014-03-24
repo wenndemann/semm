@@ -9,12 +9,6 @@
 #define PLAYBOARD_H_
 
 
-// global includes
-#include <boost/thread/lock_guard.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/shared_ptr.hpp>
-#include <map>
-
 // local includes
 #include "../Player.h"
 #include "Field.h"
@@ -25,6 +19,12 @@
 #include "hardware/XYdrive.h"
 #include "Meeple.h"
 #include "route.h"
+
+// global includes
+#include <boost/thread/lock_guard.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/shared_ptr.hpp>
+#include <map>
 
 #include <boost/msm/back/state_machine.hpp>
 namespace fsm
