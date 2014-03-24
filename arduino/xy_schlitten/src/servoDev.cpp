@@ -5,7 +5,7 @@ ServoDev::ServoDev(int servoPin) {
     m_servoPin = servoPin; 
     m_dev = new Servo;
 
-    m_min = 55;
+    m_min = 45;
     m_max = 95;
     m_state = true;
 }

@@ -34,7 +34,12 @@ namespace fsm
 		FSM_EVENT_COUT( "evMove"); }
 		uint8_t _from, _to;
 	};
+	struct evDice { evDice( ){ FSM_EVENT_COUT( "evDice" ); } };
+	struct evEnter { evEnter( ){ FSM_EVENT_COUT( "evEnter" ); } };
+	struct evShowDie { evShowDie( ){ FSM_EVENT_COUT( "evShowDie" ); } };
 	struct evMoveDone { evMoveDone( ){ FSM_EVENT_COUT( "evMoveDone" ); } };
+	struct evMeepleOK { evMeepleOK( ){ FSM_EVENT_COUT( "evMeepleOK" ); } };
+	struct evMeepleNotOK { evMeepleNotOK( ){ FSM_EVENT_COUT( "evMeepleNotOK" ); } };
 
 	// A "complicated" event type that carries some data.
 	/*

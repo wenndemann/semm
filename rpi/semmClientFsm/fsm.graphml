@@ -357,7 +357,7 @@ ap	= active player<y:LabelModel>
           <y:Geometry height="114.38463999999999" width="213.69216000000006" x="-72.0" y="554.9753599999999"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="103.80419921875" x="54.94398039062503" y="3.0">gmMoveDone<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="105.1689453125" x="54.26160734375003" y="3.0">GmMoveDone<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -378,7 +378,7 @@ ap	= active player<y:LabelModel>
           <y:Geometry height="29.264639999999872" width="213.69216000000006" x="293.2601672399988" y="929.8968"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="145.25439453125" x="34.21888273437503" y="3.0">gmWaitforShowDie<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="146.619140625" x="33.53650968750003" y="3.0">GmWaitforShowDie<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -399,7 +399,7 @@ ap	= active player<y:LabelModel>
           <y:Geometry height="114.38463999999999" width="312.18816000000015" x="666.2681672399985" y="887.3367999999999"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="90.47412109375" x="110.85701945312508" y="3.0">gmShowDie<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="91.8388671875" x="110.17464640625008" y="3.0">GmShowDie<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -423,7 +423,7 @@ d[other !avail].activatePic(dice_1 (0x87) + pips)</y:MethodLabel>
           <y:Geometry height="114.38463999999999" width="213.69216000000006" x="-86.7398327600012" y="887.3367999999999"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="58.62158203125" x="77.53528898437503" y="3.0">gmDice<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="59.986328125" x="76.85291593750003" y="3.0">GmDice<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -445,7 +445,7 @@ d[other !avail].activatePic(dice_1 (0x87) + pips)</y:MethodLabel>
           <y:Geometry height="114.38463999999999" width="312.18816000000015" x="666.2681672399985" y="554.9753599999999"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="172.4287109375" x="69.87972453125008" y="3.0">gmCheckMovedMeeple<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="173.79345703125" x="69.19735148437508" y="3.0">GmCheckMovedMeeple<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -467,7 +467,7 @@ pg.checkMovedMeepe(ap)</y:MethodLabel>
           <y:Geometry height="114.38463999999999" width="312.18816000000015" x="666.2681672399985" y="-17.842560000000105"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="155.71533203125" x="78.23641398437508" y="3.0">gmCheckDestination<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="157.080078125" x="77.55404093750008" y="3.0">GmCheckDestination<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -489,7 +489,7 @@ defer(s.receive(dice, player, pips))</y:MethodLabel>
           <y:Geometry height="114.38463999999999" width="312.18816000000015" x="666.2681672399985" y="268.56639999999993"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="165.205078125" x="73.49154093750008" y="3.0">gmSendMovedMeeple<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="166.56982421875" x="72.80916789062508" y="3.0">GmSendMovedMeeple<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -511,7 +511,7 @@ s.send(selectMeeple, fieldID)</y:MethodLabel>
           <y:Geometry height="114.38463999999999" width="312.1881599999999" x="666.2681672399988" y="1219.6982399999997"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="119.1591796875" x="96.51449015624996" y="3.0">gmMoveMeeple<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="120.52392578125" x="95.83211710937496" y="3.0">GmMoveMeeple<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -532,7 +532,7 @@ s.send(selectMeeple, fieldID)</y:MethodLabel>
           <y:Geometry height="114.38463999999999" width="312.18816000000015" x="666.2681672399985" y="-317.2486400000001"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="154.54736328125" x="78.82039835937508" y="3.0">gmSearchForMeeple<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="155.912109375" x="78.13802531250008" y="3.0">GmSearchForMeeple<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -554,7 +554,7 @@ defer(s.receive(dice, player, pips))</y:MethodLabel>
           <y:Geometry height="114.38463999999999" width="312.18816000000015" x="248.95596723999864" y="-317.2486400000001"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="125.62744140625" x="93.28035929687508" y="3.0">gmFoundMeeple<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="126.9921875" x="92.59798625000008" y="3.0">GmFoundMeeple<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -577,7 +577,7 @@ defer(s.receive(dice, player, pips))</y:MethodLabel>
           <y:Geometry height="114.38463999999999" width="312.18816000000015" x="1226.8441672399986" y="-317.2486400000001"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="183.49267578125" x="64.34774210937508" y="3.0">gmMoveMeeplesByHand<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="184.857421875" x="63.665369062500076" y="3.0">GmMoveMeeplesByHand<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -600,7 +600,7 @@ defer(s.receive(dice, player, pips))
           <y:Geometry height="114.38463999999999" width="312.18816000000015" x="1226.8441672399986" y="-17.842560000000105"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="191.98583984375" x="60.101160078125076" y="3.0">gmReconfigureMeepleIDs<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="193.3505859375" x="59.418787031250076" y="3.0">GmReconfigureMeepleIDs<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -623,7 +623,7 @@ defer(s.receive(dice, player, pips))</y:MethodLabel>
           <y:Geometry height="114.38463999999999" width="312.1881599999999" x="1226.8441672399986" y="281.56351999999987"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="224.923828125" x="43.63216593749996" y="3.0">gmMoveMeeplesToCorrectPos<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" modelName="custom" textColor="#000000" visible="true" width="226.28857421875" x="42.94979289062496" y="3.0">GmMoveMeeplesToCorrectPos<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -1579,7 +1579,6 @@ a: s.send(delClient, x)<y:LabelModel>
       </data>
     </edge>
     <edge id="n2::e10" source="n2::n2" target="n2::n8">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -1598,7 +1597,6 @@ a: s.send(delClient, x)<y:LabelModel>
       </data>
     </edge>
     <edge id="n2::e11" source="n2::n3" target="n2::n8">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -1617,7 +1615,6 @@ a: s.send(delClient, x)<y:LabelModel>
       </data>
     </edge>
     <edge id="n2::e12" source="n2::n1" target="n2::n8">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -1636,7 +1633,6 @@ a: s.send(delClient, x)<y:LabelModel>
       </data>
     </edge>
     <edge id="n2::e13" source="n2::n3" target="n2::n0">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-55.75316381204834" sy="-9.560615721699264" tx="20.58563246666654" ty="51.935815784870954"/>
@@ -1655,7 +1651,6 @@ a: s.send(delClient, x)<y:LabelModel>
       </data>
     </edge>
     <edge id="n2::e14" source="n2::n7" target="n2::n8">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -1674,7 +1669,6 @@ a: s.send(delClient, x)<y:LabelModel>
       </data>
     </edge>
     <edge id="n2::e15" source="n2::n0" target="n2::n8">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">

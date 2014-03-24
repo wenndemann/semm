@@ -61,6 +61,8 @@ struct WaitForClientColors : public msm::front::state<>
 
 struct SelectColorMode : public msm::front::state<>
 {
+	typedef mpl::vector<fsm::evMove> deferred_events;
+
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
 	void on_entry(Event const&, FSM& fsm) {
@@ -109,6 +111,45 @@ struct GmMoveDone : public msm::front::state<>
 	}
 };
 
+struct GmDice: public msm::front::state<>
+{
+	// every (optional) entry/exit methods get the event passed.
+	template<class Event, class FSM>
+	void on_entry(Event const&, FSM&) {
+		std::cout << "-> GmDice" << std::endl;
+	}
+	template<class Event, class FSM>
+	void on_exit(Event const&, FSM&) {
+		std::cout << "<- GmDice" << std::endl;
+	}
+};
+
+struct GmWaitForShowDie: public msm::front::state<>
+{
+	// every (optional) entry/exit methods get the event passed.
+	template<class Event, class FSM>
+	void on_entry(Event const&, FSM&) {
+		std::cout << "-> GmWaitForShowDie" << std::endl;
+	}
+	template<class Event, class FSM>
+	void on_exit(Event const&, FSM&) {
+		std::cout << "<- GmWaitForShowDie" << std::endl;
+	}
+};
+
+struct GmShowDie: public msm::front::state<>
+{
+	// every (optional) entry/exit methods get the event passed.
+	template<class Event, class FSM>
+	void on_entry(Event const&, FSM&) {
+		std::cout << "-> GmShowDie" << std::endl;
+	}
+	template<class Event, class FSM>
+	void on_exit(Event const&, FSM&) {
+		std::cout << "<- GmShowDie" << std::endl;
+	}
+};
+
 struct GmMoveMeeple : public msm::front::state<>
 {
 	// every (optional) entry/exit methods get the event passed.
@@ -124,6 +165,110 @@ struct GmMoveMeeple : public msm::front::state<>
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM&) {
 		std::cout << "<- GmMoveMeeple" << std::endl;
+	}
+};
+
+struct GmCheckMovedMeeple: public msm::front::state<>
+{
+	// every (optional) entry/exit methods get the event passed.
+	template<class Event, class FSM>
+	void on_entry(Event const& ev, FSM& fsm) {
+		std::cout << "-> GmCheckMovedMeeple" << std::endl;
+	}
+	template<class Event, class FSM>
+	void on_exit(Event const&, FSM&) {
+		std::cout << "<- GmCheckMovedMeeple" << std::endl;
+	}
+};
+
+struct GmSendMovedMeeple: public msm::front::state<>
+{
+	// every (optional) entry/exit methods get the event passed.
+	template<class Event, class FSM>
+	void on_entry(Event const& ev, FSM& fsm) {
+		std::cout << "-> GmSendMovedMeeple" << std::endl;
+	}
+	template<class Event, class FSM>
+	void on_exit(Event const&, FSM&) {
+		std::cout << "<- GmSendMovedMeeple" << std::endl;
+	}
+};
+
+struct GmCheckDestination: public msm::front::state<>
+{
+	// every (optional) entry/exit methods get the event passed.
+	template<class Event, class FSM>
+	void on_entry(Event const& ev, FSM& fsm) {
+		std::cout << "-> GmCheckDestination" << std::endl;
+	}
+	template<class Event, class FSM>
+	void on_exit(Event const&, FSM&) {
+		std::cout << "<- GmCheckDestination" << std::endl;
+	}
+};
+
+struct GmSearchForMeeple: public msm::front::state<>
+{
+	// every (optional) entry/exit methods get the event passed.
+	template<class Event, class FSM>
+	void on_entry(Event const& ev, FSM& fsm) {
+		std::cout << "-> GmCheckDestination" << std::endl;
+	}
+	template<class Event, class FSM>
+	void on_exit(Event const&, FSM&) {
+		std::cout << "<- GmCheckDestination" << std::endl;
+	}
+};
+
+struct GmFoundMeeple: public msm::front::state<>
+{
+	// every (optional) entry/exit methods get the event passed.
+	template<class Event, class FSM>
+	void on_entry(Event const& ev, FSM& fsm) {
+		std::cout << "-> GmFoundMeeple" << std::endl;
+	}
+	template<class Event, class FSM>
+	void on_exit(Event const&, FSM&) {
+		std::cout << "<- GmFoundMeeple" << std::endl;
+	}
+};
+
+struct GmMoveMeeplesByHand: public msm::front::state<>
+{
+	// every (optional) entry/exit methods get the event passed.
+	template<class Event, class FSM>
+	void on_entry(Event const& ev, FSM& fsm) {
+		std::cout << "-> GmMoveMeeplesByHand" << std::endl;
+	}
+	template<class Event, class FSM>
+	void on_exit(Event const&, FSM&) {
+		std::cout << "<- GmMoveMeeplesByHand" << std::endl;
+	}
+};
+
+struct GmReconfigureMeepleIDs: public msm::front::state<>
+{
+	// every (optional) entry/exit methods get the event passed.
+	template<class Event, class FSM>
+	void on_entry(Event const& ev, FSM& fsm) {
+		std::cout << "-> GmReconfigureMeepleIDs" << std::endl;
+	}
+	template<class Event, class FSM>
+	void on_exit(Event const&, FSM&) {
+		std::cout << "<- GmReconfigureMeepleIDs" << std::endl;
+	}
+};
+
+struct GmMoveMeeplesToCorrectPos: public msm::front::state<>
+{
+	// every (optional) entry/exit methods get the event passed.
+	template<class Event, class FSM>
+	void on_entry(Event const& ev, FSM& fsm) {
+		std::cout << "-> GmMoveMeeplesToCorrectPos" << std::endl;
+	}
+	template<class Event, class FSM>
+	void on_exit(Event const&, FSM&) {
+		std::cout << "<- GmMoveMeeplesToCorrectPos" << std::endl;
 	}
 };
 
