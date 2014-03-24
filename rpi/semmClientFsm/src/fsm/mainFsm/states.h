@@ -152,6 +152,8 @@ struct GmShowDie: public msm::front::state<>
 
 struct GmMoveMeeple : public msm::front::state<>
 {
+	typedef mpl::vector<fsm::evMove> deferred_events;
+
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
 	void on_entry(Event const& ev, FSM& fsm) {
@@ -196,6 +198,8 @@ struct GmSendMovedMeeple: public msm::front::state<>
 
 struct GmCheckDestination: public msm::front::state<>
 {
+	typedef mpl::vector<fsm::evDice> deferred_events;
+
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
 	void on_entry(Event const& ev, FSM& fsm) {
@@ -209,6 +213,8 @@ struct GmCheckDestination: public msm::front::state<>
 
 struct GmSearchForMeeple: public msm::front::state<>
 {
+	typedef mpl::vector<fsm::evDice> deferred_events;
+
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
 	void on_entry(Event const& ev, FSM& fsm) {
@@ -222,6 +228,8 @@ struct GmSearchForMeeple: public msm::front::state<>
 
 struct GmFoundMeeple: public msm::front::state<>
 {
+	typedef mpl::vector<fsm::evDice> deferred_events;
+
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
 	void on_entry(Event const& ev, FSM& fsm) {
@@ -235,6 +243,8 @@ struct GmFoundMeeple: public msm::front::state<>
 
 struct GmMoveMeeplesByHand: public msm::front::state<>
 {
+	typedef mpl::vector<fsm::evDice> deferred_events;
+
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
 	void on_entry(Event const& ev, FSM& fsm) {
@@ -248,6 +258,8 @@ struct GmMoveMeeplesByHand: public msm::front::state<>
 
 struct GmReconfigureMeepleIDs: public msm::front::state<>
 {
+	typedef mpl::vector<fsm::evDice> deferred_events;
+
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
 	void on_entry(Event const& ev, FSM& fsm) {
@@ -261,6 +273,8 @@ struct GmReconfigureMeepleIDs: public msm::front::state<>
 
 struct GmMoveMeeplesToCorrectPos: public msm::front::state<>
 {
+	typedef mpl::vector<fsm::evDice> deferred_events;
+
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
 	void on_entry(Event const& ev, FSM& fsm) {
@@ -272,59 +286,6 @@ struct GmMoveMeeplesToCorrectPos: public msm::front::state<>
 	}
 };
 
-
-/*
-struct Empty: public msm::front::state<> {
-	// every (optional) entry/exit methods get the event passed.
-	template<class Event, class FSM>
-	void on_entry(Event const&, FSM&) {
-		std::cout << "-> Empty" << std::endl;
-	}
-	template<class Event, class FSM>
-	void on_exit(Event const&, FSM&) {
-		std::cout << "<- Empty" << std::endl;
-	}
-};
-
-struct Open: public msm::front::state<> {
-	template<class Event, class FSM>
-	void on_entry(Event const&, FSM&) {
-		std::cout << "-> Open" << std::endl;
-	}
-	template<class Event, class FSM>
-	void on_exit(Event const&, FSM&) {
-		std::cout << "<- Open" << std::endl;
-	}
-};
-
-struct Stopped: public msm::front::state<> {
-	// when stopped, the CD is loaded
-	template<class Event, class FSM>
-	void on_entry(Event const&, FSM&) {
-		std::cout << "-> Stopped" << std::endl;
-	}
-	template<class Event, class FSM>
-	void on_exit(Event const&, FSM&) {
-		std::cout << "<- Stopped" << std::endl;
-	}
-};
-
-struct Playing: public msm::front::state<> {
-	template<class Event, class FSM>
-	void on_entry(Event const&, FSM&) {
-		std::cout << "-> Playing" << std::endl;
-	}
-	template<class Event, class FSM>
-	void on_exit(Event const&, FSM&) {
-		std::cout << "<- Playing" << std::endl;
-	}
-};
-
-// state not defining any entry or exit
-struct Paused: public msm::front::state<> {
-};
-*/
-// the initial state of the player SM. Must be defined
 typedef Init initial_state;
 typedef int activate_deferred_events;
 

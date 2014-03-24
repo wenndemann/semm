@@ -9,6 +9,7 @@
 #define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
 #define BOOST_MPL_LIMIT_VECTOR_SIZE 30
 #define BOOST_MPL_LIMIT_MAP_SIZE 30
+//#define FUSION_MAX_VECTOR_SIZE 30
 
 // global includes
 #include <iostream>

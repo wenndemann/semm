@@ -20,7 +20,7 @@
 							<option id="cdt.managedbuild.option.gnu.cross.path.778897987" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" value="bin/arm-unknown-linux-gnueabihf/bin" valueType="string"/>
 							<option id="cdt.managedbuild.option.gnu.cross.prefix.1018644667" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" value="arm-unknown-linux-gnueabihf-" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.1049347885" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
-							<builder buildPath="${workspace_loc:/semmClientFsm}/Debug" id="cdt.managedbuild.builder.gnu.cross.1967408378" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="unlimited" superClass="cdt.managedbuild.builder.gnu.cross">
+							<builder buildPath="${workspace_loc:/semmClientFsm}/Debug" id="cdt.managedbuild.builder.gnu.cross.1967408378" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="false" superClass="cdt.managedbuild.builder.gnu.cross">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug"/>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
