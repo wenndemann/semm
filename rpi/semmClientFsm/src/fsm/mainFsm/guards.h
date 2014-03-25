@@ -11,6 +11,18 @@
 #include "../../game/Game.h"
 
 // guard conditions
+struct gMoveAllowed {
+	template<class EVT, class FSM, class SourceState, class TargetState>
+	bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt) {
+		return src._moveAllowed;
+	}
+};
+struct gMoveNotAllowed {
+	template<class EVT, class FSM, class SourceState, class TargetState>
+	bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt) {
+		return !(src._moveAllowed);
+	}
+};
 /*
 struct DummyGuard {
 	template<class EVT, class FSM, class SourceState, class TargetState>

@@ -74,7 +74,7 @@ struct SelectColorMode : public msm::front::state<>
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
 		for ( Playboard::DisplayMapIt it = displayMap.begin( ); it != displayMap.end( ); ++it )
-		{	it->second->init( );	}
+		{	it->second->enableSubFSMEvents( );	}
 
 		for ( boost::uint32_t i = 0; i < fsm._ssms->size( ); i++ )
 		{
@@ -95,6 +95,12 @@ struct SelectColorMode : public msm::front::state<>
 			fsm._ssms->at( i )->stop( );
 			//fsm._ssms->at( i ).reset( );
 		}
+		Playboard::DisplayMap displays = fsm._gamePtr->playboard( )->displays( );
+		Playboard::DisplayMapIt it = displays.begin( );
+		for ( ; it != displays.end( ); ++it )
+		{
+			it->second->disableSubFSMEvents( );
+		}
 	}
 };
 
@@ -102,8 +108,18 @@ struct GmMoveDone : public msm::front::state<>
 {
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
-	void on_entry(Event const&, FSM&) {
+	void on_entry(Event const&, FSM& fsm) {
 		std::cout << "-> GmMoveDone" << std::endl;
+
+		// if the dice data for the next turn has been sent already
+		// save it to the current dice data and do the dice event
+		// to start the next turn
+		if ( fsm._next.valid &&
+		     ( fsm.get_message_queue_size() + fsm.get_deferred_queue( ).size( ) ) == 0 )
+		{
+			fsm._curr = fsm._next;
+			fsm.enqueue_event( fsm::evDice( ) );
+		}
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM&) {
@@ -115,39 +131,51 @@ struct GmDice: public msm::front::state<>
 {
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
-	void on_entry(Event const&, FSM&) {
+	void on_entry(Event const& ev, FSM& fsm) {
 		std::cout << "-> GmDice" << std::endl;
+
+		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
+		Playboard::DisplayMapIt displayMapIt = displayMap.find( static_cast<int32_t>(fsm._curr.player) );
+		if ( displayMapIt == displayMap.end( ) )
+		{
+			std::cout << "No player " << static_cast<int32_t>(fsm._curr.player)
+					  << " to move on dice " << static_cast<int32_t>(fsm._curr.dice) << std::endl;
+		}
+
+		displayMapIt->second->setPictureDice( 0 ); //ev._dice );
 	}
 	template<class Event, class FSM>
-	void on_exit(Event const&, FSM&) {
+	void on_exit(Event const&, FSM& fsm) {
 		std::cout << "<- GmDice" << std::endl;
 	}
 };
 
-struct GmWaitForShowDie: public msm::front::state<>
+struct GmWaitForShowDice: public msm::front::state<>
 {
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
-	void on_entry(Event const&, FSM&) {
-		std::cout << "-> GmWaitForShowDie" << std::endl;
+	void on_entry(Event const&, FSM& fsm) {
+		std::cout << "-> GmWaitForShowDice" << std::endl;
+		fsm._tcpIp->sendDieDone( fsm._curr.player );
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM&) {
-		std::cout << "<- GmWaitForShowDie" << std::endl;
+		std::cout << "<- GmWaitForShowDice" << std::endl;
 	}
 };
 
-struct GmShowDie: public msm::front::state<>
+struct GmShowDice: public msm::front::state<>
 {
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
-	void on_entry(Event const&, FSM&) {
-		std::cout << "-> GmShowDie" << std::endl;
+	void on_entry(Event const& ev, FSM& fsm) {
+		std::cout << "-> GmShowDice" << std::endl;
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM&) {
-		std::cout << "<- GmShowDie" << std::endl;
+		std::cout << "<- GmShowDice" << std::endl;
 	}
+	bool _moveAllowed;
 };
 
 struct GmMoveMeeple : public msm::front::state<>

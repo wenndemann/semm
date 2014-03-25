@@ -342,7 +342,9 @@ namespace fsm // Concrete FSM implementation
 			//  +----------------+----------------+------------------+--- ---------+-----------------+
 			Row < ScmStart       , scmEvEnter       , ScmReady         , none        , none            >,
 			Row < ScmStart       , scmEvCancel      , ScmEnter         , deleteColor , none            >,
-			Row < ScmStart       , scmEvGetReady    , ScmReady         , none        , none            >
+			Row < ScmStart       , scmEvGetReady    , ScmReady         , none        , none            >,
+			//  +----------------+----------------+------------------+--- ---------+-----------------+
+			Row < ScmReady       , scmEvGetReady    , none             , none        , none            >
 		> {};
 
 		boost::shared_ptr< Game > _gamePtr;

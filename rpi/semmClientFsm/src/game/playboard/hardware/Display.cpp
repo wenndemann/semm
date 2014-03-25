@@ -6,6 +6,7 @@
 
 Display::Display(uint8_t i2cAddr, long msec, fsm::gameFSM* gameFsmPtr)
 : _mainFSM( gameFsmPtr )
+, _subFsmEnabled( false )
 {
 	std::cout << "    creating display " << static_cast<int32_t>(i2cAddr-80) << std::endl;
 	setI2cAddr(i2cAddr);
@@ -23,9 +24,16 @@ Display::~Display() {
 
 }
 
-void Display::init( )
+void Display::enableSubFSMEvents( )
 {
 	_subFSM = _mainFSM->_ssms->at( static_cast<int32_t>(getI2cAddr())-80 );
+	if ( _subFSM )
+		_subFsmEnabled = true;
+}
+
+void Display::disableSubFSMEvents( )
+{
+	_subFsmEnabled = false;
 }
 
 int Display::setPictures(uint8_t number) {
@@ -37,6 +45,24 @@ int Display::setPictures(uint8_t number) {
 	//if(m_cliDisplay != NULL) m_cliDisplay->callPicture(number);
 	std::cout << "set display " << pow(2,static_cast<int32_t>(getI2cAddr())-80) << " to pic " << static_cast<int32_t>(number) << std::endl;
 	return 0;
+}
+
+void Display::setPictureDice( uint8_t dice )
+{
+	if ( dice == 0 )
+		this->setPictures( I2C_DBEN_PIC_DICE );
+	else if ( dice == 1 )
+		this->setPictures( I2C_DBEN_PIC_DICE_1 );
+	else if ( dice == 2 )
+		this->setPictures( I2C_DBEN_PIC_DICE_2 );
+	else if ( dice == 3 )
+		this->setPictures( I2C_DBEN_PIC_DICE_3 );
+	else if ( dice == 4 )
+		this->setPictures( I2C_DBEN_PIC_DICE_4 );
+	else if ( dice == 5 )
+		this->setPictures( I2C_DBEN_PIC_DICE_5 );
+	else if ( dice == 6 )
+		this->setPictures( I2C_DBEN_PIC_DICE_6 );
 }
 
 int Display::setName(uint8_t player, const char* name) {
@@ -63,14 +89,15 @@ void Display::handler() {
 	if(m_encoder < 255 && m_encoder > 0) {
 		if ( m_encoder == 1 )
 		{
-			if ( _subFSM )
+			std::cout << "Display " << static_cast<int32_t>(getI2cAddr())-80 << " pressed Enter" << std::endl;
+			if ( _subFsmEnabled )
 				_subFSM->process_event( fsm::scmEvEnter( ) );
-			//else
-				//_mainFSM->process_event( fsm::GEILES_ENTER_EVENT( ) );
+			else
+				_mainFSM->process_event( fsm::evEnter( ) );
 		}
 		if ( m_encoder == 2 )
 		{
-			if ( _subFSM )
+			if ( _subFsmEnabled )
 				_subFSM->process_event( fsm::scmEvCancel( ) );
 			//else
 				//_mainFSM->process_event( fsm::GEILES_ENTER_EVENT( ) );

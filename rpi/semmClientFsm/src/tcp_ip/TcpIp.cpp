@@ -105,8 +105,8 @@ void TcpIp::sendAddClient(const string& name) {
 	buf[0] = TCP_CMD_ADD_CLIENT_CS;
 	memcpy(&buf[1], name.c_str(), 18);
 	buf[name.length( ) + 1] = '\0';
-	writeToSocket(buf, 20);
 	cout << "send command \"ADD CLIENT\" " << name << " to server" << endl;
+	writeToSocket(buf, 20);
 }
 
 void TcpIp::sendSetColor(uint8_t color) {
@@ -115,8 +115,8 @@ void TcpIp::sendSetColor(uint8_t color) {
 	buf[0] = TCP_CMD_SET_COLOR_CS;
 	buf[1] = color;
 	buf[2] = '\0';
+	cout << "send command \"SET_COLOR\" (" << static_cast<int32_t>(color) << ") to server" << endl;
 	writeToSocket(buf, 3);
-	cout << "send command \"SET_COLOR\" (" << color << ") to server" << endl;
 }
 
 void TcpIp::sendDelColor(uint8_t color) {
@@ -125,8 +125,8 @@ void TcpIp::sendDelColor(uint8_t color) {
 	buf[0] = TCP_CMD_DEL_COLOR_CS;
 	buf[1] = color;
 	buf[2] = '\0';
+	cout << "send command\"DEL_COLOR\" (" <<  static_cast<int32_t>(color) << ") to server" << endl;
 	writeToSocket(buf, 3);
-	cout << "send command\"DEL_COLOR\" (" <<  color << ") to server" << endl;
 }
 
 void TcpIp::sendStartGame(uint8_t pid) {
@@ -134,8 +134,8 @@ void TcpIp::sendStartGame(uint8_t pid) {
 	uint8_t buf[2];
 	buf[0] = TCP_CMD_START_GAME_CS;
 	buf[1] = '\0';
+	cout << "send command\"START_GAME\" (" << static_cast<int32_t>(pid) << ") to server" << endl;
 	writeToSocket(buf, 2);
-	cout << "send command\"START_GAME\" (" << pid << ") to server" << endl;
 }
 
 void TcpIp::sendDieDone(uint8_t pid) {
@@ -143,8 +143,8 @@ void TcpIp::sendDieDone(uint8_t pid) {
 	uint8_t buf[2];
 	buf[0] = TCP_CMD_DIE_DONE_CS;
 	buf[1] = '\0';
+	cout << "send command\"DIE DONE\" (" << static_cast<int32_t>(pid) << ") to server" << endl;
 	writeToSocket(buf, 2);
-	cout << "send command\"DIE DONE\" (" << pid << ") to server" << endl;
 }
 
 void TcpIp::sendCancelGame(uint8_t pid) {
@@ -153,8 +153,8 @@ void TcpIp::sendCancelGame(uint8_t pid) {
 	buf[0] = TCP_CMD_CANCEL_GAME_CS;
 	buf[1] = pid;
 	buf[2] = '\0';
+	cout << "send command\"Cancel Game\" (" << static_cast<int32_t>(pid) << ") to server" << endl;
 	writeToSocket(buf, 3);
-	cout << "send command\"Cancel Game\" (" << pid << ") to server" << endl;
 }
 
 
@@ -165,9 +165,9 @@ void TcpIp::sendSelectFigure(uint8_t pid, uint8_t field) {
 	buf[1] = pid;
 	buf[2] = field;
 	buf[3] = '\0';
+	cout << "send command\"SELECT FIGURE\" (" << static_cast<int32_t>(pid) << ", "
+												  << static_cast<int32_t>(field) << ") to server" << endl;
 	writeToSocket(buf, 4);
-	cout << "send command\"SELECT FIGURE\" (" << pid << ", "
-											  << field << ") to server" << endl;
 }
 
 int TcpIp::writeToSocket(uint8_t* buf, int length) {

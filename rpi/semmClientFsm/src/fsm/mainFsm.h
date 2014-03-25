@@ -45,7 +45,9 @@ namespace fsm // Concrete FSM implementation
 	// front-end: define the FSM structure
     struct GameFSM_ : public msm::front::state_machine_def<GameFSM_>
     {
-    	GameFSM_( TcpIp* tcpIp ) : _tcpIp( tcpIp ){ }
+    	GameFSM_( TcpIp* tcpIp )
+    	: _tcpIp( tcpIp )
+    	{ }
 
     	template <class Event,class FSM>
     	void on_entry(Event const&, FSM& fsm)
@@ -87,6 +89,14 @@ namespace fsm // Concrete FSM implementation
         TcpIp* _tcpIp;
         boost::shared_ptr< Game > _gamePtr;
         SsmsVecPtr _ssms;
+
+        struct DiceData
+        {
+        	DiceData( ) : player( 0 ), dice( 0 ), valid( false ){ }
+        	uint8_t player, dice;
+        	bool valid;
+        };
+        DiceData _curr, _next;
     };
     // Pick a back-end
     typedef msm::back::state_machine< GameFSM_ > gameFSM;

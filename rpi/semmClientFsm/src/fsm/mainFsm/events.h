@@ -28,15 +28,26 @@ namespace fsm
 	struct evInitGame { evInitGame( ){ FSM_EVENT_COUT( "evInitGame" ); } };
 	struct evInitColors { evInitColors( ){ FSM_EVENT_COUT( "evInitColors" ); } };
 	struct evClientColors { evClientColors( ){ FSM_EVENT_COUT( "evClientColors" ); } };
-	struct evMove{ evMove( uint8_t from, uint8_t to )
-	: _from( from ), _to( to )
+	struct evMove
 	{
-		FSM_EVENT_COUT( "evMove"); }
+		evMove( uint8_t from, uint8_t to )
+		: _from( from ), _to( to )
+		{ FSM_EVENT_COUT( "evMove"); }
 		uint8_t _from, _to;
 	};
 	struct evDice { evDice( ){ FSM_EVENT_COUT( "evDice" ); } };
 	struct evEnter { evEnter( ){ FSM_EVENT_COUT( "evEnter" ); } };
-	struct evShowDie { evShowDie( ){ FSM_EVENT_COUT( "evShowDie" ); } };
+	struct evShowDice {
+		evShowDice( uint8_t moveAllowed )
+		{
+			FSM_EVENT_COUT( "evShowDice" );
+			if ( moveAllowed == 0 )
+			{	_moveAllowed = false;	}
+			else
+			{	_moveAllowed = true; 	}
+		}
+		bool _moveAllowed;
+	};
 	struct evMoveDone { evMoveDone( ){ FSM_EVENT_COUT( "evMoveDone" ); } };
 	struct evMeepleOK { evMeepleOK( ){ FSM_EVENT_COUT( "evMeepleOK" ); } };
 	struct evMeepleNotOK { evMeepleNotOK( ){ FSM_EVENT_COUT( "evMeepleNotOK" ); } };

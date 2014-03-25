@@ -25,8 +25,10 @@ class Display: protected I2c {
 public:
 	Display(uint8_t i2cAddr, long msec, boost::msm::back::state_machine< fsm::GameFSM_ >* gameFsmPtr);
 	virtual ~Display();
-	void init( );
+	void enableSubFSMEvents( );
+	void disableSubFSMEvents( );
 	int setPictures(uint8_t number);
+	void setPictureDice( uint8_t dice );
 	int getPicture() { return m_actPicNumber; }
 	int setName(uint8_t player, const char* name);
 	char* getName(uint8_t player);
@@ -43,6 +45,7 @@ private:
 	uint8_t m_encoder;
 	bool m_readEnable;
 	bool m_blocked;
+	bool _subFsmEnabled;
 	boost::asio::io_service m_io;
 	boost::asio::deadline_timer* m_timer;
 	boost::thread* m_handlerThread;

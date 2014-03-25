@@ -51,8 +51,8 @@ public:
 	void parseCmd( uint8_t* buf, int32_t nR );
 
 private:
-	PlayboardPtr _playboard;
 	boost::msm::back::state_machine< fsm::GameFSM_ >* _mainFSM;
+	PlayboardPtr _playboard;
 
 	Mode _mode;
 	int32_t _availColors;

@@ -12,12 +12,12 @@
 using namespace std;
 
 Game::Game( fsm::gameFSM* gameFsmPtr )
-: _mainFSM( gameFsmPtr )
-, _playboard( new Playboard( gameFsmPtr ) )
-, _mode(Mode::Init)
+: _mode(Mode::Init)
 , _availColors(0)
 , _clientColors(0)
 {
+	_mainFSM = gameFsmPtr;
+	_playboard = PlayboardPtr( new Playboard( gameFsmPtr ) );
 }
 
 Game::~Game() {
@@ -66,10 +66,19 @@ void Game::parseCmd( uint8_t* buf, int32_t nR )
 		break;
 
 	case TCP_CMD_SHOW_DIE_SC:
-
+		_mainFSM->process_event(fsm::evShowDice( buf[ 1 ] ));
 		break;
 
 	case TCP_CMD_DICE_SC:
+		// The GmMoveDone does the dive event itself if it has already valid data
+		_mainFSM->_next.player = buf[ 1 ];
+		_mainFSM->_next.player = buf[ 2 ];
+		if ( !_mainFSM->_next.valid )
+		{
+			_mainFSM->_next.valid = true;
+			_mainFSM->process_event(fsm::evDice( ));
+		}
+
 
 		break;
 
