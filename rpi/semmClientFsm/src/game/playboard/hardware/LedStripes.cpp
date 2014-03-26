@@ -10,7 +10,10 @@ LedStripes::~LedStripes() {
 }
 
 int LedStripes::set(uint8_t mode, uint8_t color) {
-	I2c::write(mode, &color, sizeof color);
+	uint8_t buf[2];
+	buf[0] = color;
+	buf[1] = color;
+	I2c::write(mode, buf, sizeof buf);
 	return 0;
 }
 
