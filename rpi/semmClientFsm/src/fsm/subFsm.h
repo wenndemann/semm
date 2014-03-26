@@ -330,6 +330,7 @@ namespace fsm // Concrete FSM implementation
 			//  +----------------+----------------+------------------+--- ---------+-----------------+
 			Row < ScmPrepare     , scmEvEnter       , ScmWait          , none        , none            >,
 			Row < ScmPrepare     , scmEvGetReady    , none             , Defer       , none            >,
+			Row < ScmEnter       , scmEvColors      , none             , none        , none            >, // ignore event
 			//  +----------------+----------------+------------------+--- ---------+-----------------+
 			Row < ScmDisable     , scmEvGetReady    , ScmReady         , none        , none            >,
 			Row < ScmDisable     , scmEvColors      , ScmSemm          , none        , gColorAvailable >,

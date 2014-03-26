@@ -54,7 +54,13 @@ public:
 
 	void moveMeeple(const Meeple& m, const Field& to);
 	void moveMeeple(uint8_t from, uint8_t to);
+	/// read id and set to target color
 	uint16_t readId(uint32_t fieldId);
+
+	uint8_t checkMovedMeeple( uint8_t color );
+	bool checkMeepleMove( uint8_t from, uint8_t to );
+
+	bool setMeepleMove( uint8_t color, uint8_t from, uint8_t to );
 
 	bool addPlayer( int32_t );
 	bool delPlayer( int32_t );

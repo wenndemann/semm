@@ -28,7 +28,7 @@ public:
 	void enableSubFSMEvents( );
 	void disableSubFSMEvents( );
 	int setPictures(uint8_t number);
-	void setPictureDice( uint8_t dice );
+	void setPictureDice( uint8_t dice, bool moveAllowedAndCurrPlayer = false );
 	int getPicture() { return m_actPicNumber; }
 	int setName(uint8_t player, const char* name);
 	char* getName(uint8_t player);

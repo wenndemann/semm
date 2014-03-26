@@ -93,19 +93,25 @@ bool Playboard::addPlayer( int32_t colorId) {
 	_players[colorId] = PlayerPtr(new Player(colorId));
 
 	std::vector< uint16_t > tags( 3 );
+	std::stringstream ss;
+	ss << "addPlayer " << colorId << " from fields";
 	for (uint32_t i = 0; i < tags.size( ); i++) {
 
-		uint32_t fieldId = _players[colorId]->getStartAreaPos(i);
+		uint32_t fieldId = static_cast<int32_t>(_players[colorId]->getStartAreaPos(i));
 
 		tags[ i ] = readId( fieldId );
+
+		ss << " " << static_cast<int32_t>(fieldId);
 
 		if ( tags[ i ] == 0 )
 		{
 			_players.erase(_players.find(colorId));
+			cout << ss.str( ) << " failed!" << std::endl;
 			return false;
 		}
 	}
 	_players[colorId]->addMeeples( tags );
+	cout << ss.str( ) << " successfull!" << std::endl;
 	return true;
 }
 
@@ -176,16 +182,78 @@ void Playboard::moveMeeple(uint8_t from, uint8_t to) {
 	meeple->fieldId( to );
 }
 
-uint16_t Playboard::readId(uint32_t fieldId) {
+uint16_t Playboard::readId(uint32_t fieldId ) {
 	boost::lock_guard<boost::mutex> gard(_mutexXYDrive);
-	uint8_t color = static_cast<uint8_t>(getColorFromFieldId(fieldId));
+	uint8_t color = static_cast<uint8_t>(getColorFromFieldId(static_cast<int32_t>(fieldId)));
 	_ledStripe->set(LedStripes::ON, color);
-	uint8_t x = _fields[fieldId]->x();
-	uint8_t y = _fields[fieldId]->y();
+	uint8_t x = _fields[static_cast<uint8_t>(fieldId)]->x();
+	uint8_t y = _fields[static_cast<uint8_t>(fieldId)]->y();
+	std::cout << "reading ID from field " << static_cast<int32_t>(fieldId)
+			  << " of color " << static_cast<int32_t>(color)
+			  << " at X=" << static_cast<int32_t>(x) << " Y=" << static_cast<int32_t>(y) << std::endl;
 	_XYDrive->liftMagnet(false);
 	_XYDrive->moveCarriage(x);//static_cast<uint8_t>((10-static_cast<int32_t>(x)) * 172 + 250));
 	_ledStripe->set(LedStripes::OFF, color);
 	return _rfid->readTag(y);
+}
+
+uint8_t Playboard::checkMovedMeeple( uint8_t color )
+{
+	PlayerMapIt pIt = _players.find( static_cast<int32_t>(color) );
+	if ( pIt == _players.end( ) || !pIt->second )
+	{
+		std::cout << "There is no player with id " << static_cast<int32_t>(color)
+				  << "to check for moved meeple." << std::endl;
+		return 255;
+	}
+
+	MeepleVec& meeples = pIt->second->meeples();
+	for ( uint32_t i = 0; i < meeples.size( ); i++ )
+	{
+		if ( readId( static_cast<uint32_t>(meeples[ i ]->fieldId()) ) == 0 )
+		{
+			return static_cast<uint8_t>( meeples[ i ]->fieldId() );
+		}
+	}
+
+	std::cout << "There is no meeple moved of player " << static_cast<int32_t>(color) << std::endl;
+	return 255;
+}
+
+bool Playboard::checkMeepleMove( uint8_t from, uint8_t to )
+{
+	uint16_t fromTagId = getMeepleFromFieldId( static_cast<int32_t>( from ) )->tag();
+
+	uint16_t toTagId = static_cast<uint16_t>( readId( static_cast<uint32_t>(to) ) );
+
+	return (fromTagId == toTagId);
+}
+
+bool Playboard::setMeepleMove( uint8_t color, uint8_t from, uint8_t to )
+{
+	PlayerMapIt pIt = _players.find( static_cast<int32_t>(color) );
+	if ( pIt == _players.end( ) || !pIt->second )
+	{
+		std::cout << "There is no player with id " << static_cast<int32_t>(color)
+				  << "to set the moved meeple from " << static_cast<int32_t>(from)
+				  << "to " << static_cast<int32_t>(to) << std::endl;
+		return false;
+	}
+
+	MeepleVec& meeples = pIt->second->meeples();
+	for ( uint32_t i = 0; i < meeples.size( ); i++ )
+	{
+		if ( static_cast<uint8_t>(meeples[ i ]->fieldId()) == from )
+		{
+			meeples[ i ]->fieldId( static_cast<int32_t>(to) );
+			return true;
+		}
+	}
+
+	std::cout << "There is no meeple on field " << static_cast<int32_t>(from)
+			  << "of player " << static_cast<int32_t>(color)
+			  << "to set a movement." << std::endl;
+	return false;
 }
 
 int32_t Playboard::getColorFromFieldId( int32_t fieldId) {

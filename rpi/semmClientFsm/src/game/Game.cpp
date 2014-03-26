@@ -72,7 +72,7 @@ void Game::parseCmd( uint8_t* buf, int32_t nR )
 	case TCP_CMD_DICE_SC:
 		// The GmMoveDone does the dive event itself if it has already valid data
 		_mainFSM->_next.player = buf[ 1 ];
-		_mainFSM->_next.player = buf[ 2 ];
+		_mainFSM->_next.dice = buf[ 2 ];
 		if ( !_mainFSM->_next.valid )
 		{
 			_mainFSM->_next.valid = true;

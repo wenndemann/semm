@@ -158,7 +158,7 @@ void TcpIp::sendCancelGame(uint8_t pid) {
 }
 
 
-void TcpIp::sendSelectFigure(uint8_t pid, uint8_t field) {
+void TcpIp::sendSelectMeeple(uint8_t pid, uint8_t field) {
 	//send selected figure to move
 	uint8_t buf[4];
 	buf[0] = TCP_CMD_SELECT_FIGURE_CS;

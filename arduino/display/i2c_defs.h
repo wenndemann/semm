@@ -32,12 +32,12 @@
 #define I2C_DBEN_PIC_START            0x84
 #define I2C_DBEN_PIC_WAIT             0x85
 #define I2C_DBEN_PIC_DICE             0x86
-#define I2C_DBEN_PIC_DICE_1           0x87  //Variante B - A7 (6. Bit gesetzt)
-#define I2C_DBEN_PIC_DICE_2           0x88  //Variante B - A8 (6. Bit gesetzt)
-#define I2C_DBEN_PIC_DICE_3           0x89  //Variante B - A9 (6. Bit gesetzt)
-#define I2C_DBEN_PIC_DICE_4           0x8A  //Variante B - AA (6. Bit gesetzt)
-#define I2C_DBEN_PIC_DICE_5           0x8B  //Variante B - AB (6. Bit gesetzt)
-#define I2C_DBEN_PIC_DICE_6           0x8C  //Variante B - AC (6. Bit gesetzt)
+#define I2C_DBEN_PIC_DICE_1           0x87  //Variante B - C7 (7. Bit gesetzt)
+#define I2C_DBEN_PIC_DICE_2           0x88  //Variante B - C8 (7. Bit gesetzt)
+#define I2C_DBEN_PIC_DICE_3           0x89  //Variante B - C9 (7. Bit gesetzt)
+#define I2C_DBEN_PIC_DICE_4           0x8A  //Variante B - CA (7. Bit gesetzt)
+#define I2C_DBEN_PIC_DICE_5           0x8B  //Variante B - CB (7. Bit gesetzt)
+#define I2C_DBEN_PIC_DICE_6           0x8C  //Variante B - CC (7. Bit gesetzt)
 #define I2C_DBEN_PIC_MOVE_ILLEGAL     0x8D  //wird in server eingebaut 23.01.2014 
 #define I2C_DBEN_PIC_NOT_FOUND        0x8E  //neu
 #define I2C_DBEN_PIC_WIN              0x8F

@@ -47,22 +47,26 @@ int Display::setPictures(uint8_t number) {
 	return 0;
 }
 
-void Display::setPictureDice( uint8_t dice )
+void Display::setPictureDice( uint8_t dice, bool moveAllowedAndCurrPlayer )
 {
+	uint8_t moveAllowedFlag = 0;
+	if ( moveAllowedAndCurrPlayer )
+	{	moveAllowedFlag = 64; 	}
+
 	if ( dice == 0 )
-		this->setPictures( I2C_DBEN_PIC_DICE );
+		this->setPictures( I2C_DBEN_PIC_DICE | moveAllowedFlag );
 	else if ( dice == 1 )
-		this->setPictures( I2C_DBEN_PIC_DICE_1 );
+		this->setPictures( I2C_DBEN_PIC_DICE_1 | moveAllowedFlag );
 	else if ( dice == 2 )
-		this->setPictures( I2C_DBEN_PIC_DICE_2 );
+		this->setPictures( I2C_DBEN_PIC_DICE_2 | moveAllowedFlag );
 	else if ( dice == 3 )
-		this->setPictures( I2C_DBEN_PIC_DICE_3 );
+		this->setPictures( I2C_DBEN_PIC_DICE_3 | moveAllowedFlag );
 	else if ( dice == 4 )
-		this->setPictures( I2C_DBEN_PIC_DICE_4 );
+		this->setPictures( I2C_DBEN_PIC_DICE_4 | moveAllowedFlag );
 	else if ( dice == 5 )
-		this->setPictures( I2C_DBEN_PIC_DICE_5 );
+		this->setPictures( I2C_DBEN_PIC_DICE_5 | moveAllowedFlag );
 	else if ( dice == 6 )
-		this->setPictures( I2C_DBEN_PIC_DICE_6 );
+		this->setPictures( I2C_DBEN_PIC_DICE_6 | moveAllowedFlag );
 }
 
 int Display::setName(uint8_t player, const char* name) {
@@ -89,7 +93,7 @@ void Display::handler() {
 	if(m_encoder < 255 && m_encoder > 0) {
 		if ( m_encoder == 1 )
 		{
-			std::cout << "Display " << static_cast<int32_t>(getI2cAddr())-80 << " pressed Enter" << std::endl;
+			std::cout << "Display " << pow(2,static_cast<int32_t>(getI2cAddr())-80) << " pressed Enter" << std::endl;
 			if ( _subFsmEnabled )
 				_subFSM->process_event( fsm::scmEvEnter( ) );
 			else

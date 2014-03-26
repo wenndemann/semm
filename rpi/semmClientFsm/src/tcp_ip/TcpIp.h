@@ -39,7 +39,7 @@ public:
 	void sendStartGame(uint8_t pid);
 	void sendDieDone(uint8_t pid);
 	void sendCancelGame(uint8_t pid);
-	void sendSelectFigure(uint8_t pid, uint8_t field);
+	void sendSelectMeeple(uint8_t pid, uint8_t field);
 
 private:
 	bool _connected;
