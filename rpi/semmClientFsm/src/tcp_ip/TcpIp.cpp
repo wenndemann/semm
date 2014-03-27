@@ -84,13 +84,22 @@ void TcpIp::worker( )
 			if (errno != EBADF) std::cout << "ERROR reading to TCP IP: " << strerror(errno) << std::endl;
 		}
 		else if(nR > 0) {
-			std::stringstream ss;
-			for ( int32_t i = 0; i < (nR-1); i++ )
+			uint32_t a = 0;
+			for ( int32_t i = 0; i < nR; i++ )
 			{
-				ss << static_cast<int32_t>( inputBuf[ i ] ) << " ";
+				buf[a++] = inputBuf[ i ];
+				if ( (inputBuf[ i ] == 0 ) || i == (nR-1) )
+				{
+					std::stringstream ss2;
+					ss2 << "TCP: ";
+					for ( uint32_t j = 0; j < a-1; j++ ){ ss2 << static_cast<int32_t>(buf[ j ]) << " "; }
+					std::cout << ss2.str( ) << std::endl;
+
+					_gamePtr->parseCmd( buf, a-1 );
+					a = 0;
+					memset( &buf, 0 ,TCP_MSG_LENGTH );
+				}
 			}
-			std::cout << ss.str( ) << std::endl;
-			_gamePtr->parseCmd(inputBuf, nR); // TODO
 		}
 	}while( nR > 0);
 	_running = false;

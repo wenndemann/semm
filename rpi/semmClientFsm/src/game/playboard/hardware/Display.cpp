@@ -51,7 +51,7 @@ void Display::setPictureDice( uint8_t dice, bool moveAllowedAndCurrPlayer )
 {
 	uint8_t moveAllowedFlag = 0;
 	if ( moveAllowedAndCurrPlayer )
-	{	moveAllowedFlag = 64; 	}
+	{	moveAllowedFlag = 32; 	}
 
 	if ( dice == 0 )
 		this->setPictures( I2C_DBEN_PIC_DICE | moveAllowedFlag );

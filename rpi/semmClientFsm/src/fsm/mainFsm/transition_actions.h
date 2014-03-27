@@ -93,6 +93,37 @@ struct meepleMoved {
 	}
 };
 
+struct transferFromTo {
+	template<class EVT, class FSM, class SourceState, class TargetState>
+	void operator()(EVT const&, FSM& fsm, SourceState& src, TargetState& target) {
+		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
+
+		target._from = src._from;
+		target._to = src._to;
+	}
+};
+
+struct transferFromToIllegal {
+	template<class EVT, class FSM, class SourceState, class TargetState>
+	void operator()(EVT const&, FSM& fsm, SourceState& src, TargetState& target) {
+		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
+
+		target._from = src._from;
+		target._to = src._to;
+		target._illegal = src._illegal;
+	}
+};
+
+struct transferFromToAll {
+	template<class EVT, class FSM, class SourceState, class TargetState>
+	void operator()(EVT const&, FSM& fsm, SourceState& src, TargetState& target) {
+		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
+
+		target._fromAll = src._fromAll;
+		target._toAll = src._toAll;
+	}
+};
+
 /*
 
 */

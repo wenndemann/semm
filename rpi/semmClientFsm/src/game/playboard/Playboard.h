@@ -52,6 +52,11 @@ public:
 	Playboard( boost::msm::back::state_machine< fsm::GameFSM_ >* gameFsmPtr );
 	virtual ~Playboard( );
 
+	bool addPlayer( int32_t );
+	bool delPlayer( int32_t );
+	bool readPlayersMeepleAtStart( int32_t colorId, std::vector< uint16_t >& tags );
+	bool reconfigurePlayersMeeple( int32_t colorId, const std::vector< uint16_t >& tags );
+
 	void moveMeeple(const Meeple& m, const Field& to);
 	void moveMeeple(uint8_t from, uint8_t to);
 	/// read id and set to target color
@@ -59,11 +64,10 @@ public:
 
 	uint8_t checkMovedMeeple( uint8_t color );
 	bool checkMeepleMove( uint8_t from, uint8_t to );
-
 	bool setMeepleMove( uint8_t color, uint8_t from, uint8_t to );
 
-	bool addPlayer( int32_t );
-	bool delPlayer( int32_t );
+	// TODO optimize! do not search in fieldId order for efficiency
+	bool searchForMeeple( uint8_t from, uint8_t& illegalPos );
 
 	DisplayPtr display( int32_t id )
 	{
@@ -76,6 +80,13 @@ public:
 
 	XYDrivePtr drive( ){ return _XYDrive; }
 
+	LedStripesPtr ledStripe( ){ return _ledStripe; }
+
+	PlayerMap& players( ){ return _players; }
+
+	int32_t getColorFromFieldId( int32_t fieldId);
+	MeeplePtr getMeepleFromFieldId( int32_t fieldId);
+
 private:
 	DisplayMap _displays;
 	LedRingPtr _ledRing;
@@ -86,9 +97,6 @@ private:
 	FieldMap _fields;
 	PlayerMap _players;
 	boost::mutex _mutexXYDrive;
-
-	int32_t getColorFromFieldId( int32_t fieldId);
-	MeeplePtr getMeepleFromFieldId( int32_t fieldId);
 };
 
 #endif /* PLAYBOARD_H_ */

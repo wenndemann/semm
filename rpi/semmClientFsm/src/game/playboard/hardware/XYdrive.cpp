@@ -1,10 +1,13 @@
 #include "XYdrive.h"
 
+#include <iostream>
+#include <cstdio>
+
 using namespace std;
 
 XYdrive::XYdrive(uint8_t i2cAddrXYdrive)
 : _x(0)
-, _y(0)
+, _y(5)
 {
 	setI2cAddr(i2cAddrXYdrive);
 

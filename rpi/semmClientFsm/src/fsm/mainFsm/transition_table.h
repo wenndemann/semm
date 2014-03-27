@@ -41,15 +41,20 @@ struct transition_table : mpl::vector<
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmSendMovedMeeple       , evMove         , GmCheckDestination        , none        , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
-	Row < GmCheckDestination      , evMeepleNotOK  , GmSearchForMeeple         , none        , none            >,
+	Row < GmCheckDestination      , evMeepleNotOK  , GmSearchForMeeple         , transferFromTo, none          >,
 	Row < GmCheckDestination      , evMoveDone     , GmMoveDone                , meepleMoved , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
-	Row < GmSearchForMeeple       , evMeepleOK     , GmFoundMeeple             , meepleMoved , none            >,
-	Row < GmSearchForMeeple       , evMeepleNotOK  , GmMoveMeeplesByHand       , none        , none            >,
+	Row < GmSearchForMeeple       , evMeepleOK     , GmFoundMeeple             , transferFromToIllegal, none   >,
+	Row < GmSearchForMeeple       , evMeepleNotOK  , GmMoveMeeplesByHand       , transferFromTo, none          >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
-	Row < GmMoveMeeplesByHand     , evEnter        , GmReconfigureMeepleIDs    , none        , none            >,
+	Row < GmFoundMeeple           , evMoveDone     , GmMoveDone                , meepleMoved , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
-	Row < GmReconfigureMeepleIDs  , evMoveDone     , GmMoveDone                , none        , none            >
+	Row < GmMoveMeeplesByHand     , evEnter        , GmReconfigureMeepleIDs    , transferFromTo, none          >,
+	//  +-------------------------+----------------+---------------------------+-------------+------------------+
+	Row < GmReconfigureMeepleIDs  , evMeepleNotOK  , GmMoveMeeplesByHand       , none        , none            >,
+	Row < GmReconfigureMeepleIDs  , evMeepleOK     , GmMoveMeeplesToCorrectPos , transferFromToAll, none       >,
+	//  +-------------------------+----------------+---------------------------+-------------+------------------+
+	Row < GmMoveMeeplesToCorrectPos,evMoveDone     , GmMoveDone                , meepleMoved , none            >
 > {};
 
 #endif /* TRANSITION_TABLE_H_ */

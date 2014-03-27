@@ -23,7 +23,7 @@ int I2c::open(const char* devName) {
 
 	i2cMutex.lock();
 	if((fd = ::open(devName, O_RDWR)) < 0) {
-		cout << "I2C open error! " << fd << endl;
+		cout << "I2C open error! " << static_cast<int32_t>(fd) << endl;
 	}
 	i2cMutex.unlock();
 	return 0;
@@ -43,7 +43,7 @@ int I2c::write(void* data, uint8_t length) {
 	do {
 		nW = ::write(fd, data, length);
 		if(nW != length) {
-			cout << "write error to addr: " << m_i2cAddr <<
+			cout << "write error to addr: " << static_cast<int32_t>(m_i2cAddr) <<
 					" (" << (char*)data << ")" << endl;
 			tries++;
 			usleep(10000);
@@ -73,7 +73,7 @@ int I2c::read(void* data, uint8_t length) {
 	do {
 		nR = ::read(fd, data, length);
 		if(nR != length) {
-			cout << "read error from addr: " << m_i2cAddr <<
+			cout << "read error from addr: " << static_cast<int32_t>(m_i2cAddr) <<
 					" (" << (char*)data << ")" << endl;
 			tries++;
 			usleep(10000);

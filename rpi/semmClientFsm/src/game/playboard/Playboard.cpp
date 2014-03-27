@@ -92,26 +92,20 @@ Playboard::~Playboard() {
 bool Playboard::addPlayer( int32_t colorId) {
 	_players[colorId] = PlayerPtr(new Player(colorId));
 
-	std::vector< uint16_t > tags( 3 );
 	std::stringstream ss;
-	ss << "addPlayer " << colorId << " from fields";
-	for (uint32_t i = 0; i < tags.size( ); i++) {
+	ss << "addPlayer " << colorId << std::endl;
 
-		uint32_t fieldId = static_cast<int32_t>(_players[colorId]->getStartAreaPos(i));
+	std::vector< uint16_t > tags( 3 );
 
-		tags[ i ] = readId( fieldId );
-
-		ss << " " << static_cast<int32_t>(fieldId);
-
-		if ( tags[ i ] == 0 )
-		{
-			_players.erase(_players.find(colorId));
-			cout << ss.str( ) << " failed!" << std::endl;
-			return false;
-		}
+	if ( !readPlayersMeepleAtStart( colorId, tags ) )
+	{
+		_players.erase(_players.find(colorId));
+		cout << ss.str( ) << " failed!" << std::endl;
+		return false;
 	}
+
 	_players[colorId]->addMeeples( tags );
-	cout << ss.str( ) << " successfull!" << std::endl;
+	cout << ss.str( ) << " successful!" << std::endl;
 	return true;
 }
 
@@ -124,6 +118,44 @@ bool Playboard::delPlayer( int32_t colorId )
 		return true;
 	}
 	return false;
+}
+
+bool Playboard::readPlayersMeepleAtStart( int32_t colorId, std::vector< uint16_t >& tags )
+{
+	stringstream ss;
+	ss << "Reading from fields ";
+
+	for (uint32_t i = 0; i < tags.size( ); i++) {
+
+		uint32_t fieldId = static_cast<int32_t>(_players[colorId]->getStartAreaPos(i));
+
+		tags[ i ] = readId( fieldId );
+
+		ss << " " << static_cast<int32_t>(fieldId);
+
+		if ( tags[ i ] == 0 )
+		{
+			std::cout << ss.str( ) << " failed";
+			return false;
+		}
+	}
+	std::cout << ss.str( ) << " successful";
+	return true;
+}
+
+bool Playboard::reconfigurePlayersMeeple( int32_t colorId, const std::vector< uint16_t >& tags )
+{
+	MeepleVec& meeples = _players[colorId]->meeples( );
+	const std::vector<int32_t>& startAreaPos = _players[colorId]->startAreaPos( );
+	if ( tags.size( ) != meeples.size( ) ){ return false; }
+
+	for ( uint32_t i = 0; i < tags.size( ); i++ )
+	{
+		meeples.at( i )->fieldId( static_cast<uint16_t>(tags.at( i )) );
+		meeples.at( i )->fieldId( static_cast<int32_t>(startAreaPos.at( i )) );
+	}
+
+	return true;
 }
 
 //void Playboard::moveMeeple(const Meeple& m, const Field& to) {
@@ -158,10 +190,8 @@ void Playboard::moveMeeple(uint8_t from, uint8_t to) {
 	// set LEDs
 	if(to >= 32 && to <= 43) { // if someone is kicked out
 		_ledRing->set(LedRing::BLINK, color);
-		_ledStripe->set(LedStripes::BLINK_FAST, color);
 	} else {
 		_ledRing->set(LedRing::ON, color);
-		_ledStripe->set(LedStripes::ON, color);
 	}
 
 	// move along path
@@ -171,8 +201,7 @@ void Playboard::moveMeeple(uint8_t from, uint8_t to) {
 		_XYDrive->moveMagnet(it->x(), it->y());
 	}
 
-	//turn LedStripe off
-	_ledStripe->set(LedStripes::OFF, color);
+	//turn LedRing off
 	_ledRing->set(LedRing::OFF, color);
 
 	//lower magnet
@@ -253,6 +282,28 @@ bool Playboard::setMeepleMove( uint8_t color, uint8_t from, uint8_t to )
 	std::cout << "There is no meeple on field " << static_cast<int32_t>(from)
 			  << "of player " << static_cast<int32_t>(color)
 			  << "to set a movement." << std::endl;
+	return false;
+}
+
+// TODO optimize! do not search in fieldId order for efficiency
+bool Playboard::searchForMeeple( uint8_t from, uint8_t& illegalPos )
+{
+	// Get the tag id from current playboard inner state where the meeple comes from.
+	// The new position ( to ) is not set yet
+	uint16_t origTagId = getMeepleFromFieldId( static_cast<int32_t>( from ) )->tag();
+
+	// search on all fields
+	for ( FieldMapIt it = _fields.begin( ); it != _fields.end( ); ++it )
+	{
+		// compare the ID just read against the Id of the meeple we are searching for
+		if ( readId( static_cast<uint32_t>(it->first) ) == origTagId )
+		{
+			// found
+			illegalPos = it->first;
+			return true;
+		}
+	}
+	// not found
 	return false;
 }
 

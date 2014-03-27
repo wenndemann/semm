@@ -29,6 +29,8 @@ public:
 	int32_t getStartAreaPos(int32_t i);
 	int32_t color() { return _color; }
 
+	const std::vector<int32_t>& startAreaPos( ){ return _startAreaPos; }
+
 private:
 	int32_t _color;
 	MeepleVec _meeples;

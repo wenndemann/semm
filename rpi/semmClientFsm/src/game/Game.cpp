@@ -73,6 +73,8 @@ void Game::parseCmd( uint8_t* buf, int32_t nR )
 		// The GmMoveDone does the dive event itself if it has already valid data
 		_mainFSM->_next.player = buf[ 1 ];
 		_mainFSM->_next.dice = buf[ 2 ];
+		std::cout << "Next dice: color " << static_cast<int32_t>( buf[ 1 ] )
+				  << " pips: " << static_cast<int32_t>( buf[ 2 ] ) << std::endl;
 		if ( !_mainFSM->_next.valid )
 		{
 			_mainFSM->_next.valid = true;
@@ -83,7 +85,7 @@ void Game::parseCmd( uint8_t* buf, int32_t nR )
 		break;
 
 	case TCP_CMD_MOVE_NOT_ALLOWED_SC:
-
+		_mainFSM->process_event(fsm::evMeepleNotOK( ));
 		break;
 
 	case TCP_CMD_PLAYER_IN_HOME_SC:
