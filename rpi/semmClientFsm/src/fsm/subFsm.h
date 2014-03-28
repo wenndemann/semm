@@ -26,6 +26,8 @@
 
 #include "../game/Game.h"
 
+#include "mainFsm/events.h"
+
 //using namespace std;
 namespace msm = boost::msm;
 namespace mpl = boost::mpl;
@@ -118,8 +120,6 @@ namespace fsm // Concrete FSM implementation
 			template<class Event, class FSM>
 			void on_exit(Event const&, FSM& fsm) {
 				std::cout << "<- ScmDisable " << fsm._color_id << std::endl;
-
-				fsm._gamePtr->playboard()->delPlayer( fsm._color_id );
 			}
 		};
 		struct ScmPrepare : public msm::front::state<>
@@ -151,8 +151,10 @@ namespace fsm // Concrete FSM implementation
 				std::cout << "-> ScmWait " << fsm._color_id << std::endl;
 
 				fsm._gamePtr->playboard()->display( fsm._color_id )->setPictures( I2C_DBEN_PIC_WAIT );
-				if ( fsm._gamePtr->playboard()->addPlayer( fsm._color_id ) )
+				if ( fsm._gamePtr->playboard()->addPlayer( fsm._color_id ) ) {
+					fsm._gamePtr->addToClientColors( fsm._color_id );
 					fsm.process_event( fsm::scmEvMeeplesOK( ) );
+				}
 				else
 					fsm.process_event( fsm::scmEvMeeplesNotOK( ) );
 			}
@@ -185,6 +187,9 @@ namespace fsm // Concrete FSM implementation
 
 				fsm._gamePtr->playboard()->display( fsm._color_id )->setPictures( I2C_DBEN_PIC_WAIT );
 
+
+
+
 				boost::shared_ptr< std::vector< boost::shared_ptr< msm::back::state_machine< SelectColorFSM_ > > > > ssms =
 						fsm._gamePtr->mainFSM( )->_ssms;
 
@@ -200,8 +205,10 @@ namespace fsm // Concrete FSM implementation
 				if ( everyoneReady ) // is ready, start the game
 				{
 					std::cout << "\teveryone is ready" << std::endl;
-					fsm._gamePtr->mainFSM( )->_tcpIp->sendStartGame( static_cast<uint8_t>(fsm._color_id) );
+					if(fsm._gamePtr->mode() == Game::SelectColor)
+						fsm._gamePtr->mainFSM( )->_tcpIp->sendStartGame( static_cast<uint8_t>(fsm._color_id) );
 					//fsm.startGame( );
+					fsm._gamePtr->mainFSM()->process_event( fsm::evInitGame() );
 				}
 				else // send a broadcast message that everyone gets ready
 				{
@@ -221,13 +228,23 @@ namespace fsm // Concrete FSM implementation
 		};
 
 		// actions
-		struct deleteColor {
+		struct delColor {
 			template<class EVT, class FSM, class SourceState, class TargetState>
 			void operator()(EVT const&, FSM& fsm, SourceState&, TargetState&) {
 				std::cout << "transition with event:" << typeid(EVT).name() << " " << fsm._color_id << std::endl;
 
 				fsm._gamePtr->mainFSM( )->_tcpIp->sendDelColor( static_cast<uint8_t>(fsm._color_id) );
 				fsm._gamePtr->playboard( )->delPlayer( fsm._color_id );
+				fsm._gamePtr->delFromClientColors( fsm._color_id );
+
+			}
+		};
+
+		struct delPlayer {
+			template<class EVT, class FSM, class SourceState, class TargetState>
+			void operator()(EVT const&, FSM& fsm, SourceState&, TargetState&) {
+				std::cout << "transition with event:" << typeid(EVT).name() << " " << fsm._color_id << std::endl;
+				fsm._gamePtr->playboard()->delPlayer( fsm._color_id );
 			}
 		};
 
@@ -316,35 +333,35 @@ namespace fsm // Concrete FSM implementation
 
 		// Transition table for player
 		struct transition_table : mpl::vector<
-			//    Start                     Event           Next                      Action        Guard
-			//  +----------------+----------------+------------------+--- ---------+-----------------+
-			Row < ScmSemm        , none           , ScmEnter           , none        , gAccept          >,
-			Row < ScmSemm        , none           , ScmDisable         , none        , gBlocked         >,
-			Row < ScmSemm        , none           , ScmPrepare         , none        , gKnown           >,
-			Row < ScmSemm        , none           , ScmReady           , none        , gLeftOut         >,
-			//Row < ScmSemm        , scmEvGetReady  , none               , none        , none            >,
-			//  +----------------+----------------+------------------+--- ---------+-----------------+
+			//    Start            Event           Next                  Action        Guard
+			//  +----------------+------------------+------------------+-------------+-----------------+
+			Row < ScmSemm        , none             , ScmEnter         , none        , gAccept         >,
+			Row < ScmSemm        , none             , ScmDisable       , none        , gBlocked        >,
+			Row < ScmSemm        , none             , ScmPrepare       , none        , gKnown          >,
+			Row < ScmSemm        , none             , ScmReady         , none        , gLeftOut        >,
+			//Row < ScmSemm        , scmEvGetReady  , none             , none        , none            >,
+			//  +----------------+------------------+------------------+--- ---------+-----------------+
 			Row < ScmEnter       , scmEvEnter       , ScmPrepare       , none        , none            >,
 			Row < ScmEnter       , scmEvGetReady    , ScmReady         , none        , none            >,
 			Row < ScmEnter       , scmEvColors      , ScmSemm          , none        , gColorTaken     >,
-			//  +----------------+----------------+------------------+--- ---------+-----------------+
+			//  +----------------+------------------+------------------+--- ---------+-----------------+
 			Row < ScmPrepare     , scmEvEnter       , ScmWait          , none        , none            >,
 			Row < ScmPrepare     , scmEvGetReady    , none             , Defer       , none            >,
-			Row < ScmEnter       , scmEvColors      , none             , none        , none            >, // ignore event
-			//  +----------------+----------------+------------------+--- ---------+-----------------+
+//			Row < ScmEnter       , scmEvColors      , none             , none        , none            >, // ignore event
+			//  +----------------+------------------+------------------+--- ---------+-----------------+
 			Row < ScmDisable     , scmEvGetReady    , ScmReady         , none        , none            >,
-			Row < ScmDisable     , scmEvColors      , ScmSemm          , none        , gColorAvailable >,
-			//  +----------------+----------------+------------------+--- ---------+-----------------+
-			Row < ScmWait        , scmEvMeeplesNotOK, ScmEnter         , deleteColor , none            >,
+			Row < ScmDisable     , scmEvColors      , ScmSemm          , delPlayer   , gColorAvailable >,
+			//  +----------------+------------------+------------------+--- ---------+-----------------+
+			Row < ScmWait        , scmEvMeeplesNotOK, ScmEnter         , delColor    , none            >,
 			Row < ScmWait        , scmEvMeeplesOK   , ScmStart         , none        , gSelectColorMode>,
 			//Row < ScmWait        , none             , ScmStart         , none        , gSelectColorMode>, // TODO remove later
 			Row < ScmWait        , scmEvGetReady    , none             , Defer       , none            >,
 			Row < ScmWait        , scmEvMeeplesOK   , ScmReady         , none        , gGameMode       >,
-			//  +----------------+----------------+------------------+--- ---------+-----------------+
+			//  +----------------+------------------+------------------+--- ---------+-----------------+
 			Row < ScmStart       , scmEvEnter       , ScmReady         , none        , none            >,
-			Row < ScmStart       , scmEvCancel      , ScmEnter         , deleteColor , none            >,
+			Row < ScmStart       , scmEvCancel      , ScmEnter         , delColor , none            >,
 			Row < ScmStart       , scmEvGetReady    , ScmReady         , none        , none            >,
-			//  +----------------+----------------+------------------+--- ---------+-----------------+
+			//  +----------------+------------------+------------------+--- ---------+-----------------+
 			Row < ScmReady       , scmEvGetReady    , none             , none        , none            >
 		> {};
 

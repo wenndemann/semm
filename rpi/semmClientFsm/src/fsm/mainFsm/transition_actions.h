@@ -58,11 +58,8 @@ struct checkDice {
 
 		// if the first dice data is being sent during the GmMoveDone,
 		// current (curr) DiceData is not set, so simply set it.
-		if ( !fsm._curr.valid && fsm._next.valid )
-		{
-			std::cout << "Setting the first DiceData in checkDice" << std::endl;
-			fsm._curr = fsm._next;
-		}
+//		if ( !fsm._curr.valid && fsm._next.valid )
+
 	}
 };
 
@@ -89,7 +86,7 @@ struct meepleMoved {
 	void operator()(EVT const&, FSM& fsm, SourceState& src, TargetState& target) {
 		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
 
-		fsm._gamePtr->playboard( )->setMeepleMove( fsm._curr.player, src._from, src._to );
+		fsm._gamePtr->playboard( )->setMeepleMove( fsm._ddm.front().player, src._from, src._to );
 	}
 };
 
@@ -110,7 +107,8 @@ struct transferFromToIllegal {
 
 		target._from = src._from;
 		target._to = src._to;
-		target._illegal = src._illegal;
+		target._x = src._x;
+		target._y = src._y;
 	}
 };
 

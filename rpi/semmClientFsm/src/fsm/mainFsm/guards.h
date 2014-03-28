@@ -23,6 +23,19 @@ struct gMoveNotAllowed {
 		return !(src._moveAllowed);
 	}
 };
+struct gMyColor {
+	template<class EVT, class FSM, class SourceState, class TargetState>
+	bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt) {
+		if(fsm._ddm.size() > 1)
+		{
+			std::cout << "pop from DiceData quere" << std::endl;
+			fsm._ddm.pop();
+		}
+		bool thisClient = static_cast<uint8_t>(fsm._gamePtr->clientColors( ) ) & fsm._ddm.front( ).player;
+		cout << "clientColors=" << fsm._gamePtr->clientColors( ) << " = " << thisClient << endl;
+		return thisClient;
+	}
+};
 /*
 struct DummyGuard {
 	template<class EVT, class FSM, class SourceState, class TargetState>

@@ -23,7 +23,7 @@ struct transition_table : mpl::vector<
 	Row < SelectColorMode         , evDice         , none                      , none        , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmMoveDone              , evMove         , GmMoveMeeple              , /*TODO meepleMoved*/none, none>,
-	Row < GmMoveDone              , evDice         , GmDice                    , checkDice   , none            >,
+	Row < GmMoveDone              , evDice         , GmDice                    , checkDice   , gMyColor        >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmDice                  , evEnter        , GmWaitForShowDice         , none        , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+

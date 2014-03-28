@@ -69,19 +69,23 @@ void Game::parseCmd( uint8_t* buf, int32_t nR )
 		_mainFSM->process_event(fsm::evShowDice( buf[ 1 ] ));
 		break;
 
-	case TCP_CMD_DICE_SC:
+	case TCP_CMD_DICE_SC: {
 		// The GmMoveDone does the dive event itself if it has already valid data
-		_mainFSM->_next.player = buf[ 1 ];
-		_mainFSM->_next.dice = buf[ 2 ];
+		fsm::GameFSM_::DiceData dd;
+		dd.player = buf[ 1 ];
+		dd.dice = buf[ 2 ];
+		_mainFSM->_ddm.push(dd);
+//		_mainFSM->_next.player = buf[ 1 ];
+//		_mainFSM->_next.dice = buf[ 2 ];
 		std::cout << "Next dice: color " << static_cast<int32_t>( buf[ 1 ] )
 				  << " pips: " << static_cast<int32_t>( buf[ 2 ] ) << std::endl;
-		if ( !_mainFSM->_next.valid )
-		{
-			_mainFSM->_next.valid = true;
+//		if ( !_mainFSM->_next.valid )
+//		{
+//			_mainFSM->_next.valid = true;
 			_mainFSM->process_event(fsm::evDice( ));
-		}
+//		}
 
-
+	}
 		break;
 
 	case TCP_CMD_MOVE_NOT_ALLOWED_SC:
@@ -97,3 +101,12 @@ void Game::parseCmd( uint8_t* buf, int32_t nR )
 		break;
 	}
 }
+
+void Game::addToClientColors(uint8_t colorId) {
+	_clientColors |= colorId;
+}
+
+void Game::delFromClientColors(uint8_t colorId) {
+	_clientColors &= ~colorId;
+}
+

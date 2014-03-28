@@ -22,6 +22,7 @@ public:
 
 private:
 	void move( uint8_t x, uint8_t y, int32_t offset );
+	void resetDev();
 
 	bool _magPos;
 	uint8_t _x, _y;

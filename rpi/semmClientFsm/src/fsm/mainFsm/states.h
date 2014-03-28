@@ -111,10 +111,14 @@ struct GmMoveDone : public msm::front::state<>
 	void on_entry(Event const&, FSM& fsm) {
 		std::cout << "-> GmMoveDone" << std::endl;
 
-		/*
-		for ( uint8_t i = 0; i < 4; i++ )
-		{ fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, static_cast<uint8_t>(pow(2,i)) ); }
-		*/
+
+//		for ( uint8_t i = 0; i < 4; i++ )
+//		{ fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, static_cast<uint8_t>(1<<i)); }
+		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, 1);
+		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, 2);
+		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, 4);
+		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, 8);
+
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
 		Playboard::DisplayMapIt it = displayMap.begin( );
@@ -127,15 +131,15 @@ struct GmMoveDone : public msm::front::state<>
 		// if the dice data for the next turn has been sent already
 		// save it to the current dice data and do the dice event
 		// to start the next turn
-		if ( fsm._next.valid &&
-		     ( fsm.get_deferred_queue( ).size( ) ) == 0 )
+//		if ( fsm._next.valid &&
+		if ( fsm.get_deferred_queue( ).size( )  == 0  && fsm._ddm.size() > 0)
 		{
-			fsm._curr.player = fsm._next.player;
-			fsm._curr.dice = fsm._next.dice;
-			fsm._curr.valid = true;
+//			fsm._ddm.front().player = fsm._next.player;
+//			fsm._ddm.front().dice = fsm._next.dice;
+//			fsm._ddm.front().valid = true;
 			//fsm._next.valid = false;
-			std::cout << "Initiaizing the next DiceData with color " << static_cast<int32_t>(fsm._curr.player)
-					  << " and dice result " << static_cast<int32_t>(fsm._curr.dice) << std::endl;
+			std::cout << "Initiaizing the next DiceData with color " << static_cast<int32_t>(fsm._ddm.front().player)
+					  << " and dice result " << static_cast<int32_t>(fsm._ddm.front().dice) << std::endl;
 			fsm.process_event( fsm::evDice( ) );
 		}
 	}
@@ -153,16 +157,16 @@ struct GmDice: public msm::front::state<>
 		std::cout << "-> GmDice" << std::endl;
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
-		Playboard::DisplayMapIt displayMapIt = displayMap.find( static_cast<int32_t>(fsm._curr.player) );
+		Playboard::DisplayMapIt displayMapIt = displayMap.find( static_cast<int32_t>(fsm._ddm.front().player) );
 		if ( displayMapIt == displayMap.end( ) )
 		{
-			std::cout << "No player " << static_cast<int32_t>(fsm._curr.player)
-					  << " to move on dice " << static_cast<int32_t>(fsm._curr.dice) << std::endl;
+			std::cout << "No player " << static_cast<int32_t>(fsm._ddm.front().player)
+					  << " to move on dice " << static_cast<int32_t>(fsm._ddm.front().dice) << std::endl;
 		}
 
 		displayMapIt->second->setPictureDice( 0 ); //ev._dice );
 
-		//fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::ON, fsm._curr.player);
+		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::ON, fsm._ddm.front().player);
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM& fsm) {
@@ -176,7 +180,7 @@ struct GmWaitForShowDice: public msm::front::state<>
 	template<class Event, class FSM>
 	void on_entry(Event const&, FSM& fsm) {
 		std::cout << "-> GmWaitForShowDice" << std::endl;
-		fsm._tcpIp->sendDieDone( fsm._curr.player );
+		fsm._tcpIp->sendDieDone( fsm._ddm.front().player );
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM&) {
@@ -195,10 +199,10 @@ struct GmShowDice: public msm::front::state<>
 		Playboard::DisplayMapIt it = displayMap.begin( );
 		for ( ; it != displayMap.end( ); ++it )
 		{
-			if ( _moveAllowed && it == displayMap.find( static_cast<int32_t>(fsm._curr.player) ) )
-				it->second->setPictureDice( fsm._curr.dice, true );
+			if ( _moveAllowed && it == displayMap.find( static_cast<int32_t>(fsm._ddm.front().player) ) )
+				it->second->setPictureDice( fsm._ddm.front().dice, true );
 			else
-				it->second->setPictureDice( fsm._curr.dice );
+				it->second->setPictureDice( fsm._ddm.front().dice );
 		}
 	}
 	template<class Event, class FSM>
@@ -243,7 +247,7 @@ struct GmCheckMovedMeeple: public msm::front::state<>
 			it->second->setPictures( I2C_DBEN_PIC_WAIT );
 		}
 
-		uint8_t fieldId = fsm._gamePtr->playboard()->checkMovedMeeple( fsm._curr.player );
+		uint8_t fieldId = fsm._gamePtr->playboard()->checkMovedMeeple( fsm._ddm.front().player );
 		if ( fieldId == 255 ) // no moved meeple found
 		{
 			fsm.process_event( fsm::evMeepleNotOK( ) );
@@ -270,9 +274,9 @@ struct GmSendMovedMeeple: public msm::front::state<>
 	void on_entry(Event const& ev, FSM& fsm) {
 		std::cout << "-> GmSendMovedMeeple" << std::endl;
 
-		std::cout << "Sending select meeple color " << static_cast<int32_t>(fsm._curr.player)
+		std::cout << "Sending select meeple color " << static_cast<int32_t>(fsm._ddm.front().player)
 				  << " from field " << static_cast<int32_t>(_fromFieldId) << std::endl;
-		fsm._tcpIp->sendSelectMeeple( fsm._curr.player, _fromFieldId );
+		fsm._tcpIp->sendSelectMeeple( fsm._ddm.front().player, _fromFieldId );
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM&) {
@@ -327,10 +331,12 @@ struct GmSearchForMeeple: public msm::front::state<>
 		// - All fields get scanned for the meeple which has been on _from before
 		// - If found it's illegal position will be saved to _illegal (by reference)
 		// - the state whether the meeple has been found or not will be returned as a boolean
-		_illegal = 0;
-		if ( fsm._gamePtr->playboard( )->searchForMeeple( _from, _illegal ) )
+		_x = 0; _y = 0;
+		if ( fsm._gamePtr->playboard( )->searchForMeeple( _from, _x, _y ) )
 		{
-			std::cout << "Illegal meeple found on fieldId " << static_cast<int32_t>(_illegal) << std::endl;
+			std::cout << "Illegal meeple found on fieldId ("
+					<< static_cast<int32_t>(_x) << "/"
+					<< static_cast<int32_t>(_y) << ")" << std::endl;
 			fsm.process_event( fsm::evMeepleOK( ) );
 		}
 		else
@@ -344,7 +350,7 @@ struct GmSearchForMeeple: public msm::front::state<>
 		std::cout << "<- GmSearchForMeeple" << std::endl;
 	}
 
-	uint8_t _from, _to, _illegal;
+	uint8_t _from, _to, _x, _y;
 };
 
 struct GmFoundMeeple: public msm::front::state<>
@@ -357,14 +363,16 @@ struct GmFoundMeeple: public msm::front::state<>
 		std::cout << "-> GmFoundMeeple" << std::endl;
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
-		Playboard::DisplayMapIt it = displayMap.find( fsm._curr.player );
+		Playboard::DisplayMapIt it = displayMap.find( fsm._ddm.front().player );
 		if ( it != displayMap.end( ) )
 		{	it->second->setPictures( I2C_DBEN_PIC_MOVE_ILLEGAL );	}
 
 		// move the meeple found from its illegal position to the actual target position to
-		std::cout << "move meeple from illegal fieldId " << static_cast<int32_t>(_illegal)
-				  << " to " << " actual target fieldId " << static_cast<int32_t>(_to) << std::endl;
-		fsm._gamePtr->playboard( )->moveMeeple( _illegal, _to );
+		std::cout << "move meeple from illegal fieldId "
+			<< "(" << static_cast<int32_t>(_x) << "/" << static_cast<int32_t>(_y) << ")"
+			<< " to " << " actual target fieldId " << static_cast<int32_t>(_to) << std::endl;
+		fsm._gamePtr->playboard( )->moveMeepleXY( fsm._ddm.front().player, _x, _y, _to );
+		fsm._gamePtr->playboard( )->setMeepleMove( fsm._ddm.front().player, _from, _to);
 
 		//boost::this_thread::sleep( boost::posix_time::seconds( 1 ) );
 
@@ -375,7 +383,7 @@ struct GmFoundMeeple: public msm::front::state<>
 		std::cout << "<- GmFoundMeeple" << std::endl;
 	}
 
-	uint8_t _from, _to, _illegal;
+	uint8_t _from, _to, _x, _y;
 };
 
 struct GmMoveMeeplesByHand: public msm::front::state<>
@@ -388,7 +396,7 @@ struct GmMoveMeeplesByHand: public msm::front::state<>
 		std::cout << "-> GmMoveMeeplesByHand" << std::endl;
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
-		Playboard::DisplayMapIt it = displayMap.find( fsm._curr.player );
+		Playboard::DisplayMapIt it = displayMap.find( fsm._ddm.front().player );
 		if ( it != displayMap.end( ) )
 		{	it->second->setPictures( I2C_DBEN_PIC_PREPARE );	}
 	}
@@ -410,14 +418,14 @@ struct GmReconfigureMeepleIDs: public msm::front::state<>
 		std::cout << "-> GmReconfigureMeepleIDs" << std::endl;
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
-		Playboard::DisplayMapIt it = displayMap.find( fsm._curr.player );
+		Playboard::DisplayMapIt it = displayMap.find( fsm._ddm.front().player );
 		if ( it != displayMap.end( ) )
 		{	it->second->setPictures( I2C_DBEN_PIC_WAIT );	}
 
 		// All meeple of current player should be on their starting positions.
 		// Check it by reading their tags and reconfigure if successful.
 		std::vector< uint16_t > tags( 3 );
-		if ( fsm._gamePtr->playboard( )->readPlayersMeepleAtStart( static_cast<int32_t>(fsm._curr.player), tags ) )
+		if ( fsm._gamePtr->playboard( )->readPlayersMeepleAtStart( static_cast<int32_t>(fsm._ddm.front().player), tags ) )
 		{
 			// save the new "to" field to the missing's meeple's "to" field, to move the meeples
 			// to the correct position in the next state when moving them from the starting position
@@ -425,7 +433,7 @@ struct GmReconfigureMeepleIDs: public msm::front::state<>
 
 			// saving all "to" fields
 			Playboard::PlayerMapIt playerIt =
-				fsm._gamePtr->playboard( )->players( ).find( static_cast<int32_t>(fsm._curr.player) );
+				fsm._gamePtr->playboard( )->players( ).find( static_cast<int32_t>(fsm._ddm.front().player) );
 			// error handling
 			if ( playerIt == fsm._gamePtr->playboard( )->players( ).end( ) )
 			{	 fsm.process_event( fsm::evMeepleNotOK( ) ); 	}
@@ -441,7 +449,7 @@ struct GmReconfigureMeepleIDs: public msm::front::state<>
 			for ( uint8_t i = 0; i < meeples.size( ); i++ )
 			{ _toAll.at( i ) = static_cast<uint8_t>(meeples.at( i )->fieldId( )); }
 
-			if ( fsm._gamePtr->playboard( )->reconfigurePlayersMeeple( static_cast<int32_t>(fsm._curr.player), tags ) )
+			if ( fsm._gamePtr->playboard( )->reconfigurePlayersMeeple( static_cast<int32_t>(fsm._ddm.front().player), tags ) )
 
 			// saving the new fromFieldIds
 			// error handling

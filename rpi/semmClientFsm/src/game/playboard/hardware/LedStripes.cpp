@@ -1,8 +1,8 @@
 #include "LedStripes.h"
 
 LedStripes::LedStripes(uint8_t i2cAddr) {
+	std::cout << "    creating led stripe" << std::endl;
 	setI2cAddr(i2cAddr);
-	set(0, 0);
 }
 
 LedStripes::~LedStripes() {
@@ -10,10 +10,12 @@ LedStripes::~LedStripes() {
 }
 
 int LedStripes::set(uint8_t mode, uint8_t color) {
+	return 0;
 	uint8_t buf[2];
 	buf[0] = color;
 	buf[1] = color;
-	I2c::write(mode, buf, sizeof buf);
+
+	I2c::write(mode, buf, 2);
 	return 0;
 }
 
