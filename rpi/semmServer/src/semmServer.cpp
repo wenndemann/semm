@@ -23,7 +23,8 @@
  */
 
 //* include files
-//#include <stdio.h>
+#include <stdio.h>
+#include <signal.h>
 //#include <stdlib.h>
 //#include <iostream>
 //#include <strings.h>
@@ -52,11 +53,12 @@
 #define SEMM_NUM_THREADS 8
 
 //* global variables section
-//pthread_t* pthreadTcpIpListen;
-//std::map<int, Client*> g_clientMap;
+int sockfd;
+Game* gGame;
 
 //* prototype section
 void* tcpIpListen(void* g);
+void exitFunc(int sig);
 
 /**
  * main function of semmServer.
@@ -71,12 +73,15 @@ void* tcpIpListen(void* g);
  */
 int main(int argc, char** argv)
 {
+	signal(SIGINT, exitFunc);
+
 	Game* game; ///< global instance of Game
 	boost::thread* tcpIpThread;
 
 	srand (time(NULL));
 	while(true) {
 		game = new Game;
+		gGame = game;
 		tcpIpThread = new boost::thread(boost::bind(tcpIpListen, game));
 
 		while(game->getMode() != 4)
@@ -107,7 +112,7 @@ int main(int argc, char** argv)
  *  	the global instance of Game by its addClient(Client) method.
  */
 void* tcpIpListen(void* g) {
-	int sockfd, newsockfd, portno;
+	int newsockfd, portno;
 	socklen_t clilen;
 	struct sockaddr_in serv_addr, cli_addr;
 	Client *cli;
@@ -147,3 +152,13 @@ void* tcpIpListen(void* g) {
 	}
 	return NULL;
 }
+
+void exitFunc(int sig) {
+	std::map<int, Client*> * cm = gGame->getClientMap();
+	std::map<int, Client*>::iterator it = cm->begin();
+	for( ; it != cm->end(); ++it)
+		close(it->second->getFd());
+	close(sockfd);
+	printf("bye bye\n");
+	exit(1);
+};
