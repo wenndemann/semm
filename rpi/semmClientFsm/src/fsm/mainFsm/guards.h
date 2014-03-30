@@ -31,8 +31,10 @@ struct gMyColor {
 			std::cout << "pop from DiceData quere" << std::endl;
 			fsm._ddm.pop();
 		}
+
+		fsm._gamePtr->playboard()->ledStripe()->set(LedStripes::Mode::ON, fsm._ddm.front( ).player);
+
 		bool thisClient = static_cast<uint8_t>(fsm._gamePtr->clientColors( ) ) & fsm._ddm.front( ).player;
-		cout << "clientColors=" << fsm._gamePtr->clientColors( ) << " = " << thisClient << endl;
 		return thisClient;
 	}
 };

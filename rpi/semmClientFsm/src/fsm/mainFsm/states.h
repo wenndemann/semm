@@ -114,10 +114,10 @@ struct GmMoveDone : public msm::front::state<>
 
 //		for ( uint8_t i = 0; i < 4; i++ )
 //		{ fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, static_cast<uint8_t>(1<<i)); }
-		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, 1);
-		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, 2);
-		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, 4);
-		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, 8);
+		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, LedStripes::Corner::MARTINA);
+		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, LedStripes::Corner::MARCEL);
+		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, LedStripes::Corner::ELLLA);
+		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, LedStripes::Corner::STEFAN);
 
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
@@ -151,6 +151,7 @@ struct GmMoveDone : public msm::front::state<>
 
 struct GmDice: public msm::front::state<>
 {
+	typedef mpl::vector<fsm::evMove, fsm::evDice> deferred_events;
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
 	void on_entry(Event const& ev, FSM& fsm) {
@@ -176,6 +177,7 @@ struct GmDice: public msm::front::state<>
 
 struct GmWaitForShowDice: public msm::front::state<>
 {
+	typedef mpl::vector<fsm::evMove> deferred_events;
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
 	void on_entry(Event const&, FSM& fsm) {
@@ -214,7 +216,7 @@ struct GmShowDice: public msm::front::state<>
 
 struct GmMoveMeeple : public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evMove> deferred_events;
+	typedef mpl::vector<fsm::evMove, fsm::evDice> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
@@ -288,7 +290,7 @@ struct GmSendMovedMeeple: public msm::front::state<>
 
 struct GmCheckDestination: public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evDice> deferred_events;
+	typedef mpl::vector<fsm::evDice, fsm::evMove> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
@@ -320,7 +322,7 @@ struct GmCheckDestination: public msm::front::state<>
 
 struct GmSearchForMeeple: public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evDice> deferred_events;
+	typedef mpl::vector<fsm::evDice, fsm::evMove> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
@@ -355,7 +357,7 @@ struct GmSearchForMeeple: public msm::front::state<>
 
 struct GmFoundMeeple: public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evDice> deferred_events;
+	typedef mpl::vector<fsm::evDice, fsm::evMove> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
@@ -388,7 +390,7 @@ struct GmFoundMeeple: public msm::front::state<>
 
 struct GmMoveMeeplesByHand: public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evDice> deferred_events;
+	typedef mpl::vector<fsm::evDice, fsm::evMove> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
@@ -410,7 +412,7 @@ struct GmMoveMeeplesByHand: public msm::front::state<>
 
 struct GmReconfigureMeepleIDs: public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evDice> deferred_events;
+	typedef mpl::vector<fsm::evDice, fsm::evMove> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
@@ -479,7 +481,7 @@ struct GmReconfigureMeepleIDs: public msm::front::state<>
 
 struct GmMoveMeeplesToCorrectPos: public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evDice> deferred_events;
+	typedef mpl::vector<fsm::evDice, fsm::evMove> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>

@@ -122,6 +122,31 @@ struct transferFromToAll {
 	}
 };
 
+struct resetMove {
+	template<class EVT, class FSM, class SourceState, class TargetState>
+	void operator()(EVT const&, FSM& fsm, SourceState& src, TargetState& target) {
+		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
+		std::cout << "This move was illegal. Searching for meeple." << endl;
+
+		uint8_t x, y;
+		bool found = fsm._gamePtr->playboard( )->searchForMeeple( src._fromFieldId, x, y );
+
+		while( !found ) {
+			std::cout << "  Not found. Please reset manual." << std::endl;
+			Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
+			Playboard::DisplayMapIt it = displayMap.find( fsm._ddm.front().player );
+			if ( it != displayMap.end( ) )
+				{	it->second->setPictures( I2C_DBEN_PIC_NOT_FOUND );	}
+			boost::this_thread::sleep( boost::posix_time::seconds( 5 ) );
+			bool found = fsm._gamePtr->playboard( )->searchForMeeple( src._fromFieldId, x, y );
+		}
+
+		std::cout << "  Found illegal moved meeple and set it "
+				  << "back to its original Positition" << endl;
+		fsm._gamePtr->playboard( )->moveMeepleXY( fsm._ddm.front().player, x, y, src._fromFieldId );
+	}
+};
+
 /*
 
 */

@@ -80,7 +80,9 @@ Playboard::Playboard( fsm::gameFSM* gameFsmPtr ) :
 		{ 55, FieldPtr(new Field(  5,  6, 55)) }
 	})
 {
-
+	//ledShow();
+	sleep(15);
+	_XYDrive->moveMagnet(5, 5);
 }
 
 Playboard::~Playboard() {
@@ -295,18 +297,6 @@ bool Playboard::searchForMeeple( uint8_t from, uint8_t& _x, uint8_t& _y )
 	// The new position ( to ) is not set yet
 	uint16_t origTagId = getMeepleFromFieldId( static_cast<int32_t>( from ) )->tag();
 
-//	// search on all fields
-//	for ( FieldMapIt it = _fields.begin( ); it != _fields.end( ); ++it )
-//	{
-//		// compare the ID just read against the Id of the meeple we are searching for
-//		if ( readId( static_cast<uint32_t>(it->first) ) == origTagId )
-//		{
-//			// found
-//			illegalPos = it->first;
-//			return true;
-//		}
-//	}
-
 	for(uint8_t x = 0; x <= 10; x++) {
 		std::vector<uint16_t> line(11);
 		_XYDrive->moveCarriage(x);
@@ -355,3 +345,93 @@ uint8_t Playboard::getFieldIdFromXY( uint8_t x, uint8_t y) {
 	}
 	return 255;
 }
+
+void Playboard::ledShow() {
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::RED);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::RED       , LedStripes::Corner::STEFAN);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::YELLOW);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::YELLOW    , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::RED       , LedStripes::Corner::ELLLA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::ORANGE);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::ORANGE    , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::YELLOW    , LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::RED       , LedStripes::Corner::MARCEL);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::GREEN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::GREEN     , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::ORANGE    , LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::YELLOW    , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::RED       , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::BLUE);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::BLUE      , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::GREEN     , LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::ORANGE    , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::YELLOW    , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::PINK);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::PINK      , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::BLUE      , LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::GREEN     , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::ORANGE    , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::LIGHT_BLUE);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::PINK      , LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::BLUE      , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::GREEN     , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::WHITE);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::WHITE     , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::PINK      , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::BLUE      , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::WHITE);
+		_ledStripe->set(LedStripes::Mode::BLINK_SLOW, LedStripes::Color::WHITE     , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::BLINK_SLOW, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::BLINK_SLOW, LedStripes::Color::PINK      , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::BLINK_SLOW, LedStripes::Color::BLUE      , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::LIGHT_BLUE);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::PINK);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::BLUE);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::WHITE);
+		_ledStripe->set(LedStripes::Mode::BLINK_FAST, LedStripes::Color::WHITE     , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::BLINK_FAST, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::BLINK_FAST, LedStripes::Color::PINK      , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::BLINK_FAST, LedStripes::Color::BLUE      , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::LIGHT_BLUE);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::PINK);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::BLUE);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::OFF, LedStripes::Color::WHITE);
+		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::WHITE     , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::PINK      , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::BLUE      , LedStripes::Corner::MARTINA);
+}

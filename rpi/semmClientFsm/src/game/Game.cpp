@@ -92,8 +92,11 @@ void Game::parseCmd( uint8_t* buf, int32_t nR )
 		_mainFSM->process_event(fsm::evMeepleNotOK( ));
 		break;
 
-	case TCP_CMD_PLAYER_IN_HOME_SC:
-
+	case TCP_CMD_PLAYER_IN_HOME_SC: {
+		Playboard::DisplayMapIt dp = _playboard->displays().find(static_cast<int32_t>(buf[1]));
+		dp->second->setPictures(I2C_DBEN_PIC_WIN);
+		_playboard->displays().erase(dp);
+	}
 		break;
 
 	default:

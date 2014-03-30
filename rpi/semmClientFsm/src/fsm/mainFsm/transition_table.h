@@ -10,7 +10,7 @@
 
 // Transition table for player
 struct transition_table : mpl::vector<
-	//    Start                     Event         Next                        Action        Guard
+	//    Start                     Event            Next                        Action        Guard
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < Init                    , evInitGame     , WaitForAvailColors        , none        , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
@@ -23,7 +23,7 @@ struct transition_table : mpl::vector<
 	Row < SelectColorMode         , evDice         , none                      , none        , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmMoveDone              , evMove         , GmMoveMeeple              , /*TODO meepleMoved*/none, none>,
-	Row < GmMoveDone              , evDice         , GmDice                    , checkDice   , gMyColor        >,
+	Row < GmMoveDone              , evDice         , GmDice                    , none        , gMyColor        >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmDice                  , evEnter        , GmWaitForShowDice         , none        , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
@@ -40,6 +40,7 @@ struct transition_table : mpl::vector<
 	Row < GmCheckMovedMeeple      , evMeepleNotOK  , GmShowDice                , none        , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmSendMovedMeeple       , evMove         , GmCheckDestination        , none        , none            >,
+	Row < GmSendMovedMeeple       , evMeepleNotOK  , GmShowDice				   , resetMove   , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmCheckDestination      , evMeepleNotOK  , GmSearchForMeeple         , transferFromTo, none          >,
 	Row < GmCheckDestination      , evMoveDone     , GmMoveDone                , meepleMoved , none            >,

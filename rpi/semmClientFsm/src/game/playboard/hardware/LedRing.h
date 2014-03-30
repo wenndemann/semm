@@ -7,8 +7,13 @@
 
 class LedRing: protected I2c {
 public:
-	enum {
+	enum Mode{
 		OFF = 0, ON = 1, BLINK = 2
+	};
+
+	enum Color {
+		BLUE = 1, PINK = 2, GREEN = 3, LIGHT_BLUE = 4,
+		YELLOW = 5, RED = 6, ORANGE = 7, WHITE = 8
 	};
 
 	LedRing(uint8_t i2cAddr);

@@ -99,6 +99,8 @@ private:
 	FieldMap _fields;
 	PlayerMap _players;
 	boost::mutex _mutexXYDrive;
+
+	void ledShow();
 };
 
 #endif /* PLAYBOARD_H_ */

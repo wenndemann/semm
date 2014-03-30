@@ -51,8 +51,5 @@ int main(int argc, char *argv[])
 
 	test( std::string( argv[ 1 ] ) );
 
-	//Game* g = new Game(string(argv[0]));
-	//delete g;
-
 	return 0;
 }

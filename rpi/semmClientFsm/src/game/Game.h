@@ -15,6 +15,7 @@
 // local includes
 #include "../defs.h"
 #include "playboard/Playboard.h"
+#include "playboard/hardware/Display.h"
 
 #include <boost/msm/back/state_machine.hpp>
 namespace fsm
