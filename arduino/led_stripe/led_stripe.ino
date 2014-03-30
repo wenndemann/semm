@@ -17,7 +17,6 @@
 
 #include <SoftPWM.h>
 #include <Wire.h>
-#include <QueueList.h>
 #include "i2c_defs.h"
 #include "farben.h"
 
@@ -40,6 +39,8 @@
 #define redPin4 A10
 #define greenPin4 A11  
 
+static volatile bool data = false;
+volatile char buf[16];
 
 byte faktorRot = 100;  //LEDs sind 100% an
 byte faktorGruen = 100;
@@ -49,16 +50,6 @@ int (*out1)[6];    //Zeiger auf aktuelle Farbe/Modus (Zeiger auf zweidimensional
 int (*out2)[6];
 int (*out3)[6];
 int (*out4)[6];
-
-struct Data {
-  Data() { }
-  Data(char b, char f, char e) : befehl(b), farbe(f), ecke(e) { }
-  char befehl, farbe, ecke; 
-};
-
-QueueList<Data> data_queue;
-
-static volatile bool mutex = false;
 
 void setup ()
 {
@@ -92,13 +83,6 @@ void setup ()
   out2 = aus; //aktuelle Farbe/Modus = aus 
   out3 = aus; //aktuelle Farbe/Modus = aus 
   out4 = aus; //aktuelle Farbe/Modus = aus 
-  
-/*
-  out1 = aus; //aktuelle Farbe/Modus = aus 
-  out2 = aus; //aktuelle Farbe/Modus = aus 
-  out3 = aus; //aktuelle Farbe/Modus = aus 
-  out4 = aus; //aktuelle Farbe/Modus = aus 
-*/
 }    
 
 
@@ -116,6 +100,7 @@ void loop ()
     SoftPWMSet(redPin1, (byte)outRot);                  //Ausgabewerte an PWM übergeben
     SoftPWMSet(greenPin1, (byte)outGruen);
     SoftPWMSet(bluePin1, (byte)outBlau);
+      delay(62);    
     
     outRot = out2[RED][i];        //ausgabe Werte aus Array laden und mit "Dimmfaktor" multiplizieren
     outGruen = out2[GREEN][i];
@@ -126,6 +111,7 @@ void loop ()
     SoftPWMSet(redPin2, (byte)outRot);                  //Ausgabewerte an PWM übergeben
     SoftPWMSet(greenPin2, (byte)outGruen);
     SoftPWMSet(bluePin2, (byte)outBlau);
+      delay(62);    
     
     outRot = out3[RED][i];        //ausgabe Werte aus Array laden und mit "Dimmfaktor" multiplizieren
     outGruen = out3[GREEN][i] ;
@@ -136,6 +122,7 @@ void loop ()
     SoftPWMSet(redPin3, (byte)outRot);                  //Ausgabewerte an PWM übergeben
     SoftPWMSet(greenPin3, (byte)outGruen);
     SoftPWMSet(bluePin3, (byte)outBlau);
+      delay(62);    
     
     outRot = out4[RED][i] ;        //ausgabe Werte aus Array laden und mit "Dimmfaktor" multiplizieren
     outGruen = out4[GREEN][i];
@@ -146,60 +133,48 @@ void loop ()
     SoftPWMSet(redPin4, (byte)outRot);                  //Ausgabewerte an PWM übergeben
     SoftPWMSet(greenPin4, (byte)outGruen);
     SoftPWMSet(bluePin4, (byte)outBlau);
+      delay(62);    
 
-    while(mutex) Serial.println("wait main");
-    mutex = true;
-    while(!data_queue.isEmpty()) {
-      mutex = true;
-      Data d = data_queue.pop();
-      mutex = false;
-      auswerten(d.befehl, d.farbe, d.ecke); 
+    if(data) {
+      for(int i = 0; i < 8; i++)
+        buf[i] = Wire.read();
+      auswerten_8(buf[0], buf[1]);
+      auswerten_1(buf[6], buf[7]);
+      auswerten_4(buf[2], buf[3]);
+      auswerten_2(buf[4], buf[5]);
+      data = false;
     }
-    mutex = false;
-    delay(250);                                    //500ms Pause
   }
 }
 
 void I2C_RECEICVE_INT(int howMany)//externer Zugriff für Stefan möglich
 {
-  unsigned char b,f,e;
-  
-  delay(1);
-  
+/*
+  //cli(); 
+  Serial.print("I2C Event ");
+  Serial.println(howMany);
+  //char buffer[16];
   byte i = 0;
-  if(howMany >= 3) {
-    //while (Wire.available()) { //lese 3 Zeichen in Buffer
-      b = (char)Wire.read();
-      i++;
-      f = (char)Wire.read();
-      i++;
-      e = (char)Wire.read();
-      i++;
-      //if (i >  3) break;  //breche nach 3 Zeichen ab
-    //}
-  }
   
-  if(Wire.available()) {
-    while (Wire.available())   //leere input buffer
-      (char)Wire.read();
-  }
+  delay(10);
   
-  Serial.print("recieve ");
-  Serial.println(i);
-
-  
-  //while(mutex) Serial.println("wait interrupt");
-  //mutex = true;  
-  if(i == 3) {
-    auswerten(b,f,e);
-  //  data_queue.push(Data(buffer[0], buffer[1], buffer[2] ) ); 
+  while (Wire.available()) { //lese 3 Zeichen in Buffer
+    buf[i] = (char)Wire.read();
+    i++;
+    if (i >=  8) break;  //breche nach 3 Zeichen ab
   }
-  //mutex = false;
-//  delay(1);
+*/  
+//  while (Wire.available())   //leere input buffer
+//    (char)Wire.read();
+  data = true;
+  //if(i >= 8) auswerten(buffer);
+  //sei();
+  //delay(10);
 }
 
 
 void serialEvent() { //x
+  Serial.println("serialEvent");
   char buffer[3];
   byte i = 0;
   
@@ -211,180 +186,248 @@ void serialEvent() { //x
   while (Serial.available())   //leere input buffer
     (char)Serial.read();
 
-  auswerten(buffer[0], buffer[1], buffer[2]);
+//  auswerten(buffer[0], buffer[1], buffer[2]);
+  auswerten(buffer);
 }
 
 
-void auswerten(unsigned char befehl,unsigned char farbe,unsigned char ecke) {
-  int (**out)[6];
+void auswerten(volatile char* buf) {
+ 
+//  Serial.print(befehl);
+//  Serial.print(" ");
+//  Serial.print(farbe);
+//  Serial.print(" ");
+//  Serial.println(ecke);
   
-  switch(ecke)
-  {
-    case 1:
-    Serial.print(" Ecke1 ");
-      out = &out1;
-      break;
-    case 8:
-      out = &out2;
-    Serial.print(" Ecke2 ");
-      break;
-    case 4:
-      out = &out3;
-    Serial.print(" Ecke3 ");
-      break;
-    case 2:
-      out = &out4;
-    Serial.print(" Ecke4 ");
-      break;
-    default:
+  //int (**out)[6];
+  //*out = aus;
+//  switch(ecke)
+//  {
+//    case 8:
+Serial.print("1 ");
+        //auswerten_8(buf[0], buf[1]);
+        
+//      Serial.print(" Ecke1 ");
+//      out = &out1;
+//      break;
+//    case 1:
+Serial.print("2 ");
+        auswerten_1(buf[6], buf[7]);
+//      out = &out2;
+//      Serial.print(" Ecke2 ");
+//      break;
+//    case 4:
+Serial.print("3 ");
+        auswerten_4(buf[2], buf[3]);
+//      out = &out3;
+//      Serial.print(" Ecke3 ");
+//      break;
+//    case 2:
+Serial.print("4 ");
+        auswerten_2(buf[4], buf[5]);
+//      out = &out4;
+//      Serial.print(" Ecke4 ");
+//      break;
+//    default:
 //      Serial.println("ecke unbekannt");
-      return;
-      break;
-  }
-  
-  
+//      return;
+//      break;
+//  }
+ Serial.println(" ");
+}
+
+void auswerten_1(char befehl, char farbe) {
   switch(befehl) //modus
   {
-  case 0: //aus
-    *out = aus;
-  while(mutex);
-    Serial.println("aus");
-    break;
+  case 0: out2 = aus; break;
     
   case 1: // an
     Serial.print("an ");
-    switch(farbe) //farbe
-    {
-      case 1: // Marcel
-        *out = blau_an;
-        Serial.println("blau");  
-        break;
-      case 2: // Martina 
-        *out = pink_an;
-      Serial.println("pink");  
-        break;
-      case 3: // gruen
-        *out = gruen_an;
-      Serial.println("gruen");  
-        break;
-      case 4: // Ela
-        *out = hblau_an;
-      Serial.println("hellblau");  
-        break;
-      case 5: // gelb
-        *out = gelb_an;
-      Serial.println("gelb");  
-        break;
-      case 6: // rot
-        *out = rot_an;
-      Serial.println("rot");  
-        break;
-      case 7: // orange
-        *out = orange_an;
-      Serial.println("orange");  
-        break;
-      case 8: // Stefan 
-        *out = weiss_an;
-      Serial.println("weiss");  
-        break;
-      default:
-      Serial.println("Farbe ungueltig");
-        return;
-        break;  
-    }
-    break;
+    switch(farbe) {
+      case 1: out2 = blau_an;      break;
+      case 2: out2 = pink_an;      break;
+      case 3: out2 = gruen_an;     break;
+      case 4: out2 = hblau_an;     break;
+      case 5: out2 = gelb_an;      break;
+      case 6: out2 = rot_an;       break;
+      case 7: out2 = orange_an;    break;
+      case 8: out2 = weiss_an;     break;
+      default: return; break;  
+    } break;
     
   case 2: //blinken
-    Serial.print("herz");
-    switch(farbe) //farbe
-    {
-      case 1: // Marcel 
-        *out = blau_herz;
-      Serial.println("blau");  
-        break;
-      case 2: // Martina
-        *out = pink_herz;
-      Serial.println("pink");  
-        break;
-      case 3: // gruen
-        *out = gruen_herz;
-      Serial.println("gruen");  
-        break;
-      case 4: // Ela
-        *out = hblau_herz;
-      Serial.println("hellblau");  
-        break;
-      case 5: //gelb
-        *out = gelb_herz;
-      Serial.println("gelb");  
-        break;
-      case 6: // rot
-        *out = rot_herz;
-      Serial.println("rot");  
-        break;
-      case 7: // orange
-        *out = orange_herz;
-      Serial.println("orange");  
-        break;
-      case 8: // Stefan 
-        *out = weiss_herz;
-     Serial.println("weiss");  
-        break;
-      default:
-      Serial.println("Farbe ungueltig");
-       return;
-        break;  
-    }
-    break;
-    
+    switch(farbe) {
+      case 1: out2 = blau_herz;    break;
+      case 2: out2 = pink_herz;    break;
+      case 3: out2 = gruen_herz;   break;
+      case 4: out2 = hblau_herz;   break;
+      case 5: out2 = gelb_herz;    break;
+      case 6: out2 = rot_herz;     break;
+      case 7: out2 = orange_herz;  break;
+      case 8: out2 = weiss_herz;   break;
+      default: return; break;  
+    } break;
     
     case 3: //angst
-  Serial.print("angst ");
-    switch(farbe) //farbe
-    {
-      case 1: // Marcel 
-        *out = blau_angst;
-      Serial.println("blau");  
-        break;
-      case 2: // Martina
-        *out = pink_angst;
-      Serial.println("pink");  
-        break;
-      case 3: // gruen
-        *out = gruen_angst;
-      Serial.println("gruen");  
-        break;
-      case 4: // Ela
-        *out = hblau_angst;
-      Serial.println("hellblau");  
-        break;
-      case 5: //gelb
-        *out = gelb_angst;
-      Serial.println("gelb");  
-        break;
-      case 6: // rot
-        *out = rot_angst;
-      Serial.println("rot");  
-        break;
-      case 7: // orange
-        *out = orange_angst;
-      Serial.println("orange");  
-        break;
-      case 8: // Stefan 
-        *out = weiss_angst;
-      Serial.println("weiss");  
-        break;
-      default:
-      Serial.println("Farbe ungueltig");
-        return;
-        break;  
-    }
-    break;
+    switch(farbe) {
+      case 1: out2 = blau_angst;   break;
+      case 2: out2 = pink_angst;   break;
+      case 3: out2 = gruen_angst;  break;
+      case 4: out2 = hblau_angst;  break;
+      case 5: out2 = gelb_angst;   break;
+      case 6: out2 = rot_angst;    break;
+      case 7: out2 = orange_angst; break;
+      case 8: out2 = weiss_angst;  break;
+      default: return; break;  
+    } break;
 
-  default:
-  Serial.println("Befehl ungueltig");
-    return;
-    break;  
-  }
+  default: return; break;  
+  }  
 }
 
+void auswerten_2(char befehl, char farbe) {
+  switch(befehl) //modus
+  {
+  case 0: out4 = aus; break;
+    
+  case 1: // an
+    Serial.print("an ");
+    switch(farbe) {
+      case 1: out4 = blau_an;      break;
+      case 2: out4 = pink_an;      break;
+      case 3: out4 = gruen_an;     break;
+      case 4: out4 = hblau_an;     break;
+      case 5: out4 = gelb_an;      break;
+      case 6: out4 = rot_an;       break;
+      case 7: out4 = orange_an;    break;
+      case 8: out4 = weiss_an;     break;
+      default: return; break;  
+    } break;
+    
+  case 2: //blinken
+    switch(farbe) {
+      case 1: out4 = blau_herz;    break;
+      case 2: out4 = pink_herz;    break;
+      case 3: out4 = gruen_herz;   break;
+      case 4: out4 = hblau_herz;   break;
+      case 5: out4 = gelb_herz;    break;
+      case 6: out4 = rot_herz;     break;
+      case 7: out4 = orange_herz;  break;
+      case 8: out4 = weiss_herz;   break;
+      default: return; break;  
+    } break;
+    
+    case 3: //angst
+    switch(farbe) {
+      case 1: out4 = blau_angst;   break;
+      case 2: out4 = pink_angst;   break;
+      case 3: out4 = gruen_angst;  break;
+      case 4: out4 = hblau_angst;  break;
+      case 5: out4 = gelb_angst;   break;
+      case 6: out4 = rot_angst;    break;
+      case 7: out4 = orange_angst; break;
+      case 8: out4 = weiss_angst;  break;
+      default: return; break;  
+    } break;
+
+  default: return; break;  
+  }  
+}
+
+void auswerten_4(char befehl, char farbe) {
+  switch(befehl) //modus
+  {
+  case 0: out3 = aus; break;
+    
+  case 1: // an
+    Serial.print("an ");
+    switch(farbe) {
+      case 1: out3 = blau_an;      break;
+      case 2: out3 = pink_an;      break;
+      case 3: out3 = gruen_an;     break;
+      case 4: out3 = hblau_an;     break;
+      case 5: out3 = gelb_an;      break;
+      case 6: out3 = rot_an;       break;
+      case 7: out3 = orange_an;    break;
+      case 8: out3 = weiss_an;     break;
+      default: return; break;  
+    } break;
+    
+  case 2: //blinken
+    switch(farbe) {
+      case 1: out3 = blau_herz;    break;
+      case 2: out3 = pink_herz;    break;
+      case 3: out3 = gruen_herz;   break;
+      case 4: out3 = hblau_herz;   break;
+      case 5: out3 = gelb_herz;    break;
+      case 6: out3 = rot_herz;     break;
+      case 7: out3 = orange_herz;  break;
+      case 8: out3 = weiss_herz;   break;
+      default: return; break;  
+    } break;
+    
+    case 3: //angst
+    switch(farbe) {
+      case 1: out3 = blau_angst;   break;
+      case 2: out3 = pink_angst;   break;
+      case 3: out3 = gruen_angst;  break;
+      case 4: out3 = hblau_angst;  break;
+      case 5: out3 = gelb_angst;   break;
+      case 6: out3 = rot_angst;    break;
+      case 7: out3 = orange_angst; break;
+      case 8: out3 = weiss_angst;  break;
+      default: return; break;  
+    } break;
+
+  default: return; break;  
+  }  
+}
+
+void auswerten_8(char befehl, char farbe) {
+  switch(befehl) //modus
+  {
+  case 0: out1 = aus; break;
+    
+  case 1: // an
+    Serial.print("an ");
+    switch(farbe) {
+      case 1: out1 = blau_an;      break;
+      case 2: out1 = pink_an;      break;
+      case 3: out1 = gruen_an;     break;
+      case 4: out1 = hblau_an;     break;
+      case 5: out1 = gelb_an;      break;
+      case 6: out1 = rot_an;       break;
+      case 7: out1 = orange_an;    break;
+      case 8: out1 = weiss_an;     break;
+      default: return; break;  
+    } break;
+    
+  case 2: //blinken
+    switch(farbe) {
+      case 1: out1 = blau_herz;    break;
+      case 2: out1 = pink_herz;    break;
+      case 3: out1 = gruen_herz;   break;
+      case 4: out1 = hblau_herz;   break;
+      case 5: out1 = gelb_herz;    break;
+      case 6: out1 = rot_herz;     break;
+      case 7: out1 = orange_herz;  break;
+      case 8: out1 = weiss_herz;   break;
+      default: return; break;  
+    } break;
+    
+    case 3: //angst
+    switch(farbe) {
+      case 1: out1 = blau_angst;   break;
+      case 2: out1 = pink_angst;   break;
+      case 3: out1 = gruen_angst;  break;
+      case 4: out1 = hblau_angst;  break;
+      case 5: out1 = gelb_angst;   break;
+      case 6: out1 = rot_angst;    break;
+      case 7: out1 = orange_angst; break;
+      case 8: out1 = weiss_angst;  break;
+      default: return; break;  
+    } break;
+
+  default: return; break;  
+  }  
+}
