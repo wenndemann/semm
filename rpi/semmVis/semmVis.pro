@@ -10,11 +10,17 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = semmVis
 TEMPLATE = app
-
+QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    playboardview.cpp \
+    playboardscene.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    playboardview.h \
+    playboardscene.h
+
+#LIBS += boost_system
 
 FORMS    += mainwindow.ui
