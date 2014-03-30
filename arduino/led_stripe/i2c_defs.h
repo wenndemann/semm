@@ -1,3 +1,5 @@
+// i2c_defs.h zur led_streifen.ino
+
 #ifndef I2C_DEFS_LS_H_
 #define I2C_DEFS_LS_H_
 /*****************************************************************************/
