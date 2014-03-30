@@ -58,11 +58,8 @@ struct checkDice {
 
 		// if the first dice data is being sent during the GmMoveDone,
 		// current (curr) DiceData is not set, so simply set it.
-		if ( !fsm._curr.valid && fsm._next.valid )
-		{
-			std::cout << "Setting the first DiceData in checkDice" << std::endl;
-			fsm._curr = fsm._next;
-		}
+//		if ( !fsm._curr.valid && fsm._next.valid )
+
 	}
 };
 
@@ -89,7 +86,7 @@ struct meepleMoved {
 	void operator()(EVT const&, FSM& fsm, SourceState& src, TargetState& target) {
 		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
 
-		fsm._gamePtr->playboard( )->setMeepleMove( fsm._curr.player, src._from, src._to );
+		fsm._gamePtr->playboard( )->setMeepleMove( fsm._ddm.front().player, src._from, src._to );
 	}
 };
 
@@ -110,7 +107,8 @@ struct transferFromToIllegal {
 
 		target._from = src._from;
 		target._to = src._to;
-		target._illegal = src._illegal;
+		target._x = src._x;
+		target._y = src._y;
 	}
 };
 
@@ -121,6 +119,31 @@ struct transferFromToAll {
 
 		target._fromAll = src._fromAll;
 		target._toAll = src._toAll;
+	}
+};
+
+struct resetMove {
+	template<class EVT, class FSM, class SourceState, class TargetState>
+	void operator()(EVT const&, FSM& fsm, SourceState& src, TargetState& target) {
+		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
+		std::cout << "This move was illegal. Searching for meeple." << endl;
+
+		uint8_t x, y;
+		bool found = fsm._gamePtr->playboard( )->searchForMeeple( src._fromFieldId, x, y );
+
+		while( !found ) {
+			std::cout << "  Not found. Please reset manual." << std::endl;
+			Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
+			Playboard::DisplayMapIt it = displayMap.find( fsm._ddm.front().player );
+			if ( it != displayMap.end( ) )
+				{	it->second->setPictures( I2C_DBEN_PIC_NOT_FOUND );	}
+			boost::this_thread::sleep( boost::posix_time::seconds( 5 ) );
+			bool found = fsm._gamePtr->playboard( )->searchForMeeple( src._fromFieldId, x, y );
+		}
+
+		std::cout << "  Found illegal moved meeple and set it "
+				  << "back to its original Positition" << endl;
+		fsm._gamePtr->playboard( )->moveMeepleXY( fsm._ddm.front().player, x, y, src._fromFieldId );
 	}
 };
 

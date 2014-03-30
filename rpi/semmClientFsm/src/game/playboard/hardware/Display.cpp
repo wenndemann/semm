@@ -18,6 +18,7 @@ Display::Display(uint8_t i2cAddr, long msec, fsm::gameFSM* gameFsmPtr)
 	m_timer = new boost::asio::deadline_timer(m_io, boost::posix_time::milliseconds(m_periode));
 	m_timer->async_wait(m_strand->wrap(boost::bind(&Display::handler, this)));
 	m_handlerThread = new boost::thread(boost::bind(&boost::asio::io_service::run, &m_io));
+	setPictures(I2C_DBEN_PIC_SEMM);
 }
 
 Display::~Display() {
@@ -43,7 +44,7 @@ int Display::setPictures(uint8_t number) {
 	m_actPicNumber = number;
 	I2c::write(I2C_DBEN_PICTURE, &number, sizeof number);
 	//if(m_cliDisplay != NULL) m_cliDisplay->callPicture(number);
-	std::cout << "set display " << pow(2,static_cast<int32_t>(getI2cAddr())-80) << " to pic " << static_cast<int32_t>(number) << std::endl;
+//	std::cout << "set display " << pow(2,static_cast<int32_t>(getI2cAddr())-80) << " to pic " << static_cast<int32_t>(number) << std::endl;
 	return 0;
 }
 

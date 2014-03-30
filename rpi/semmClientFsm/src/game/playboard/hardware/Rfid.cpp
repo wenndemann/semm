@@ -9,13 +9,18 @@ Rfid::~Rfid() {
 }
 
 uint16_t Rfid::readTag(uint8_t y) {
-	tagLine_t line;
+//	tagLine_t line;
+	std::vector<uint16_t> line(11);
 	readLine(&line);
-	return line.tag[y];
+	return line[y];
 }
 
-int Rfid::readLine(tagLine_t* buf) {
+int Rfid::readLine(std::vector<uint16_t>* tag) {
 	write(I2C_RFID_IREAD, NULL, 0);
 	usleep(RFID_TIME_US_READ);
-	return read(I2C_RFID_TAGS, buf, sizeof(tagLine_t));
+	uint16_t buf[11];
+	int n =read(I2C_RFID_TAGS, buf, sizeof(buf));
+	for(int i = 0 ; i < 11 ; i++)
+		tag->at(i) = buf[i];
+	return n;
 }

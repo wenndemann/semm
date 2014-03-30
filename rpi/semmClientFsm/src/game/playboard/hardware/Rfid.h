@@ -1,6 +1,9 @@
 #ifndef RFID_H_
 #define RFID_H_
 
+// globale includes
+#include <vector>
+
 // locale includes
 #include "I2c.h"
 #include "../../../../../../arduino/rfid_reader/i2c_defs.h"
@@ -27,9 +30,7 @@ public:
 	virtual ~Rfid();
 
 	uint16_t readTag(uint8_t y);
-
-private:
-	int readLine(tagLine_t* buf);
+	int readLine(std::vector<uint16_t>* buf);
 };
 
 #endif /* RFID_H_ */

@@ -94,12 +94,16 @@ void loop() {
 		   << Data::d.rotaryEncoder[1]->getPos() << endl;
     switch(mode) {
         case 0:
-            if(!Data::d.motor[0]->isRef()) Data::d.setpointSpeed[0] = 0.0f;
-            if(!Data::d.motor[1]->isRef()) Data::d.setpointSpeed[1] = 0.0f;
+            if(!Data::d.motor[0]->isRef()) {
+                Data::d.rotaryEncoder[0]->setPos(-50.0f);
+                Data::d.setpointSpeed[0] = 0.0f;
+            }
+            if(!Data::d.motor[1]->isRef()) {
+                Data::d.rotaryEncoder[1]->setPos(-270.0f);
+                Data::d.setpointSpeed[1] = 0.0f;
+            }
             if(Data::d.setpointSpeed[0] == 0.0f && Data::d.setpointSpeed[1] == 0.0f) {
                 mode = 1;
-                Data::d.rotaryEncoder[0]->setPos(-50.0f);
-                Data::d.rotaryEncoder[1]->setPos(-270.0f);
                 Data::d.path->newSetpoint(vec2d(0.0f, 0.0f), 
 										  vec2d(Data::d.rotaryEncoder[0]->getPos(), 
 										  Data::d.rotaryEncoder[1]->getPos()), 

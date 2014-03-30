@@ -80,7 +80,9 @@ Playboard::Playboard( fsm::gameFSM* gameFsmPtr ) :
 		{ 55, FieldPtr(new Field(  5,  6, 55)) }
 	})
 {
-
+	ledShow();
+//	sleep(15);
+	_XYDrive->moveMagnet(5, 5);
 }
 
 Playboard::~Playboard() {
@@ -93,7 +95,7 @@ bool Playboard::addPlayer( int32_t colorId) {
 	_players[colorId] = PlayerPtr(new Player(colorId));
 
 	std::stringstream ss;
-	ss << "addPlayer " << colorId << std::endl;
+	ss << "addPlayer " << colorId;
 
 	std::vector< uint16_t > tags( 3 );
 
@@ -111,6 +113,7 @@ bool Playboard::addPlayer( int32_t colorId) {
 
 bool Playboard::delPlayer( int32_t colorId )
 {
+	cout << "delPlayer " << colorId << endl;
 	PlayerMapIt it = _players.find( colorId );
 	if ( it != _players.end( ) )
 	{
@@ -139,7 +142,7 @@ bool Playboard::readPlayersMeepleAtStart( int32_t colorId, std::vector< uint16_t
 			return false;
 		}
 	}
-	std::cout << ss.str( ) << " successful";
+	std::cout << ss.str( ) << " successful" << endl;
 	return true;
 }
 
@@ -160,61 +163,63 @@ bool Playboard::reconfigurePlayersMeeple( int32_t colorId, const std::vector< ui
 
 //void Playboard::moveMeeple(const Meeple& m, const Field& to) {
 void Playboard::moveMeeple(uint8_t from, uint8_t to) {
-	boost::lock_guard<boost::mutex> gard(_mutexXYDrive);
-
-	if(from == to) return;
-
-	MeeplePtr meeple = getMeepleFromFieldId( from );
-	if ( !meeple )
-		return;
-
-	uint8_t color = static_cast<uint8_t>(getColorFromFieldId(from));
-
-	//calculate path
-	Route r;
-	// add actual positions of meeples to block list
-	for(PlayerMapIt pIt = _players.begin(); pIt != _players.end(); ++pIt) {
-		MeepleVec& m = pIt->second->meeples();
-		for(MeepleVecIt mIt = m.begin(); mIt != m.end(); ++mIt)
-			r.block( _fields[(*mIt)->fieldId()]->x(), _fields[(*mIt)->fieldId()]->y());
-	}
-	//calculate and optimize path to target position
-	r.calcPath(_fields[from]->x(), _fields[from]->y(),
-		_fields[to]->x(), _fields[to]->y());
-	r.optimize();
-	//move to start field if necessary
-	if(_fields[from]->x() != _XYDrive->y()
-		|| _fields[from]->y() != _XYDrive->y())
-			r.appendFront(_fields[from]->x(), _fields[from]->y(), false);
-
-	// set LEDs
-	if(to >= 32 && to <= 43) { // if someone is kicked out
-		_ledRing->set(LedRing::BLINK, color);
-	} else {
-		_ledRing->set(LedRing::ON, color);
-	}
-
-	// move along path
-	WaypointVec& wayPts = r.getList();
-	for(WaypointVecIt it = wayPts.begin(); it != wayPts.end(); ++it) {
-		_XYDrive->liftMagnet(it->mag());
-		_XYDrive->moveMagnet(it->x(), it->y());
-	}
-
-	//turn LedRing off
-	_ledRing->set(LedRing::OFF, color);
-
-	//lower magnet
-	_XYDrive->liftMagnet(false);
+	uint8_t color = static_cast<uint8_t>(getColorFromFieldId(static_cast<int32_t>(from)));
+	moveMeepleXY(color, _fields[from]->x(), _fields[from]->y(), to);
 
 	//move meeple
-	meeple->fieldId( to );
+	setMeepleMove(color, from, to);
+}
+
+void Playboard::moveMeepleXY(uint8_t color, uint8_t fromX, uint8_t fromY, uint8_t to) {
+	boost::lock_guard<boost::mutex> gard(_mutexXYDrive);
+
+		if(fromX == _fields[to]->x() && fromY == _fields[to]->y() ) return;
+
+//		MeeplePtr meeple = getMeepleFromFieldId( from );
+//		if ( !meeple )
+//			return;
+
+
+		//calculate path
+		Route r;
+		// add actual positions of meeples to block list
+		for(PlayerMapIt pIt = _players.begin(); pIt != _players.end(); ++pIt) {
+			MeepleVec& m = pIt->second->meeples();
+			for(MeepleVecIt mIt = m.begin(); mIt != m.end(); ++mIt)
+				r.block( _fields[(*mIt)->fieldId()]->x(), _fields[(*mIt)->fieldId()]->y());
+		}
+		//calculate and optimize path to target position
+		r.calcPath(fromX, fromY, _fields[to]->x(), _fields[to]->y());
+		r.optimize();
+		//move to start field if necessary
+		if(fromX != _XYDrive->y() || fromY != _XYDrive->y())
+				r.appendFront(fromX, fromY, false);
+
+		// set LEDs
+		if(to >= 32 && to <= 43) { // if someone is kicked out
+			_ledRing->set(LedRing::BLINK, color);
+		} else {
+			_ledRing->set(LedRing::ON, color);
+		}
+
+		// move along path
+		WaypointVec& wayPts = r.getList();
+		for(WaypointVecIt it = wayPts.begin(); it != wayPts.end(); ++it) {
+			_XYDrive->liftMagnet(it->mag());
+			_XYDrive->moveMagnet(it->x(), it->y());
+		}
+
+		//turn LedRing off
+		_ledRing->set(LedRing::OFF, color);
+
+		//lower magnet
+		_XYDrive->liftMagnet(false);
 }
 
 uint16_t Playboard::readId(uint32_t fieldId ) {
 	boost::lock_guard<boost::mutex> gard(_mutexXYDrive);
 	uint8_t color = static_cast<uint8_t>(getColorFromFieldId(static_cast<int32_t>(fieldId)));
-	_ledStripe->set(LedStripes::ON, color);
+//	_ledStripe->set(LedStripes::ON, color);
 	uint8_t x = _fields[static_cast<uint8_t>(fieldId)]->x();
 	uint8_t y = _fields[static_cast<uint8_t>(fieldId)]->y();
 	std::cout << "reading ID from field " << static_cast<int32_t>(fieldId)
@@ -222,7 +227,7 @@ uint16_t Playboard::readId(uint32_t fieldId ) {
 			  << " at X=" << static_cast<int32_t>(x) << " Y=" << static_cast<int32_t>(y) << std::endl;
 	_XYDrive->liftMagnet(false);
 	_XYDrive->moveCarriage(x);//static_cast<uint8_t>((10-static_cast<int32_t>(x)) * 172 + 250));
-	_ledStripe->set(LedStripes::OFF, color);
+//	_ledStripe->set(LedStripes::OFF, color);
 	return _rfid->readTag(y);
 }
 
@@ -286,23 +291,26 @@ bool Playboard::setMeepleMove( uint8_t color, uint8_t from, uint8_t to )
 }
 
 // TODO optimize! do not search in fieldId order for efficiency
-bool Playboard::searchForMeeple( uint8_t from, uint8_t& illegalPos )
+bool Playboard::searchForMeeple( uint8_t from, uint8_t& _x, uint8_t& _y )
 {
 	// Get the tag id from current playboard inner state where the meeple comes from.
 	// The new position ( to ) is not set yet
 	uint16_t origTagId = getMeepleFromFieldId( static_cast<int32_t>( from ) )->tag();
 
-	// search on all fields
-	for ( FieldMapIt it = _fields.begin( ); it != _fields.end( ); ++it )
-	{
-		// compare the ID just read against the Id of the meeple we are searching for
-		if ( readId( static_cast<uint32_t>(it->first) ) == origTagId )
+	for(uint8_t x = 0; x <= 10; x++) {
+		std::vector<uint16_t> line(11);
+		_XYDrive->moveCarriage(x);
+		_rfid->readLine(&line);
+
+		for(uint8_t y = 0; y <= 10; y++)
 		{
-			// found
-			illegalPos = it->first;
-			return true;
+			if( line[y] == origTagId) {
+				_x = x; _y = y;
+				return true;
+			}
 		}
 	}
+
 	// not found
 	return false;
 }
@@ -311,8 +319,9 @@ int32_t Playboard::getColorFromFieldId( int32_t fieldId) {
 	for(PlayerMapIt pIt = _players.begin(); pIt != _players.end(); ++pIt) {
 		MeepleVec& m = pIt->second->meeples();
 		for(MeepleVecIt mIt = m.begin(); mIt != m.end(); ++mIt) {
-			if ( (*mIt)->fieldId() == fieldId)
+			if ( (*mIt)->fieldId() == fieldId) {
 				return pIt->second->color();
+			}
 		}
 	}
 	return -1;
@@ -327,3 +336,102 @@ MeeplePtr Playboard::getMeepleFromFieldId( int32_t fieldId) {
 	}
 	return MeeplePtr();
 }
+
+uint8_t Playboard::getFieldIdFromXY( uint8_t x, uint8_t y) {
+	FieldMapIt it = _fields.begin();
+	for( ; it != _fields.end() ; ++it ) {
+		if( ( it->second->x() == x ) && ( it->second->y() == y ) )
+			return it->second->no();
+	}
+	return 255;
+}
+
+void Playboard::ledShow() {
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::RED);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::RED       , LedStripes::Corner::STEFAN);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::YELLOW);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::YELLOW    , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::RED       , LedStripes::Corner::ELLLA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::ORANGE);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::ORANGE    , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::YELLOW    , LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::RED       , LedStripes::Corner::MARCEL);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::GREEN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::GREEN     , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::ORANGE    , LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::YELLOW    , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::RED       , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::BLUE);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::BLUE      , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::GREEN     , LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::ORANGE    , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::YELLOW    , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::PINK);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::PINK      , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::BLUE      , LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::GREEN     , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::ORANGE    , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::LIGHT_BLUE);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::PINK      , LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::BLUE      , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::GREEN     , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::WHITE);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::WHITE     , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::PINK      , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::BLUE      , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::WHITE);
+		_ledStripe->set(LedStripes::Mode::BLINK_SLOW, LedStripes::Color::WHITE     , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::BLINK_SLOW, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::BLINK_SLOW, LedStripes::Color::PINK      , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::BLINK_SLOW, LedStripes::Color::BLUE      , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::LIGHT_BLUE);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::PINK);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::BLUE);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::WHITE);
+		_ledStripe->set(LedStripes::Mode::BLINK_FAST, LedStripes::Color::WHITE     , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::BLINK_FAST, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::BLINK_FAST, LedStripes::Color::PINK      , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::BLINK_FAST, LedStripes::Color::BLUE      , LedStripes::Corner::MARTINA);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::LIGHT_BLUE);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::PINK);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::BLUE);
+		sleep(1);
+
+		_ledRing->set(LedRing::Mode::OFF, LedStripes::Color::WHITE);
+		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::WHITE     , LedStripes::Corner::STEFAN);
+		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::ELLLA);
+		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::PINK      , LedStripes::Corner::MARCEL);
+		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::BLUE      , LedStripes::Corner::MARTINA);
+}

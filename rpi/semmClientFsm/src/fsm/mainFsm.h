@@ -4,6 +4,7 @@
 #include "../defs.h"
 
 #include <vector>
+#include <queue>
 #include <algorithm>
 #include <iostream>
 
@@ -96,7 +97,7 @@ namespace fsm // Concrete FSM implementation
         	uint8_t player, dice;
         	bool valid;
         };
-        DiceData _curr, _next;
+        std::queue<DiceData> _ddm;
     };
     // Pick a back-end
     typedef msm::back::state_machine< GameFSM_ > gameFSM;

@@ -15,6 +15,7 @@
 // local includes
 #include "../defs.h"
 #include "playboard/Playboard.h"
+#include "playboard/hardware/Display.h"
 
 #include <boost/msm/back/state_machine.hpp>
 namespace fsm
@@ -44,6 +45,8 @@ public:
 	Mode mode() { return _mode;}
 	const int32_t availableColors( ) { return _availColors; }
 	const int32_t clientColors( ) { return _clientColors; }
+	void addToClientColors(uint8_t colorId);
+	void delFromClientColors(uint8_t colorId);
 
 	PlayboardPtr playboard( ){ return _playboard; }
 	boost::msm::back::state_machine< fsm::GameFSM_ >* mainFSM( ) { return _mainFSM; }

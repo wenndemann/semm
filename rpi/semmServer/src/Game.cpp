@@ -210,6 +210,7 @@ void Game::m_worker() {
 			if(m_mode == 2) {
 				if(buf[0]) {
 					m_availColor |= m_playerMap[buf[0]]->getColor();
+					m_clientMap.find(color)->second->sendSelectColorMode();
 					m_clientMap[cid]->delSelectedColor(buf[0]);
 					printf("  cid=%d colors=%d\n", cid, m_clientMap[cid]->getSelectedColors());
 					delete m_playerMap[color];

@@ -57,8 +57,9 @@ public:
 	bool readPlayersMeepleAtStart( int32_t colorId, std::vector< uint16_t >& tags );
 	bool reconfigurePlayersMeeple( int32_t colorId, const std::vector< uint16_t >& tags );
 
-	void moveMeeple(const Meeple& m, const Field& to);
+//	void moveMeeple(const Meeple& m, const Field& to);
 	void moveMeeple(uint8_t from, uint8_t to);
+	void moveMeepleXY(uint8_t color, uint8_t fromX, uint8_t fromY, uint8_t to);
 	/// read id and set to target color
 	uint16_t readId(uint32_t fieldId);
 
@@ -67,7 +68,7 @@ public:
 	bool setMeepleMove( uint8_t color, uint8_t from, uint8_t to );
 
 	// TODO optimize! do not search in fieldId order for efficiency
-	bool searchForMeeple( uint8_t from, uint8_t& illegalPos );
+	bool searchForMeeple( uint8_t from, uint8_t& _x, uint8_t& _y );
 
 	DisplayPtr display( int32_t id )
 	{
@@ -86,6 +87,7 @@ public:
 
 	int32_t getColorFromFieldId( int32_t fieldId);
 	MeeplePtr getMeepleFromFieldId( int32_t fieldId);
+	uint8_t getFieldIdFromXY( uint8_t x, uint8_t y);
 
 private:
 	DisplayMap _displays;
@@ -97,6 +99,8 @@ private:
 	FieldMap _fields;
 	PlayerMap _players;
 	boost::mutex _mutexXYDrive;
+
+	void ledShow();
 };
 
 #endif /* PLAYBOARD_H_ */

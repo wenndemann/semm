@@ -15,22 +15,11 @@
 
 namespace fsm
 {
-
-	// events
-	/*
-	struct play { };
-	struct end_pause { };
-	struct stop { };
-	struct paus { };
-	struct open_close { };
-	*/
-
 	struct evInitGame { evInitGame( ){ FSM_EVENT_COUT( "evInitGame" ); } };
 	struct evInitColors { evInitColors( ){ FSM_EVENT_COUT( "evInitColors" ); } };
 	struct evClientColors { evClientColors( ){ FSM_EVENT_COUT( "evClientColors" ); } };
-	struct evMove
-	{
-		evMove( uint8_t from, uint8_t to )
+	struct evMove {
+		evMove( uint8_t from,  uint8_t to )
 		: _from( from ), _to( to )
 		{ FSM_EVENT_COUT( "evMove"); }
 		uint8_t _from, _to;
