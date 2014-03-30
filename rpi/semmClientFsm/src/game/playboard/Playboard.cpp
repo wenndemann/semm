@@ -80,8 +80,8 @@ Playboard::Playboard( fsm::gameFSM* gameFsmPtr ) :
 		{ 55, FieldPtr(new Field(  5,  6, 55)) }
 	})
 {
-	//ledShow();
-	sleep(15);
+	ledShow();
+//	sleep(15);
 	_XYDrive->moveMagnet(5, 5);
 }
 

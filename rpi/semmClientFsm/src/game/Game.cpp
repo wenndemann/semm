@@ -66,7 +66,8 @@ void Game::parseCmd( uint8_t* buf, int32_t nR )
 		break;
 
 	case TCP_CMD_SHOW_DIE_SC:
-		_mainFSM->process_event(fsm::evShowDice( buf[ 1 ] ));
+		if( _mainFSM->_ddm.front().player & _clientColors)
+			_mainFSM->process_event(fsm::evShowDice( buf[ 1 ] ));
 		break;
 
 	case TCP_CMD_DICE_SC: {

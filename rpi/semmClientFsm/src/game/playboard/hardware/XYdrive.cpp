@@ -57,10 +57,10 @@ void XYdrive::move( uint8_t x, uint8_t y, int32_t offset )
 	char b[32];
 	bool running = true;
 	float offsetX = 0.0f, offsetY = 0.0f;
-	if(_x < x) offsetX = -30.0f;
-	else if(_x > x) offsetX = 3.0f;
-	if(_y < y) offsetY = -30.0f;
-	else if(_y > y) offsetY = 3.0f;
+	if(_x < x) offsetX = -10.0f;
+	else if(_x > x) offsetX = 10.0f;
+	if(_y < y) offsetY = -10.0f;
+	else if(_y > y) offsetY = 10.0f;
 
 	_x = x; _y = y;
 
