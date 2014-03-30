@@ -149,7 +149,7 @@ void PlayboardScene::addMeeples( uint8_t color, std::map< uint16_t, uint8_t > ta
         // TODO
         const Point2D& pos = _fields[ it->second ];
 
-        _mapPlayerToMeepleItems[ color ][ it->first ]->setOffset( offsetX + factorX * pos.x, offsetY + factorY * pos.y );
+        _mapPlayerToMeepleItems[ color ][ it->first ]->setOffset( _offsetX + _factorX * pos.x, _offsetY + _factorY * pos.y );
         i++;
     }
 
@@ -158,6 +158,6 @@ void PlayboardScene::addMeeples( uint8_t color, std::map< uint16_t, uint8_t > ta
 void PlayboardScene::setMeeplePos( uint8_t color, uint8_t tag, uint8_t toFieldId )
 {
     const Point2D& pos = _fields[ toFieldId ];
-    _mapPlayerToMeepleItems[ color ][ tag ]->setOffset( offsetX + factorX * pos.x, offsetY + factorY * pos.y );
+    _mapPlayerToMeepleItems[ color ][ tag ]->setOffset( _offsetX + _factorX * pos.x, _offsetY + _factorY * pos.y );
 }
 
