@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 #TEMPLATE = app
 TEMPLATE = lib
 CONFIG+= staticlib
+#DEFINES += TEST
 
 TARGET = semmVis
 QMAKE_CXXFLAGS += -std=c++11
@@ -18,11 +19,13 @@ QMAKE_CXXFLAGS += -std=c++11
 SOURCES += main.cpp\
         mainwindow.cpp \
     playboardview.cpp \
-    playboardscene.cpp
+    playboardscene.cpp \
+    pimpl.cpp
 
 HEADERS  += mainwindow.h \
     playboardview.h \
-    playboardscene.h
+    playboardscene.h \
+    pimpl.h
 
 #LIBS += boost_system
 

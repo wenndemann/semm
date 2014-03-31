@@ -164,7 +164,7 @@ void PlayboardScene::addMeeples( uint8_t color, std::map< uint16_t, uint8_t > ta
     }
 }
 
-void PlayboardScene::setMeeplePos( uint8_t color, uint8_t tag, uint8_t toFieldId )
+void PlayboardScene::setMeeplePos( uint8_t color, uint16_t tag, uint8_t toFieldId )
 {
     assert( color == 1 || color == 2 || color == 4 || color == 8 );
     assert( _fields.find( toFieldId ) != _fields.end( ) );

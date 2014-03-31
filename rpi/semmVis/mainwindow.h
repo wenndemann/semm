@@ -1,7 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
+#include <QtWidgets/QMainWindow>
+
+#include "playboardview.h"
+#include "playboardscene.h"
 
 namespace Ui {
 class MainWindow;
@@ -22,6 +25,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+
+    PlayboardView* playboardView;
 };
 
 #endif // MAINWINDOW_H
