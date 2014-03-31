@@ -44,6 +44,7 @@ void PlayboardView::keyPressEvent( QKeyEvent *event )
 
 void PlayboardView::resizeEvent( QResizeEvent *event )
 {
+    Q_UNUSED( event );
     this->fitInView( this->scene( )->sceneRect( ), Qt::KeepAspectRatio );
 }
 

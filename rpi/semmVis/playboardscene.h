@@ -26,16 +26,20 @@ public:
                             uint32_t meepleWidth, uint32_t meepleHeight,
                             QObject *parent = 0);
 
+private:
+
+
+signals:
+
+public slots:
     // add meepes of player color with idtags (uint16_t) on fieldIds (uint8_t)
     void addMeeples( uint8_t color, std::map< uint16_t, uint8_t > tagsFields );
 
     void setMeeplePos( uint8_t color, uint8_t tag, uint8_t toFieldId );
 
-signals:
-
-public slots:
-
 private:
+
+    float _scalePlayboard, _scalePixmapMeeple;
 
     std::map< uint8_t, Point2D > _fields;
     uint32_t _offsetX,
@@ -51,8 +55,6 @@ private:
 
     QGraphicsItemGroup *_groupPlayboard,
                        *_groupMeeples;
-
-    float _scalePlayboard, _scalePixmapMeeple;
 };
 
 #endif // PLAYBOARDSCENE_H

@@ -8,8 +8,11 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+#TEMPLATE = app
+TEMPLATE = lib
+CONFIG+= staticlib
+
 TARGET = semmVis
-TEMPLATE = app
 QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES += main.cpp\

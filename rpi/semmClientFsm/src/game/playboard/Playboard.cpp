@@ -434,4 +434,4 @@ void Playboard::ledShow() {
 		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::ELLLA);
 		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::PINK      , LedStripes::Corner::MARCEL);
 		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::BLUE      , LedStripes::Corner::MARTINA);
-}
+}
