@@ -126,7 +126,7 @@ struct resetMove {
 	template<class EVT, class FSM, class SourceState, class TargetState>
 	void operator()(EVT const&, FSM& fsm, SourceState& src, TargetState& target) {
 		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
-		std::cout << "This move was illegal. Searching for meeple." << endl;
+		std::cout << "This move was illegal. Searching for meeple." << std::endl;
 
 		uint8_t x, y;
 		bool found = fsm._gamePtr->playboard( )->searchForMeeple( src._fromFieldId, x, y );
