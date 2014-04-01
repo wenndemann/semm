@@ -210,16 +210,31 @@ void Game::m_worker() {
 			if(m_mode == 2) {
 				if(buf[0]) {
 					m_availColor |= m_playerMap[buf[0]]->getColor();
-					m_clientMap.find(color)->second->sendSelectColorMode();
-					m_clientMap[cid]->delSelectedColor(buf[0]);
-					printf("  cid=%d colors=%d\n", cid, m_clientMap[cid]->getSelectedColors());
-					delete m_playerMap[color];
-					m_playerMap.erase(color);
-					printf("  player pid=%d deleted\n", buf[0]);
-					m_sendAvailableColorsToAll();
+
+					std::map<int, Client*>::iterator itClient = m_clientMap.begin( );
+					for ( ; itClient != m_clientMap.end( ); ++itClient )
+					{
+						if ( itClient->second->getSelectedColors( ) & buf[0] ) break;
+					}
+
+					if ( itClient != m_clientMap.end( ) )
+					{
+						itClient->second->sendSelectColorMode();
+						m_clientMap[cid]->delSelectedColor(buf[0]);
+						printf("  cid=%d colors=%d\n", cid, m_clientMap[cid]->getSelectedColors());
+
+						if ( m_playerMap.find( color ) != m_playerMap.end( ) )
+						{
+							delete m_playerMap[color];
+							m_playerMap.erase(color);
+						}
+
+						printf("  player pid=%d deleted\n", buf[0]);
+						m_sendAvailableColorsToAll();
+					}
 				}
 				else {
-					printf("\x1b[0;31mERROR: cid=%d trys to delete a unspecified player\x1b[0m\n", cid);
+					//printf("\x1b[0;31mERROR: cid=%d trys to delete a unspecified player\x1b[0m\n", cid);
 					//TODO handle this
 				}
 			}

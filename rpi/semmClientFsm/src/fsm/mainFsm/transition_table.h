@@ -23,9 +23,10 @@ struct transition_table : mpl::vector<
 	Row < SelectColorMode         , evDice         , none                      , none        , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmMoveDone              , evMove         , GmMoveMeeple              , /*TODO meepleMoved*/none, none>,
-	Row < GmMoveDone              , evDice         , GmDice                    , none        , gMyColor        >,
+	Row < GmMoveDone              , evDice         , GmDice                    , popDiceData , gMyColor        >,
+	Row < GmMoveDone              , evDice         , GmWaitForShowDice         , popDiceData , gNotMyColor     >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
-	Row < GmDice                  , evEnter        , GmWaitForShowDice         , none        , none            >,
+	Row < GmDice                  , evEnter        , GmWaitForShowDice         , sendDiceDone, none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmWaitForShowDice       , evShowDice     , GmShowDice                , showDice    , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
@@ -34,7 +35,6 @@ struct transition_table : mpl::vector<
 	Row < GmShowDice              , none           , GmMoveDone                , waitSomeTime, gMoveNotAllowed >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmMoveMeeple            , evMoveDone     , GmMoveDone                , none        , none            >,
-	Row < GmMoveMeeple            , evMove         , none                      , Defer       , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmCheckMovedMeeple      , evMeepleOK     , GmSendMovedMeeple         , sendMovedMeeple, none         >,
 	Row < GmCheckMovedMeeple      , evMeepleNotOK  , GmShowDice                , none        , none            >,

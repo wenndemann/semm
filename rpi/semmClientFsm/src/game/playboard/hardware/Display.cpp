@@ -92,6 +92,8 @@ void Display::handler() {
 //		debug("display read error, n = %d\n",n);
 	}
 	if(m_encoder < 255 && m_encoder > 0) {
+		setPictures( I2C_DBEN_PIC_WAIT );
+
 		if ( m_encoder == 1 )
 		{
 			std::cout << "Display " << pow(2,static_cast<int32_t>(getI2cAddr())-80) << " pressed Enter" << std::endl;

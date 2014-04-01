@@ -26,16 +26,29 @@ struct gMoveNotAllowed {
 struct gMyColor {
 	template<class EVT, class FSM, class SourceState, class TargetState>
 	bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt) {
-		if(fsm._ddm.size() > 1)
+
+		bool thisClient = false;
+		if ( !fsm._ddm.empty( ) )
 		{
-			std::cout << "pop from DiceData quere" << std::endl;
-			fsm._ddm.pop();
+			uint8_t player = ( fsm._ddm.size( ) > 1 ) ? fsm._ddm[ 1 ].player : fsm._ddm[ 0 ].player;
+			fsm._gamePtr->playboard()->ledStripe()->set(LedStripes::Mode::ON, player);
+			thisClient = static_cast<uint8_t>(fsm._gamePtr->clientColors( ) ) & player;
 		}
-
-		fsm._gamePtr->playboard()->ledStripe()->set(LedStripes::Mode::ON, fsm._ddm.front( ).player);
-
-		bool thisClient = static_cast<uint8_t>(fsm._gamePtr->clientColors( ) ) & fsm._ddm.front( ).player;
 		return thisClient;
+	}
+};
+struct gNotMyColor {
+	template<class EVT, class FSM, class SourceState, class TargetState>
+	bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt) {
+
+		bool notThisClient = false;
+		if ( !fsm._ddm.empty( ) )
+		{
+			uint8_t player = ( fsm._ddm.size( ) > 1 ) ? fsm._ddm[ 1 ].player : fsm._ddm[ 0 ].player;
+			fsm._gamePtr->playboard()->ledStripe()->set(LedStripes::Mode::ON, player);
+			notThisClient = !(static_cast<uint8_t>(fsm._gamePtr->clientColors( ) ) & player);
+		}
+		return notThisClient;
 	}
 };
 /*

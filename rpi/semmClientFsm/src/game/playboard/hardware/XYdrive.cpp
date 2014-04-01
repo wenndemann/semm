@@ -40,6 +40,7 @@ void XYdrive::moveMagnet(uint8_t x, uint8_t y)
 void XYdrive::moveCarriage(uint8_t x)
 {
 	move( x, _y, 200 );
+	_x = 11;
 }
 
 void XYdrive::resetDev() {

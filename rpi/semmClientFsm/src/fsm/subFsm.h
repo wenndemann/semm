@@ -114,8 +114,11 @@ namespace fsm // Concrete FSM implementation
 
 				fsm._gamePtr->playboard()->display( fsm._color_id )->setPictures( I2C_DBEN_PIC_DISABLED );
 
-				if ( !fsm._gamePtr->playboard()->addPlayer( fsm._color_id ) )
-					fsm._gamePtr->mainFSM()->_tcpIp->sendDelColor( fsm._color_id );
+				 while( !fsm._gamePtr->playboard()->addPlayer( fsm._color_id ) )
+				 { boost::this_thread::sleep( boost::posix_time::seconds( 1 ) ); }
+
+				//if ( !fsm._gamePtr->playboard()->addPlayer( fsm._color_id ) )
+				//	fsm._gamePtr->mainFSM()->_tcpIp->sendDelColor( fsm._color_id );
 			}
 			template<class Event, class FSM>
 			void on_exit(Event const&, FSM& fsm) {

@@ -66,25 +66,20 @@ void Game::parseCmd( uint8_t* buf, int32_t nR )
 		break;
 
 	case TCP_CMD_SHOW_DIE_SC:
-		if( _mainFSM->_ddm.front().player & _clientColors)
+		//if( _mainFSM->_currDD.player & _clientColors)
 			_mainFSM->process_event(fsm::evShowDice( buf[ 1 ] ));
 		break;
 
 	case TCP_CMD_DICE_SC: {
 		// The GmMoveDone does the dive event itself if it has already valid data
-		fsm::GameFSM_::DiceData dd;
-		dd.player = buf[ 1 ];
-		dd.dice = buf[ 2 ];
-		_mainFSM->_ddm.push(dd);
-//		_mainFSM->_next.player = buf[ 1 ];
-//		_mainFSM->_next.dice = buf[ 2 ];
+		_mainFSM->_ddm.push_back( fsm::GameFSM_::DiceData( buf[ 1 ], buf[ 2 ]));
 		std::cout << "Next dice: color " << static_cast<int32_t>( buf[ 1 ] )
 				  << " pips: " << static_cast<int32_t>( buf[ 2 ] ) << std::endl;
-//		if ( !_mainFSM->_next.valid )
-//		{
-//			_mainFSM->_next.valid = true;
+
+		if ( _mainFSM->_ddm.size( ) == 1 )
+		{
 			_mainFSM->process_event(fsm::evDice( ));
-//		}
+		}
 
 	}
 		break;

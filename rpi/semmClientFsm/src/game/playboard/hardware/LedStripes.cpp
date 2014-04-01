@@ -14,11 +14,11 @@ int LedStripes::set(uint8_t mode, uint8_t color) {
 }
 
 int LedStripes::set(uint8_t mode, uint8_t color, uint8_t corner) {
-	cout << "set led stripe to mode " << static_cast<int32_t>(mode)
-		 << "with color " << static_cast<int32_t>(color)
-		 << "in corner " << static_cast<int32_t>(corner) << endl;
+	//cout << "set led stripe to mode " << static_cast<int32_t>(mode)
+	//	 << "with color " << static_cast<int32_t>(color)
+	//	 << "in corner " << static_cast<int32_t>(corner) << endl;
 
-//	return 0; // remove if led will work
+	return 0; // remove if led will work
 
 	uint8_t buf[2];
 	buf[0] = color;

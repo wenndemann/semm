@@ -129,15 +129,9 @@ struct GmMoveDone : public msm::front::state<>
 		}
 
 		// if the dice data for the next turn has been sent already
-		// save it to the current dice data and do the dice event
-		// to start the next turn
-//		if ( fsm._next.valid &&
-		if ( fsm.get_deferred_queue( ).size( )  == 0  && fsm._ddm.size() > 0)
+		// do the dice event to start the next turn
+		if ( fsm.get_deferred_queue( ).size( ) == 0 && fsm._ddm.size() > 0 )
 		{
-//			fsm._ddm.front().player = fsm._next.player;
-//			fsm._ddm.front().dice = fsm._next.dice;
-//			fsm._ddm.front().valid = true;
-			//fsm._next.valid = false;
 			std::cout << "Initiaizing the next DiceData with color " << static_cast<int32_t>(fsm._ddm.front().player)
 					  << " and dice result " << static_cast<int32_t>(fsm._ddm.front().dice) << std::endl;
 			fsm.process_event( fsm::evDice( ) );
@@ -151,23 +145,23 @@ struct GmMoveDone : public msm::front::state<>
 
 struct GmDice: public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evMove, fsm::evDice> deferred_events;
+	typedef mpl::vector<fsm::evMove> deferred_events;
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
 	void on_entry(Event const& ev, FSM& fsm) {
 		std::cout << "-> GmDice" << std::endl;
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
-		Playboard::DisplayMapIt displayMapIt = displayMap.find( static_cast<int32_t>(fsm._ddm.front().player) );
+		Playboard::DisplayMapIt displayMapIt = displayMap.find( static_cast<int32_t>(fsm._currDD.player) );
 		if ( displayMapIt == displayMap.end( ) )
 		{
-			std::cout << "No player " << static_cast<int32_t>(fsm._ddm.front().player)
-					  << " to move on dice " << static_cast<int32_t>(fsm._ddm.front().dice) << std::endl;
+			std::cout << "No player " << static_cast<int32_t>(fsm._currDD.player)
+					  << " to move on dice " << static_cast<int32_t>(fsm._currDD.dice) << std::endl;
 		}
 
 		displayMapIt->second->setPictureDice( 0 ); //ev._dice );
 
-		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::ON, fsm._ddm.front().player);
+		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::ON, fsm._currDD.player);
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM& fsm) {
@@ -182,7 +176,6 @@ struct GmWaitForShowDice: public msm::front::state<>
 	template<class Event, class FSM>
 	void on_entry(Event const&, FSM& fsm) {
 		std::cout << "-> GmWaitForShowDice" << std::endl;
-		fsm._tcpIp->sendDieDone( fsm._ddm.front().player );
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM&) {
@@ -201,10 +194,11 @@ struct GmShowDice: public msm::front::state<>
 		Playboard::DisplayMapIt it = displayMap.begin( );
 		for ( ; it != displayMap.end( ); ++it )
 		{
-			if ( _moveAllowed && it == displayMap.find( static_cast<int32_t>(fsm._ddm.front().player) ) )
-				it->second->setPictureDice( fsm._ddm.front().dice, true );
+			if ( _moveAllowed && it == displayMap.find( static_cast<int32_t>(fsm._currDD.player) )
+			    && ( fsm._currDD.player & static_cast<uint8_t>(fsm._gamePtr->clientColors( ) ) ) )
+			{ it->second->setPictureDice( fsm._currDD.dice, true ); }
 			else
-				it->second->setPictureDice( fsm._ddm.front().dice );
+			{ it->second->setPictureDice( fsm._currDD.dice ); }
 		}
 	}
 	template<class Event, class FSM>
@@ -216,7 +210,7 @@ struct GmShowDice: public msm::front::state<>
 
 struct GmMoveMeeple : public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evMove, fsm::evDice> deferred_events;
+	typedef mpl::vector<fsm::evMove> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
@@ -249,7 +243,7 @@ struct GmCheckMovedMeeple: public msm::front::state<>
 			it->second->setPictures( I2C_DBEN_PIC_WAIT );
 		}
 
-		uint8_t fieldId = fsm._gamePtr->playboard()->checkMovedMeeple( fsm._ddm.front().player );
+		uint8_t fieldId = fsm._gamePtr->playboard()->checkMovedMeeple( fsm._currDD.player );
 		if ( fieldId == 255 ) // no moved meeple found
 		{
 			fsm.process_event( fsm::evMeepleNotOK( ) );
@@ -276,9 +270,9 @@ struct GmSendMovedMeeple: public msm::front::state<>
 	void on_entry(Event const& ev, FSM& fsm) {
 		std::cout << "-> GmSendMovedMeeple" << std::endl;
 
-		std::cout << "Sending select meeple color " << static_cast<int32_t>(fsm._ddm.front().player)
+		std::cout << "Sending select meeple color " << static_cast<int32_t>(fsm._currDD.player)
 				  << " from field " << static_cast<int32_t>(_fromFieldId) << std::endl;
-		fsm._tcpIp->sendSelectMeeple( fsm._ddm.front().player, _fromFieldId );
+		fsm._tcpIp->sendSelectMeeple( fsm._currDD.player, _fromFieldId );
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM&) {
@@ -290,7 +284,7 @@ struct GmSendMovedMeeple: public msm::front::state<>
 
 struct GmCheckDestination: public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evDice, fsm::evMove> deferred_events;
+	typedef mpl::vector<fsm::evMove> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
@@ -322,7 +316,7 @@ struct GmCheckDestination: public msm::front::state<>
 
 struct GmSearchForMeeple: public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evDice, fsm::evMove> deferred_events;
+	typedef mpl::vector<fsm::evMove> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
@@ -357,7 +351,7 @@ struct GmSearchForMeeple: public msm::front::state<>
 
 struct GmFoundMeeple: public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evDice, fsm::evMove> deferred_events;
+	typedef mpl::vector<fsm::evMove> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
@@ -365,7 +359,7 @@ struct GmFoundMeeple: public msm::front::state<>
 		std::cout << "-> GmFoundMeeple" << std::endl;
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
-		Playboard::DisplayMapIt it = displayMap.find( fsm._ddm.front().player );
+		Playboard::DisplayMapIt it = displayMap.find( fsm._currDD.player );
 		if ( it != displayMap.end( ) )
 		{	it->second->setPictures( I2C_DBEN_PIC_MOVE_ILLEGAL );	}
 
@@ -373,8 +367,8 @@ struct GmFoundMeeple: public msm::front::state<>
 		std::cout << "move meeple from illegal fieldId "
 			<< "(" << static_cast<int32_t>(_x) << "/" << static_cast<int32_t>(_y) << ")"
 			<< " to " << " actual target fieldId " << static_cast<int32_t>(_to) << std::endl;
-		fsm._gamePtr->playboard( )->moveMeepleXY( fsm._ddm.front().player, _x, _y, _to );
-		fsm._gamePtr->playboard( )->setMeepleMove( fsm._ddm.front().player, _from, _to);
+		fsm._gamePtr->playboard( )->moveMeepleXY( fsm._currDD.player, _x, _y, _to );
+		fsm._gamePtr->playboard( )->setMeepleMove( fsm._currDD.player, _from, _to);
 
 		//boost::this_thread::sleep( boost::posix_time::seconds( 1 ) );
 
@@ -390,7 +384,7 @@ struct GmFoundMeeple: public msm::front::state<>
 
 struct GmMoveMeeplesByHand: public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evDice, fsm::evMove> deferred_events;
+	typedef mpl::vector<fsm::evMove> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
@@ -398,7 +392,7 @@ struct GmMoveMeeplesByHand: public msm::front::state<>
 		std::cout << "-> GmMoveMeeplesByHand" << std::endl;
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
-		Playboard::DisplayMapIt it = displayMap.find( fsm._ddm.front().player );
+		Playboard::DisplayMapIt it = displayMap.find( fsm._currDD.player );
 		if ( it != displayMap.end( ) )
 		{	it->second->setPictures( I2C_DBEN_PIC_PREPARE );	}
 	}
@@ -412,7 +406,7 @@ struct GmMoveMeeplesByHand: public msm::front::state<>
 
 struct GmReconfigureMeepleIDs: public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evDice, fsm::evMove> deferred_events;
+	typedef mpl::vector<fsm::evMove> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>
@@ -420,14 +414,14 @@ struct GmReconfigureMeepleIDs: public msm::front::state<>
 		std::cout << "-> GmReconfigureMeepleIDs" << std::endl;
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
-		Playboard::DisplayMapIt it = displayMap.find( fsm._ddm.front().player );
+		Playboard::DisplayMapIt it = displayMap.find( fsm._currDD.player );
 		if ( it != displayMap.end( ) )
 		{	it->second->setPictures( I2C_DBEN_PIC_WAIT );	}
 
 		// All meeple of current player should be on their starting positions.
 		// Check it by reading their tags and reconfigure if successful.
 		std::vector< uint16_t > tags( 3 );
-		if ( fsm._gamePtr->playboard( )->readPlayersMeepleAtStart( static_cast<int32_t>(fsm._ddm.front().player), tags ) )
+		if ( fsm._gamePtr->playboard( )->readPlayersMeepleAtStart( static_cast<int32_t>(fsm._currDD.player), tags ) )
 		{
 			// save the new "to" field to the missing's meeple's "to" field, to move the meeples
 			// to the correct position in the next state when moving them from the starting position
@@ -435,7 +429,7 @@ struct GmReconfigureMeepleIDs: public msm::front::state<>
 
 			// saving all "to" fields
 			Playboard::PlayerMapIt playerIt =
-				fsm._gamePtr->playboard( )->players( ).find( static_cast<int32_t>(fsm._ddm.front().player) );
+				fsm._gamePtr->playboard( )->players( ).find( static_cast<int32_t>(fsm._currDD.player) );
 			// error handling
 			if ( playerIt == fsm._gamePtr->playboard( )->players( ).end( ) )
 			{	 fsm.process_event( fsm::evMeepleNotOK( ) ); 	}
@@ -451,7 +445,7 @@ struct GmReconfigureMeepleIDs: public msm::front::state<>
 			for ( uint8_t i = 0; i < meeples.size( ); i++ )
 			{ _toAll.at( i ) = static_cast<uint8_t>(meeples.at( i )->fieldId( )); }
 
-			if ( fsm._gamePtr->playboard( )->reconfigurePlayersMeeple( static_cast<int32_t>(fsm._ddm.front().player), tags ) )
+			if ( fsm._gamePtr->playboard( )->reconfigurePlayersMeeple( static_cast<int32_t>(fsm._currDD.player), tags ) )
 
 			// saving the new fromFieldIds
 			// error handling
@@ -481,7 +475,7 @@ struct GmReconfigureMeepleIDs: public msm::front::state<>
 
 struct GmMoveMeeplesToCorrectPos: public msm::front::state<>
 {
-	typedef mpl::vector<fsm::evDice, fsm::evMove> deferred_events;
+	typedef mpl::vector<fsm::evMove> deferred_events;
 
 	// every (optional) entry/exit methods get the event passed.
 	template<class Event, class FSM>

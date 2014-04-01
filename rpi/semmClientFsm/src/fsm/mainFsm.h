@@ -3,6 +3,8 @@
 
 #include "../defs.h"
 
+#include "../../../semmVis/pimpl.h"
+
 #include <vector>
 #include <queue>
 #include <algorithm>
@@ -48,6 +50,7 @@ namespace fsm // Concrete FSM implementation
     {
     	GameFSM_( TcpIp* tcpIp )
     	: _tcpIp( tcpIp )
+    	//, _gui( new pimpl( ) )
     	{ }
 
     	template <class Event,class FSM>
@@ -88,16 +91,18 @@ namespace fsm // Concrete FSM implementation
         }
 
         TcpIp* _tcpIp;
+        boost::shared_ptr< pimpl > _gui;
         boost::shared_ptr< Game > _gamePtr;
         SsmsVecPtr _ssms;
 
         struct DiceData
         {
-        	DiceData( ) : player( 0 ), dice( 0 ), valid( false ){ }
+        	DiceData( ) : player( 0 ), dice( 0 ) { }
+        	DiceData( uint8_t _player, uint8_t _dice ) : player( _player ), dice( _dice ) { }
         	uint8_t player, dice;
-        	bool valid;
         };
-        std::queue<DiceData> _ddm;
+        std::deque<DiceData> _ddm;
+        DiceData _currDD;
     };
     // Pick a back-end
     typedef msm::back::state_machine< GameFSM_ > gameFSM;
