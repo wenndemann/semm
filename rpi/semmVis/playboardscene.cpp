@@ -1,6 +1,7 @@
 #include "playboardscene.h"
 #include <QFile>
 #include <assert.h>
+#include <iostream>
 
 
 PlayboardScene::PlayboardScene(uint32_t playboardWidth, uint32_t playboardHeight,
@@ -78,11 +79,19 @@ PlayboardScene::PlayboardScene(uint32_t playboardWidth, uint32_t playboardHeight
     _groupPlayboard( NULL ),
     _groupMeeples( NULL )
 {
-    QFile filePlayboard( "../semmVis/pix/playboard/Feld.png" );
+    // semmVis Test version
+    /*QFile filePlayboard( "../semmVis/pix/playboard/Feld.png" );
     QFile fileMeeple1( "../semmVis/pix/meeples/blue.png" );
     QFile fileMeeple2( "../semmVis/pix/meeples/pink.png" );
     QFile fileMeeple4( "../semmVis/pix/meeples/lightblue.png" );
-    QFile fileMeeple8( "../semmVis/pix/meeples/black.png" );
+    QFile fileMeeple8( "../semmVis/pix/meeples/black.png" );*/
+
+    // semmClientFsm version
+    QFile filePlayboard( "../../semmVis/pix/playboard/Feld.png" );
+    QFile fileMeeple1( "../../semmVis/pix/meeples/blue.png" );
+    QFile fileMeeple2( "../../semmVis/pix/meeples/pink.png" );
+    QFile fileMeeple4( "../../semmVis/pix/meeples/lightblue.png" );
+    QFile fileMeeple8( "../../semmVis/pix/meeples/black.png" );
 
     assert( filePlayboard.exists( ) );
     assert( fileMeeple1.exists( ) );
@@ -124,14 +133,15 @@ PlayboardScene::PlayboardScene(uint32_t playboardWidth, uint32_t playboardHeight
     this->addItem( _groupMeeples );
 
     // TODO experimental for testing purposes
+    /*
     addMeeples( 1, std::map< uint16_t, uint8_t >{ {10, 41}, {11, 42}, {12, 43} } );
     addMeeples( 2, std::map< uint16_t, uint8_t >{ {7, 38}, {8, 39}, {9, 40} } );
     addMeeples( 4, std::map< uint16_t, uint8_t >{ {4, 35}, {5, 36}, {6, 37} } );
     addMeeples( 8, std::map< uint16_t, uint8_t >{ {1, 32}, {2, 33}, {3, 34} } );
-
+    */
 }
 
-void PlayboardScene::addMeeples( uint8_t color, std::map< uint16_t, uint8_t > tagsPoint2Ds )
+void PlayboardScene::addMeeples( uint8_t color, semmVis::mapTagField tagsPoint2Ds )
 {
     assert( tagsPoint2Ds.size( ) == 3 );
     assert( color == 1 || color == 2 || color == 4 || color == 8 );

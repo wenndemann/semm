@@ -27,12 +27,8 @@ private:
     void worker( );
 
     MainWindow* _mainWindow;
-    PlayboardView* _view;
-    PlayboardScene* _scene;
 
     boost::thread* _thread;
-
-    typedef std::map< uint16_t, uint8_t > mapTagField;
 };
 
 #endif // PIMPL_H

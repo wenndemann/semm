@@ -21,9 +21,11 @@ public:
     void initializeVisualization( uint32_t playboardWidth, uint32_t playboardHeight,
                                   uint32_t meepleWidth, uint32_t meepleHeight );
 
+    PlayboardView* view( ){ return playboardView; }
 private slots:
 
-private:
+//private:
+public:
     Ui::MainWindow *ui;
 
     PlayboardView* playboardView;

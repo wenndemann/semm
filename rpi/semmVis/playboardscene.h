@@ -4,6 +4,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsItemGroup>
+#include "defs.h"
 
 class PlayboardScene : public QGraphicsScene
 {
@@ -33,7 +34,7 @@ signals:
 
 public slots:
     // add meepes of player color with idtags (uint16_t) on fieldIds (uint8_t)
-    void addMeeples( uint8_t color, std::map< uint16_t, uint8_t > tagsFields );
+    void addMeeples( uint8_t color, semmVis::mapTagField tagsFields );
 
     void setMeeplePos( uint8_t color, uint16_t tag, uint8_t toFieldId );
 

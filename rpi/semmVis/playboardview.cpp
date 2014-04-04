@@ -1,9 +1,11 @@
 #include "playboardview.h"
 #include <QGridLayout>
+#include <iostream>
 
 PlayboardView::PlayboardView(QWidget *parent) :
   QGraphicsView(parent),
-  _parent( parent )
+  _parent( parent ),
+  playboardScene( NULL )
 {
     this->setRenderHint( QPainter::Antialiasing, true );
     this->setRenderHint( QPainter::HighQualityAntialiasing, true );
@@ -17,7 +19,6 @@ void PlayboardView::initializePlayboard( uint32_t playboardWidth, uint32_t playb
     playboardScene = new PlayboardScene( playboardWidth, playboardHeight,
                                          meepleWidth, meepleHeight,
                                          this );
-
     setGraphicsScene( playboardScene );
 }
 

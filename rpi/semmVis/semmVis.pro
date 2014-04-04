@@ -25,7 +25,8 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     playboardview.h \
     playboardscene.h \
-    pimpl.h
+    pimpl.h \
+    defs.h
 
 #LIBS += boost_system
 
