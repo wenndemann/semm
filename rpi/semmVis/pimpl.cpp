@@ -56,7 +56,7 @@ void pimpl::setMeeplePos( uint8_t color, uint16_t tag, uint8_t toFieldId )
 {
 
 
-    QMetaObject::invokeMethod( _mainWindow->view( )->scene( ), "addMeeples",
+    QMetaObject::invokeMethod( _mainWindow->view( )->scene( ), "setMeeplePos",
                                Qt::QueuedConnection,
                                Q_ARG( uint8_t, color ),
                                Q_ARG( uint16_t, tag ),
