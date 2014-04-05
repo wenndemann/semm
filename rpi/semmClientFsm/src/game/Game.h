@@ -53,7 +53,7 @@ public:
 
 	void parseCmd( uint8_t* buf, int32_t nR );
 
-private:
+public: //private: // TODO for testing purposes public
 	boost::msm::back::state_machine< fsm::GameFSM_ >* _mainFSM;
 	PlayboardPtr _playboard;
 

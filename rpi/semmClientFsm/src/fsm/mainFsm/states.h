@@ -69,12 +69,14 @@ struct SelectColorMode : public msm::front::state<>
 		std::cout << "-> SelectColorMode" << std::endl;
 
 		for ( int32_t i = 0; i < fsm._ssms->size( ); i++ )
-		{	fsm._ssms->at( i ).reset( new fsm::selectColorFSM( pow(2,i), fsm._gamePtr ) );	}
+		{	fsm._ssms->at( i ).reset( new fsm::selectColorFSM( pow(2,i), fsm._gamePtr, fsm._gui ) );	}
 		std::cout << "   subFSMs created!" << std::endl;
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
 		for ( Playboard::DisplayMapIt it = displayMap.begin( ); it != displayMap.end( ); ++it )
-		{	it->second->enableSubFSMEvents( );	}
+		{
+			it->second->enableSubFSMEvents( );
+		}
 
 		for ( boost::uint32_t i = 0; i < fsm._ssms->size( ); i++ )
 		{
@@ -216,6 +218,11 @@ struct GmMoveMeeple : public msm::front::state<>
 	template<class Event, class FSM>
 	void on_entry(Event const& ev, FSM& fsm) {
 		std::cout << "-> GmMoveMeeple" << std::endl;
+
+		// visualization
+		uint8_t color = fsm._gamePtr->playboard( )->getColorFromFieldId( ev._from );
+		uint16_t tag = fsm._gamePtr->playboard( )->getMeepleFromFieldId( ev._from )->tag( );
+		fsm._gui->setMeeplePos( color, tag, ev._to );
 
 		fsm._gamePtr->playboard( )->moveMeeple( ev._from, ev._to );
 

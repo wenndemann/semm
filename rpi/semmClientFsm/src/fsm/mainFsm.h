@@ -50,7 +50,7 @@ namespace fsm // Concrete FSM implementation
     {
     	GameFSM_( TcpIp* tcpIp )
     	: _tcpIp( tcpIp )
-    	//, _gui( new pimpl( ) )
+    	, _gui( new pimpl( ) )
     	{ }
 
     	template <class Event,class FSM>

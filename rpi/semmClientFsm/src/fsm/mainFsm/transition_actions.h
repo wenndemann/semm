@@ -98,6 +98,11 @@ struct meepleMoved {
 	void operator()(EVT const&, FSM& fsm, SourceState& src, TargetState& target) {
 		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
 
+		// visualization
+		uint8_t color = fsm._currDD.player;
+		uint16_t tag = fsm._gamePtr->playboard( )->getMeepleFromFieldId( src._from )->tag( );
+		fsm._gui->setMeeplePos( color, tag, src._to );
+
 		fsm._gamePtr->playboard( )->setMeepleMove( fsm._currDD.player, src._from, src._to );
 	}
 };
@@ -150,7 +155,7 @@ struct resetMove {
 			if ( it != displayMap.end( ) )
 				{	it->second->setPictures( I2C_DBEN_PIC_NOT_FOUND );	}
 			boost::this_thread::sleep( boost::posix_time::seconds( 5 ) );
-			bool found = fsm._gamePtr->playboard( )->searchForMeeple( src._fromFieldId, x, y );
+			found = fsm._gamePtr->playboard( )->searchForMeeple( src._fromFieldId, x, y );
 		}
 
 		std::cout << "  Found illegal moved meeple and set it "

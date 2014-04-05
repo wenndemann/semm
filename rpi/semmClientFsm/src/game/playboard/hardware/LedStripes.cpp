@@ -24,8 +24,8 @@ int LedStripes::set(uint8_t mode, uint8_t color, uint8_t corner) {
 	buf[0] = color;
 	buf[1] = corner;
 
-	I2c::write(mode, buf, 2);
-	usleep(10000);
+	//I2c::write(mode, buf, 2);
+	//usleep(10000);
 	return 0;
 }
 
