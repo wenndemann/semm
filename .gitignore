@@ -11,3 +11,6 @@
 *.lai
 *.la
 *.a
+
+# gedit backup files
+*.*~
