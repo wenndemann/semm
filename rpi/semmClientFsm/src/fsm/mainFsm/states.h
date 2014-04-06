@@ -116,11 +116,7 @@ struct GmMoveDone : public msm::front::state<>
 
 //		for ( uint8_t i = 0; i < 4; i++ )
 //		{ fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, static_cast<uint8_t>(1<<i)); }
-		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, LedStripes::Corner::MARTINA);
-		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, LedStripes::Corner::MARCEL);
-		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, LedStripes::Corner::ELLLA);
-		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, LedStripes::Corner::STEFAN);
-
+		fsm._gamePtr->playboard( )->ledStripe( )->setAllOff( );
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
 		Playboard::DisplayMapIt it = displayMap.begin( );

@@ -100,7 +100,6 @@ void loop ()
     SoftPWMSet(redPin1, (byte)outRot);                  //Ausgabewerte an PWM übergeben
     SoftPWMSet(greenPin1, (byte)outGruen);
     SoftPWMSet(bluePin1, (byte)outBlau);
-      delay(62);    
     
     outRot = out2[RED][i];        //ausgabe Werte aus Array laden und mit "Dimmfaktor" multiplizieren
     outGruen = out2[GREEN][i];
@@ -111,7 +110,6 @@ void loop ()
     SoftPWMSet(redPin2, (byte)outRot);                  //Ausgabewerte an PWM übergeben
     SoftPWMSet(greenPin2, (byte)outGruen);
     SoftPWMSet(bluePin2, (byte)outBlau);
-      delay(62);    
     
     outRot = out3[RED][i];        //ausgabe Werte aus Array laden und mit "Dimmfaktor" multiplizieren
     outGruen = out3[GREEN][i] ;
@@ -122,7 +120,6 @@ void loop ()
     SoftPWMSet(redPin3, (byte)outRot);                  //Ausgabewerte an PWM übergeben
     SoftPWMSet(greenPin3, (byte)outGruen);
     SoftPWMSet(bluePin3, (byte)outBlau);
-      delay(62);    
     
     outRot = out4[RED][i] ;        //ausgabe Werte aus Array laden und mit "Dimmfaktor" multiplizieren
     outGruen = out4[GREEN][i];
@@ -133,7 +130,11 @@ void loop ()
     SoftPWMSet(redPin4, (byte)outRot);                  //Ausgabewerte an PWM übergeben
     SoftPWMSet(greenPin4, (byte)outGruen);
     SoftPWMSet(bluePin4, (byte)outBlau);
-      delay(62);    
+
+
+
+    delay(250);    
+
 
     if(data) {
       for(int i = 0; i < 8; i++)
