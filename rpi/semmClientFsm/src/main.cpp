@@ -80,7 +80,7 @@ void start_game( const std::string ipaddr )
 	fsm::gameFSM p( &t );
 	p.start( );
 
-	test( p );
+	//test( p );
 
 
 	while( 1 )

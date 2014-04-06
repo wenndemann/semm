@@ -228,8 +228,8 @@ uint16_t Playboard::readId(uint32_t fieldId ) {
 	_XYDrive->liftMagnet(false);
 	_XYDrive->moveCarriage(x);//static_cast<uint8_t>((10-static_cast<int32_t>(x)) * 172 + 250));
 //	_ledStripe->set(LedStripes::OFF, color);
-	//return _rfid->readTag(y);
-	return rand( ) % 100 + 1;
+	return _rfid->readTag(y);
+	//return rand( ) % 100 + 1;
 }
 
 uint8_t Playboard::checkMovedMeeple( uint8_t color )

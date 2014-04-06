@@ -14,11 +14,11 @@ Display::Display(uint8_t i2cAddr, long msec, fsm::gameFSM* gameFsmPtr)
 	m_readEnable = false;
 	m_blocked = false;
 	m_encoder = 0;
-	//m_strand = new boost::asio::strand(m_io);
-	//m_timer = new boost::asio::deadline_timer(m_io, boost::posix_time::milliseconds(m_periode));
-	//m_timer->async_wait(m_strand->wrap(boost::bind(&Display::handler, this)));
-	//m_handlerThread = new boost::thread(boost::bind(&boost::asio::io_service::run, &m_io));
-	//setPictures(I2C_DBEN_PIC_SEMM);
+	m_strand = new boost::asio::strand(m_io);
+	m_timer = new boost::asio::deadline_timer(m_io, boost::posix_time::milliseconds(m_periode));
+	m_timer->async_wait(m_strand->wrap(boost::bind(&Display::handler, this)));
+	m_handlerThread = new boost::thread(boost::bind(&boost::asio::io_service::run, &m_io));
+	setPictures(I2C_DBEN_PIC_SEMM);
 }
 
 Display::~Display() {
@@ -42,7 +42,7 @@ int Display::setPictures(uint8_t number) {
 //	while((m_actPicNumber >= I2C_DBEN_PIC_DICE_1) && (m_actPicNumber <= I2C_DBEN_PIC_DICE_6) && !m_encoder)
 //		usleep(250000);
 	m_actPicNumber = number;
-	//I2c::write(I2C_DBEN_PICTURE, &number, sizeof number);
+	I2c::write(I2C_DBEN_PICTURE, &number, sizeof number);
 	//if(m_cliDisplay != NULL) m_cliDisplay->callPicture(number);
 //	std::cout << "set display " << pow(2,static_cast<int32_t>(getI2cAddr())-80) << " to pic " << static_cast<int32_t>(number) << std::endl;
 	return 0;
@@ -81,7 +81,7 @@ char* Display::getName(uint8_t player) {
 uint8_t Display::getVersion() {
 	uint8_t version = 0;
 
-	//I2c::read(I2C_DBEN_VERSION, &version, sizeof version);
+	I2c::read(I2C_DBEN_VERSION, &version, sizeof version);
 	return version;
 }
 

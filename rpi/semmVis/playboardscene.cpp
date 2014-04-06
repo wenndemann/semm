@@ -87,11 +87,11 @@ PlayboardScene::PlayboardScene(uint32_t playboardWidth, uint32_t playboardHeight
     QFile fileMeeple8( "../semmVis/pix/meeples/black.png" );*/
 
     // semmClientFsm version
-    QFile filePlayboard( "../../semmVis/pix/playboard/Feld.png" );
-    QFile fileMeeple1( "../../semmVis/pix/meeples/blue.png" );
-    QFile fileMeeple2( "../../semmVis/pix/meeples/pink.png" );
-    QFile fileMeeple4( "../../semmVis/pix/meeples/lightblue.png" );
-    QFile fileMeeple8( "../../semmVis/pix/meeples/black.png" );
+    QFile filePlayboard( "/opt/semmVis/pix/playboard/Feld.png" );
+    QFile fileMeeple1( "/opt/semmVis/pix/meeples/blue.png" );
+    QFile fileMeeple2( "/opt/semmVis/pix/meeples/pink.png" );
+    QFile fileMeeple4( "/opt/semmVis/pix/meeples/lightblue.png" );
+    QFile fileMeeple8( "/opt/semmVis/pix/meeples/black.png" );
 
     assert( filePlayboard.exists( ) );
     assert( fileMeeple1.exists( ) );
