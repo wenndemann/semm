@@ -36,6 +36,7 @@ public:
 	uint8_t getVersion();
 	uint8_t getEncoder() { return m_encoder; }
 	void setBlocked(bool blocked) { m_blocked = blocked; }
+	boost::shared_ptr< boost::msm::back::state_machine< fsm::SelectColorFSM_ > > subFSM(){ return _subFSM; }
 
 	static const long updateInterval = 500;
 

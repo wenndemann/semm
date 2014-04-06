@@ -48,10 +48,11 @@ namespace fsm // Concrete FSM implementation
 	// front-end: define the FSM structure
     struct GameFSM_ : public msm::front::state_machine_def<GameFSM_>
     {
-    	GameFSM_( TcpIp* tcpIp )
+    	GameFSM_( TcpIp* tcpIp, bool guiEnabled )
     	: _tcpIp( tcpIp )
-    	, _gui( new pimpl( ) )
-    	{ }
+    	{
+    		if ( guiEnabled ){ _gui = boost::shared_ptr< pimpl >( new pimpl( ) ); }
+    	}
 
     	template <class Event,class FSM>
     	void on_entry(Event const&, FSM& fsm)
@@ -102,7 +103,9 @@ namespace fsm // Concrete FSM implementation
         	uint8_t player, dice;
         };
         std::deque<DiceData> _ddm;
+        std::deque<uint8_t> _deque_show_dice;
         DiceData _currDD;
+        boost::mutex _mutex_deque_show_dice;
     };
     // Pick a back-end
     typedef msm::back::state_machine< GameFSM_ > gameFSM;

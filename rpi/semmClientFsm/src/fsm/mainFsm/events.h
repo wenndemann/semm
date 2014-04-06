@@ -24,6 +24,11 @@ namespace fsm
 		{ FSM_EVENT_COUT( "evMove"); }
 		uint8_t _from, _to;
 	};
+	struct evCheckDst{
+		evCheckDst( uint8_t from, uint8_t to ) : _from( from ), _to( to )
+		{ FSM_EVENT_COUT( "evCheckDst" ); }
+		uint8_t _from, _to;
+	};
 	struct evDice { evDice( ){ FSM_EVENT_COUT( "evDice" ); } };
 	struct evEnter { evEnter( ){ FSM_EVENT_COUT( "evEnter" ); } };
 	struct evShowDice {
@@ -37,6 +42,7 @@ namespace fsm
 		}
 		bool _moveAllowed;
 	};
+	struct evWaitForShowDiceAgain{ evWaitForShowDiceAgain( ){ FSM_EVENT_COUT( "evWaitForShowDiceAgain" ); } };
 	struct evMoveDone { evMoveDone( ){ FSM_EVENT_COUT( "evMoveDone" ); } };
 	struct evMeepleOK { evMeepleOK( ){ FSM_EVENT_COUT( "evMeepleOK" ); } };
 	struct evMeepleNotOK { evMeepleNotOK( ){ FSM_EVENT_COUT( "evMeepleNotOK" ); } };

@@ -28,7 +28,7 @@ void XYdrive::liftMagnet(bool value) {
 	char b[32];
 	_magPos = value;
 	sprintf(b, " %.2d", _magPos);
-	//write(I2C_XYS_SERVO, b, sizeof(b));
+	write(I2C_XYS_SERVO, b, sizeof(b));
 	usleep(600000);
 }
 
@@ -45,13 +45,12 @@ void XYdrive::moveCarriage(uint8_t x)
 
 void XYdrive::resetDev() {
 	uint8_t one = '1';
-	//write(I2C_XYS_RESET, &one, 1);
-//	sleep(15);
+	write(I2C_XYS_RESET, &one, 1);
 }
 
 void XYdrive::move( uint8_t x, uint8_t y, int32_t offset )
 {
-	if(x == _x && y == _y) return;
+//	if(x == _x && y == _y) return;
 
 	cout << "move to " << static_cast<int32_t>(x) << " / " << static_cast<int32_t>(y) << endl;
 
@@ -72,7 +71,7 @@ void XYdrive::move( uint8_t x, uint8_t y, int32_t offset )
 	cout << "offset x = " << offsetX << " offsetY = " << offsetY << endl;
 
 	sprintf(b, " %.2f %.2f", x2, y2);
-	//write(I2C_XYS_SETPOINTS, b, sizeof(b));
+	write(I2C_XYS_SETPOINTS, b, sizeof(b));
 
 	memset(b, '\0', sizeof(b));
 	while(running) {

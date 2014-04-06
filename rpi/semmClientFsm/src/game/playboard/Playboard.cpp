@@ -167,7 +167,7 @@ void Playboard::moveMeeple(uint8_t from, uint8_t to) {
 	moveMeepleXY(color, _fields[from]->x(), _fields[from]->y(), to);
 
 	//move meeple
-	setMeepleMove(color, from, to);
+	setMeepleMove(from, to);
 }
 
 void Playboard::moveMeepleXY(uint8_t color, uint8_t fromX, uint8_t fromY, uint8_t to) {
@@ -228,7 +228,13 @@ uint16_t Playboard::readId(uint32_t fieldId ) {
 	_XYDrive->liftMagnet(false);
 	_XYDrive->moveCarriage(x);//static_cast<uint8_t>((10-static_cast<int32_t>(x)) * 172 + 250));
 //	_ledStripe->set(LedStripes::OFF, color);
-	return _rfid->readTag(y);
+	uint16_t tag;
+	for ( uint32_t i = 0; i < _num_readId_attempts; i++ )
+	{
+		tag = _rfid->readTag(y);
+		if ( tag ) { return tag; }
+	}
+	return 0;
 	//return rand( ) % 100 + 1;
 }
 
@@ -257,15 +263,22 @@ uint8_t Playboard::checkMovedMeeple( uint8_t color )
 
 bool Playboard::checkMeepleMove( uint8_t from, uint8_t to )
 {
-	uint16_t fromTagId = getMeepleFromFieldId( static_cast<int32_t>( from ) )->tag();
+	MeeplePtr miep = getMeepleFromFieldId( static_cast<int32_t>( from ) );
 
-	uint16_t toTagId = static_cast<uint16_t>( readId( static_cast<uint32_t>(to) ) );
-
-	return (fromTagId == toTagId);
+	if ( miep )
+	{
+		uint16_t fromTagId = getMeepleFromFieldId( static_cast<int32_t>( from ) )->tag();
+		uint16_t toTagId = static_cast<uint16_t>( readId( static_cast<uint32_t>(to) ) );
+		return (fromTagId == toTagId);
+	}
+	else
+		return false;
 }
 
-bool Playboard::setMeepleMove( uint8_t color, uint8_t from, uint8_t to )
+bool Playboard::setMeepleMove( uint8_t from, uint8_t to )
 {
+	uint8_t color = getColorFromFieldId( from );
+
 	PlayerMapIt pIt = _players.find( static_cast<int32_t>(color) );
 	if ( pIt == _players.end( ) || !pIt->second )
 	{
@@ -281,6 +294,11 @@ bool Playboard::setMeepleMove( uint8_t color, uint8_t from, uint8_t to )
 		if ( static_cast<uint8_t>(meeples[ i ]->fieldId()) == from )
 		{
 			meeples[ i ]->fieldId( static_cast<int32_t>(to) );
+			std::cout << "The playboard moved a meeple of"
+					  << " color " << static_cast<int32_t>(color)
+					  << " from " << static_cast<int32_t>(from)
+					  << " to " << static_cast<int32_t>(to)
+					  << std::endl;
 			return true;
 		}
 	}
@@ -353,64 +371,35 @@ void Playboard::ledShow() {
 		sleep(1);
 
 		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::YELLOW);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::YELLOW    , LedStripes::Corner::STEFAN);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::RED       , LedStripes::Corner::ELLLA);
 		_ledStripe->set(1, 5, 1, 6, 0, 0, 0, 0);
 		sleep(1);
 
 		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::ORANGE);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::ORANGE    , LedStripes::Corner::STEFAN);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::YELLOW    , LedStripes::Corner::ELLLA);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::RED       , LedStripes::Corner::MARCEL);
 		_ledStripe->set(1, 7, 1, 5, 1, 6, 0, 0);
 		sleep(1);
 
 		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::GREEN);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::GREEN     , LedStripes::Corner::STEFAN);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::ORANGE    , LedStripes::Corner::ELLLA);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::YELLOW    , LedStripes::Corner::MARCEL);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::RED       , LedStripes::Corner::MARTINA);
-		_ledStripe->set(1, 7, 1, 5, 1, 6, 0, 0);
+		_ledStripe->set(1, 3, 1, 7, 1, 5, 1, 6);
 		sleep(1);
 
 		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::BLUE);
-		_ledStripe->set(1, 1, 1, 7, 1, 5, 1, 6);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::BLUE      , LedStripes::Corner::STEFAN);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::GREEN     , LedStripes::Corner::ELLLA);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::ORANGE    , LedStripes::Corner::MARCEL);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::YELLOW    , LedStripes::Corner::MARTINA);
+		_ledStripe->set(1, 1, 1, 3, 1, 7, 1, 5);
 		sleep(1);
 
 		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::PINK);
-		_ledStripe->set(1, 2, 1, 1, 1, 7, 1, 5);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::PINK      , LedStripes::Corner::STEFAN);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::BLUE      , LedStripes::Corner::ELLLA);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::GREEN     , LedStripes::Corner::MARCEL);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::ORANGE    , LedStripes::Corner::MARTINA);
+		_ledStripe->set(1, 2, 1, 1, 1, 3, 1, 7);
 		sleep(1);
 
 		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::LIGHT_BLUE);
-		_ledStripe->set(1, 4, 1, 2, 1, 1, 1, 7);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::STEFAN);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::PINK      , LedStripes::Corner::ELLLA);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::BLUE      , LedStripes::Corner::MARCEL);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::GREEN     , LedStripes::Corner::MARTINA);
+		_ledStripe->set(1, 4, 1, 2, 1, 1, 1, 3);
 		sleep(1);
 
 		_ledRing->set(LedRing::Mode::ON, LedStripes::Color::WHITE);
 		_ledStripe->set(1, 8, 1, 4, 1, 2, 1, 1);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::WHITE     , LedStripes::Corner::STEFAN);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::ELLLA);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::PINK      , LedStripes::Corner::MARCEL);
-//		_ledStripe->set(LedStripes::Mode::ON, LedStripes::Color::BLUE      , LedStripes::Corner::MARTINA);
 		sleep(1);
 
 		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::WHITE);
 		_ledStripe->set(2, 8, 2, 4, 2, 2, 2, 1);
-//		_ledStripe->set(LedStripes::Mode::BLINK_SLOW, LedStripes::Color::WHITE     , LedStripes::Corner::STEFAN);
-//		_ledStripe->set(LedStripes::Mode::BLINK_SLOW, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::ELLLA);
-//		_ledStripe->set(LedStripes::Mode::BLINK_SLOW, LedStripes::Color::PINK      , LedStripes::Corner::MARCEL);
-//		_ledStripe->set(LedStripes::Mode::BLINK_SLOW, LedStripes::Color::BLUE      , LedStripes::Corner::MARTINA);
 		sleep(1);
 
 		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::LIGHT_BLUE);
@@ -424,10 +413,6 @@ void Playboard::ledShow() {
 
 		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::WHITE);
 		_ledStripe->set(3, 8, 3, 4, 3, 2, 3, 1);
-//		_ledStripe->set(LedStripes::Mode::BLINK_FAST, LedStripes::Color::WHITE     , LedStripes::Corner::STEFAN);
-//		_ledStripe->set(LedStripes::Mode::BLINK_FAST, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::ELLLA);
-//		_ledStripe->set(LedStripes::Mode::BLINK_FAST, LedStripes::Color::PINK      , LedStripes::Corner::MARCEL);
-//		_ledStripe->set(LedStripes::Mode::BLINK_FAST, LedStripes::Color::BLUE      , LedStripes::Corner::MARTINA);
 		sleep(1);
 
 		_ledRing->set(LedRing::Mode::BLINK, LedStripes::Color::LIGHT_BLUE);
@@ -441,8 +426,4 @@ void Playboard::ledShow() {
 
 		_ledRing->set(LedRing::Mode::OFF, LedStripes::Color::WHITE);
 		_ledStripe->setAllOff();
-//		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::WHITE     , LedStripes::Corner::STEFAN);
-//		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::LIGHT_BLUE, LedStripes::Corner::ELLLA);
-//		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::PINK      , LedStripes::Corner::MARCEL);
-//		_ledStripe->set(LedStripes::Mode::OFF, LedStripes::Color::BLUE      , LedStripes::Corner::MARTINA);
 }

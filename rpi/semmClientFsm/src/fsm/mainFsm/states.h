@@ -130,8 +130,6 @@ struct GmMoveDone : public msm::front::state<>
 		// do the dice event to start the next turn
 		if ( fsm.get_deferred_queue( ).size( ) == 0 && fsm._ddm.size() > 0 )
 		{
-			std::cout << "Initiaizing the next DiceData with color " << static_cast<int32_t>(fsm._ddm.front().player)
-					  << " and dice result " << static_cast<int32_t>(fsm._ddm.front().dice) << std::endl;
 			fsm.process_event( fsm::evDice( ) );
 		}
 	}
@@ -158,8 +156,6 @@ struct GmDice: public msm::front::state<>
 		}
 
 		displayMapIt->second->setPictureDice( 0 ); //ev._dice );
-
-		fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::ON, fsm._currDD.player);
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM& fsm) {
@@ -174,6 +170,14 @@ struct GmWaitForShowDice: public msm::front::state<>
 	template<class Event, class FSM>
 	void on_entry(Event const&, FSM& fsm) {
 		std::cout << "-> GmWaitForShowDice" << std::endl;
+
+		if ( !fsm._deque_show_dice.empty( ) )
+		{
+			std::cout << "deque_show_dice.pop( )" << std::endl;
+			uint8_t moveAllowed = fsm._deque_show_dice.front( );
+			fsm._deque_show_dice.pop_front( );
+			fsm.process_event(fsm::evShowDice( moveAllowed ));
+		}
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM&) {
@@ -215,14 +219,34 @@ struct GmMoveMeeple : public msm::front::state<>
 	void on_entry(Event const& ev, FSM& fsm) {
 		std::cout << "-> GmMoveMeeple" << std::endl;
 
-		// visualization
 		uint8_t color = fsm._gamePtr->playboard( )->getColorFromFieldId( ev._from );
-		uint16_t tag = fsm._gamePtr->playboard( )->getMeepleFromFieldId( ev._from )->tag( );
-		fsm._gui->setMeeplePos( color, tag, ev._to );
+		uint16_t tag = 0;
+		MeeplePtr miep = fsm._gamePtr->playboard( )->getMeepleFromFieldId( ev._from );
+		if ( miep ){ tag = miep->tag( ); }
 
-		fsm._gamePtr->playboard( )->moveMeeple( ev._from, ev._to );
+		// visualization
+		if ( fsm._gui )
+		{
+			fsm._gui->setMeeplePos( color, tag, ev._to );
+		}
 
-		fsm.process_event( fsm::evMoveDone( ) );
+		if ( ev._from == ev._to )
+		{
+			fsm.process_event( fsm::evMoveDone( ) );
+		}
+		else
+		{
+			uint16_t fromTag = fsm._gamePtr->playboard( )->readId( static_cast<uint32_t>( ev._from ) );
+			if ( fromTag == tag ) // check whether the meeple is still there
+			{
+				fsm._gamePtr->playboard( )->moveMeeple( ev._from, ev._to );
+				fsm.process_event( fsm::evMoveDone( ) );
+			}
+			else // if not check the destination
+			{
+				fsm.process_event( fsm::evCheckDst( ev._from, ev._to ) );
+			}
+		}
 	}
 	template<class Event, class FSM>
 	void on_exit(Event const&, FSM&) {
@@ -371,7 +395,7 @@ struct GmFoundMeeple: public msm::front::state<>
 			<< "(" << static_cast<int32_t>(_x) << "/" << static_cast<int32_t>(_y) << ")"
 			<< " to " << " actual target fieldId " << static_cast<int32_t>(_to) << std::endl;
 		fsm._gamePtr->playboard( )->moveMeepleXY( fsm._currDD.player, _x, _y, _to );
-		fsm._gamePtr->playboard( )->setMeepleMove( fsm._currDD.player, _from, _to);
+		fsm._gamePtr->playboard( )->setMeepleMove( _from, _to);
 
 		//boost::this_thread::sleep( boost::posix_time::seconds( 1 ) );
 
@@ -395,7 +419,7 @@ struct GmMoveMeeplesByHand: public msm::front::state<>
 		std::cout << "-> GmMoveMeeplesByHand" << std::endl;
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
-		Playboard::DisplayMapIt it = displayMap.find( fsm._currDD.player );
+		Playboard::DisplayMapIt it = displayMap.find( fsm._gamePtr->playboard()->getColorFromFieldId(_from) );//fsm._currDD.player );
 		if ( it != displayMap.end( ) )
 		{	it->second->setPictures( I2C_DBEN_PIC_PREPARE );	}
 	}
@@ -416,15 +440,17 @@ struct GmReconfigureMeepleIDs: public msm::front::state<>
 	void on_entry(Event const& ev, FSM& fsm) {
 		std::cout << "-> GmReconfigureMeepleIDs" << std::endl;
 
+		int32_t color = fsm._gamePtr->playboard()->getColorFromFieldId(_from);
+
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
-		Playboard::DisplayMapIt it = displayMap.find( fsm._currDD.player );
+		Playboard::DisplayMapIt it = displayMap.find( color );
 		if ( it != displayMap.end( ) )
 		{	it->second->setPictures( I2C_DBEN_PIC_WAIT );	}
 
 		// All meeple of current player should be on their starting positions.
 		// Check it by reading their tags and reconfigure if successful.
 		std::vector< uint16_t > tags( 3 );
-		if ( fsm._gamePtr->playboard( )->readPlayersMeepleAtStart( static_cast<int32_t>(fsm._currDD.player), tags ) )
+		if ( fsm._gamePtr->playboard( )->readPlayersMeepleAtStart( color, tags ) )
 		{
 			// save the new "to" field to the missing's meeple's "to" field, to move the meeples
 			// to the correct position in the next state when moving them from the starting position
@@ -432,7 +458,7 @@ struct GmReconfigureMeepleIDs: public msm::front::state<>
 
 			// saving all "to" fields
 			Playboard::PlayerMapIt playerIt =
-				fsm._gamePtr->playboard( )->players( ).find( static_cast<int32_t>(fsm._currDD.player) );
+				fsm._gamePtr->playboard( )->players( ).find( color );
 			// error handling
 			if ( playerIt == fsm._gamePtr->playboard( )->players( ).end( ) )
 			{	 fsm.process_event( fsm::evMeepleNotOK( ) ); 	}
@@ -448,7 +474,7 @@ struct GmReconfigureMeepleIDs: public msm::front::state<>
 			for ( uint8_t i = 0; i < meeples.size( ); i++ )
 			{ _toAll.at( i ) = static_cast<uint8_t>(meeples.at( i )->fieldId( )); }
 
-			if ( fsm._gamePtr->playboard( )->reconfigurePlayersMeeple( static_cast<int32_t>(fsm._currDD.player), tags ) )
+			if ( fsm._gamePtr->playboard( )->reconfigurePlayersMeeple( color, tags ) )
 
 			// saving the new fromFieldIds
 			// error handling

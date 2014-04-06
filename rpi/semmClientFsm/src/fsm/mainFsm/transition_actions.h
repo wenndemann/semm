@@ -18,18 +18,35 @@ struct delSsms {
 	void operator()(EVT const&, FSM& fsm, SourceState&, TargetState&) {
 		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
 
-		//for ( boost::uint32_t i = 0; i < fsm._ssms->size( ); i++ )
-		//{
-		//	fsm._ssms->at( i ).reset( );
-		//}
-		/*
-		Playboard::DisplayMap displays = fsm._gamePtr->playboard( )->displays( );
+		int32_t clientColors = fsm._gamePtr->clientColors();
+		int32_t availableColors = fsm._gamePtr->availableColors();
+
+		Playboard::DisplayMap& displays = fsm._gamePtr->playboard( )->displays( );
 		Playboard::DisplayMapIt it = displays.begin( );
+		std::vector< Playboard::DisplayMapIt > vecDisplayToBeErased;
 		for ( ; it != displays.end( ); ++it )
 		{
-			it->second->subFSMPtr( ).reset( );
+			int32_t color = it->second->subFSM()->_color_id;
+			// check whether its a player on playboard
+			if ( !(color & clientColors) )
+			{
+				// check whether the player is active
+				if ( color & availableColors )
+				{
+					it->second->setPictures( I2C_DBEN_PIC_SEMM );
+				}
+				else
+				{
+					it->second->setPictures( I2C_DBEN_PIC_DISABLED );
+				}
+				vecDisplayToBeErased.push_back( it );
+			}
 		}
-		*/
+
+		for ( uint32_t i = 0; i < vecDisplayToBeErased.size( ); i++ )
+		{
+			displays.erase( vecDisplayToBeErased[ i ] );
+		}
 	}
 };
 
@@ -67,10 +84,17 @@ struct popDiceData {
 
 		if( fsm._ddm.size( ) > 0 )
 		{
+			std::cout << "Initiaizing the next DiceData with color " << static_cast<int32_t>(fsm._ddm.front().player)
+								  << " and dice result " << static_cast<int32_t>(fsm._ddm.front().dice) << std::endl;
 			std::cout << "pop from DiceData deque" << std::endl;
 			fsm._currDD = fsm._ddm.front( );
 			fsm._ddm.pop_front();
+
+			std::cout << "LED___________ on for player " << static_cast<int32_t>(fsm._currDD.player) << std::endl;
+			fsm._gamePtr->playboard()->ledStripe()->set(LedStripes::Mode::ON, fsm._currDD.player);
 		}
+		else
+		{ std::cout << "No dicedata for popDiceData!" << std::endl; }
 
 	}
 };
@@ -98,12 +122,18 @@ struct meepleMoved {
 	void operator()(EVT const&, FSM& fsm, SourceState& src, TargetState& target) {
 		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
 
-		// visualization
-		uint8_t color = fsm._currDD.player;
-		uint16_t tag = fsm._gamePtr->playboard( )->getMeepleFromFieldId( src._from )->tag( );
-		fsm._gui->setMeeplePos( color, tag, src._to );
+		if ( fsm._gui )
+		{
+			// visualization
+			uint8_t color = fsm._currDD.player;
+			if ( fsm._gamePtr->playboard( )->getMeepleFromFieldId( src._from ) )
+			{
+				uint16_t tag = fsm._gamePtr->playboard( )->getMeepleFromFieldId( src._from )->tag( );
+				fsm._gui->setMeeplePos( color, tag, src._to );
+			}
+		}
 
-		fsm._gamePtr->playboard( )->setMeepleMove( fsm._currDD.player, src._from, src._to );
+		fsm._gamePtr->playboard( )->setMeepleMove( src._from, src._to );
 	}
 };
 

@@ -117,7 +117,8 @@ namespace fsm // Concrete FSM implementation
 			void on_entry(Event const&, FSM& fsm) {
 				std::cout << "-> ScmDisable " << fsm._color_id << std::endl;
 
-				fsm._gamePtr->playboard()->display( fsm._color_id )->setPictures( I2C_DBEN_PIC_DISABLED );
+				Playboard::DisplayPtr display = fsm._gamePtr->playboard()->display( fsm._color_id );
+				if ( display ){ display->setPictures( I2C_DBEN_PIC_DISABLED ); }
 
 				while( !fsm._gamePtr->playboard()->addPlayer( static_cast<int32_t>(fsm._color_id) ) )
 				{ boost::this_thread::sleep( boost::posix_time::seconds( 1 ) ); }
@@ -137,8 +138,11 @@ namespace fsm // Concrete FSM implementation
 							static_cast<uint8_t>(vecMeeples[ i ]->fieldId( ) );
 					}
 					std::cout << "meepleTagFieldIdMap filled!" << std::endl;
-					fsm._gui->addMeeples( fsm._color_id, meepleTagFieldIdMap );
-					std::cout << "meeples added to Vis!" << std::endl;
+					if ( fsm._gui )
+					{
+						fsm._gui->addMeeples( fsm._color_id, meepleTagFieldIdMap );
+						std::cout << "meeples added to Vis!" << std::endl;
+					}
 				}
 
 				//if ( !fsm._gamePtr->playboard()->addPlayer( fsm._color_id ) )
@@ -158,7 +162,8 @@ namespace fsm // Concrete FSM implementation
 			void on_entry(Event const&, FSM& fsm) {
 				std::cout << "-> ScmPrepare " << fsm._color_id << std::endl;
 
-				fsm._gamePtr->playboard()->display( fsm._color_id )->setPictures( I2C_DBEN_PIC_PREPARE );
+				Playboard::DisplayPtr display = fsm._gamePtr->playboard()->display( fsm._color_id );
+				if ( display ){ display->setPictures( I2C_DBEN_PIC_PREPARE ); }
 
 				if ( !(fsm._gamePtr->clientColors( ) & fsm._color_id) )
 				{ fsm._gamePtr->mainFSM( )->_tcpIp->sendSetColor( static_cast<uint8_t>( fsm._color_id ) ); }
@@ -177,7 +182,8 @@ namespace fsm // Concrete FSM implementation
 			void on_entry(Event const&, FSM& fsm) {
 				std::cout << "-> ScmWait " << fsm._color_id << std::endl;
 
-				fsm._gamePtr->playboard()->display( fsm._color_id )->setPictures( I2C_DBEN_PIC_WAIT );
+				Playboard::DisplayPtr display = fsm._gamePtr->playboard()->display( fsm._color_id );
+				if ( display ){ display->setPictures( I2C_DBEN_PIC_WAIT ); }
 				if ( fsm._gamePtr->playboard()->addPlayer( fsm._color_id ) ) {
 					fsm._gamePtr->addToClientColors( fsm._color_id );
 					fsm.process_event( fsm::scmEvMeeplesOK( ) );
@@ -197,7 +203,8 @@ namespace fsm // Concrete FSM implementation
 			void on_entry(Event const&, FSM& fsm) {
 				std::cout << "-> ScmStart " << fsm._color_id << std::endl;
 
-				fsm._gamePtr->playboard()->display( fsm._color_id )->setPictures( I2C_DBEN_PIC_START );
+				Playboard::DisplayPtr display = fsm._gamePtr->playboard()->display( fsm._color_id );
+				if ( display ){ display->setPictures( I2C_DBEN_PIC_START ); }
 			}
 			template<class Event, class FSM>
 			void on_exit(Event const&, FSM& fsm) {
@@ -212,10 +219,8 @@ namespace fsm // Concrete FSM implementation
 				std::cout << "-> ScmReady " << fsm._color_id << std::endl;
 				fsm._ready = true;
 
-				fsm._gamePtr->playboard()->display( fsm._color_id )->setPictures( I2C_DBEN_PIC_WAIT );
-
-
-
+				Playboard::DisplayPtr display = fsm._gamePtr->playboard()->display( fsm._color_id );
+				if ( display ){ display->setPictures( I2C_DBEN_PIC_WAIT ); }
 
 				boost::shared_ptr< std::vector< boost::shared_ptr< msm::back::state_machine< SelectColorFSM_ > > > > ssms =
 						fsm._gamePtr->mainFSM( )->_ssms;
@@ -225,7 +230,7 @@ namespace fsm // Concrete FSM implementation
 				for ( std::vector< boost::shared_ptr< msm::back::state_machine< SelectColorFSM_ > > >::iterator it = ssms->begin( );
 						  it != ssms->end( ); ++it )
 				{
-					if ( !(*it)->_ready && (*it)->_color_id != fsm._color_id )
+					if ( !(*it)->_ready )
 					{	everyoneReady = false; break;	}
 				}
 
@@ -243,8 +248,8 @@ namespace fsm // Concrete FSM implementation
 					for ( std::vector< boost::shared_ptr< msm::back::state_machine< SelectColorFSM_ > > >::iterator it = ssms->begin( );
 						  it != ssms->end( ); ++it )
 					{
-						if ( !(*it)->_ready && (*it)->_color_id != fsm._color_id )
-							(*it)->process_event( scmEvGetReady( ) );
+						//if ( !(*it)->_ready )
+						(*it)->process_event( scmEvGetReady( ) );
 					}
 				}
 			}

@@ -48,36 +48,40 @@ void test( fsm::gameFSM& stateMachine )
 	uint16_t tag;
 
 	tag = stateMachine._gamePtr->playboard( )->getMeepleFromFieldId( 41 )->tag( );
-	stateMachine._gui->setMeeplePos( 1, tag, 24 );
-	stateMachine._gamePtr->playboard( )->setMeepleMove( 1, 41, 24 );
+	if ( stateMachine._gui )
+		stateMachine._gui->setMeeplePos( 1, tag, 24 );
+	stateMachine._gamePtr->playboard( )->setMeepleMove( 41, 24 );
 	boost::this_thread::sleep( boost::posix_time::seconds( 2 ) );
 
 	tag = stateMachine._gamePtr->playboard( )->getMeepleFromFieldId( 38 )->tag( );
-	stateMachine._gui->setMeeplePos( 2, tag, 16 );
-	stateMachine._gamePtr->playboard( )->setMeepleMove( 2, 38, 16 );
+	if ( stateMachine._gui )
+		stateMachine._gui->setMeeplePos( 2, tag, 16 );
+	stateMachine._gamePtr->playboard( )->setMeepleMove( 38, 16 );
 	boost::this_thread::sleep( boost::posix_time::seconds( 2 ) );
 
 	tag = stateMachine._gamePtr->playboard( )->getMeepleFromFieldId( 35 )->tag( );
-	stateMachine._gui->setMeeplePos( 4, tag, 8 );
-	stateMachine._gamePtr->playboard( )->setMeepleMove( 4, 35, 8 );
+	if ( stateMachine._gui )
+		stateMachine._gui->setMeeplePos( 4, tag, 8 );
+	stateMachine._gamePtr->playboard( )->setMeepleMove( 35, 8 );
 	boost::this_thread::sleep( boost::posix_time::seconds( 2 ) );
 
 	tag = stateMachine._gamePtr->playboard( )->getMeepleFromFieldId( 32 )->tag( );
-	stateMachine._gui->setMeeplePos( 8, tag, 0 );
-	stateMachine._gamePtr->playboard( )->setMeepleMove( 8, 32, 0 );
+	if ( stateMachine._gui )
+		stateMachine._gui->setMeeplePos( 8, tag, 0 );
+	stateMachine._gamePtr->playboard( )->setMeepleMove( 32, 0 );
 	boost::this_thread::sleep( boost::posix_time::seconds( 2 ) );
 
 }
 
-void start_game( const std::string ipaddr )
+void start_game( const std::string ipaddr, bool guiEnabled )
 {
 	TcpIp t;
-	//if ( !t.connect( ipaddr ) )
-	//	return;
+	if ( !t.connect( ipaddr ) )
+		return;
 
 	std::cout << "start fsm" << std::endl;
 
-	fsm::gameFSM p( &t );
+	fsm::gameFSM p( &t, guiEnabled );
 	p.start( );
 
 	//test( p );
@@ -100,7 +104,10 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	start_game( std::string( argv[ 1 ] ) );
+	bool guiEnabled = false;
+	if ( argc > 2 && strcmp( argv[ 2 ], "gui" ) == 0 ){ guiEnabled = true; }
+
+	start_game( std::string( argv[ 1 ] ), guiEnabled );
 
 	return 0;
 }

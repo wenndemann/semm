@@ -85,14 +85,23 @@ void TcpIp::worker( )
 		}
 		else if(nR > 0) {
 			uint32_t a = 0;
+
+			std::stringstream ss; ss << "TCP";
+			for ( int32_t i = 0; i < nR; i++ ){ ss << " " << static_cast<int32_t>(inputBuf[i]); }
+			std::cout << ss.str( ) << std::endl;
+
 			for ( int32_t i = 0; i < nR; i++ )
 			{
 				buf[a++] = inputBuf[ i ];
 				if ( (inputBuf[ i ] == 0 ) || i == (nR-1) )
 				{
+					// sonderfallbehandlung für das beste protokoll der welt
+					//if ( buf[0] == TCP_CMD_SHOW_DIE_SC ){ a++; }
+
 					std::stringstream ss2;
 					ss2 << "TCP: ";
 					for ( uint32_t j = 0; j < a-1; j++ ){ ss2 << static_cast<int32_t>(buf[ j ]) << " "; }
+
 					std::cout << ss2.str( ) << std::endl;
 
 					_gamePtr->parseCmd( buf, a-1 );

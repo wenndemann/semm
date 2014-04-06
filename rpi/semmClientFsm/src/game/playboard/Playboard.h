@@ -65,7 +65,7 @@ public:
 
 	uint8_t checkMovedMeeple( uint8_t color );
 	bool checkMeepleMove( uint8_t from, uint8_t to );
-	bool setMeepleMove( uint8_t color, uint8_t from, uint8_t to );
+	bool setMeepleMove( uint8_t from, uint8_t to );
 
 	// TODO optimize! do not search in fieldId order for efficiency
 	bool searchForMeeple( uint8_t from, uint8_t& _x, uint8_t& _y );
@@ -99,6 +99,8 @@ private:
 	FieldMap _fields;
 	PlayerMap _players;
 	boost::mutex _mutexXYDrive;
+
+	const static uint32_t _num_readId_attempts = 2;
 
 	void ledShow();
 };

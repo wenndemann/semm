@@ -28,6 +28,7 @@ struct transition_table : mpl::vector<
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmDice                  , evEnter        , GmWaitForShowDice         , sendDiceDone, none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
+	Row < GmWaitForShowDice       , evWaitForShowDiceAgain, GmWaitForShowDice  , none        , none            >,
 	Row < GmWaitForShowDice       , evShowDice     , GmShowDice                , showDice    , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmShowDice              , evEnter        , GmCheckMovedMeeple        , none        , gMoveAllowed    >,
@@ -35,6 +36,7 @@ struct transition_table : mpl::vector<
 	Row < GmShowDice              , none           , GmMoveDone                , waitSomeTime, gMoveNotAllowed >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmMoveMeeple            , evMoveDone     , GmMoveDone                , none        , none            >,
+	Row < GmMoveMeeple            , evCheckDst     , GmCheckDestination        , none        , none            >,
 	//  +-------------------------+----------------+---------------------------+-------------+------------------+
 	Row < GmCheckMovedMeeple      , evMeepleOK     , GmSendMovedMeeple         , sendMovedMeeple, none         >,
 	Row < GmCheckMovedMeeple      , evMeepleNotOK  , GmShowDice                , none        , none            >,

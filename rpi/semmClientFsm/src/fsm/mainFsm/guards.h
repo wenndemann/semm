@@ -30,8 +30,8 @@ struct gMyColor {
 		bool thisClient = false;
 		if ( !fsm._ddm.empty( ) )
 		{
-			uint8_t player = ( fsm._ddm.size( ) > 1 ) ? fsm._ddm[ 1 ].player : fsm._ddm[ 0 ].player;
-			fsm._gamePtr->playboard()->ledStripe()->set(LedStripes::Mode::ON, player);
+			//uint8_t player = ( fsm._ddm.size( ) > 1 ) ? fsm._ddm[ 1 ].player : fsm._ddm[ 0 ].player;
+			uint8_t player = fsm._ddm.front( ).player;
 			thisClient = static_cast<uint8_t>(fsm._gamePtr->clientColors( ) ) & player;
 		}
 		return thisClient;
@@ -44,8 +44,8 @@ struct gNotMyColor {
 		bool notThisClient = false;
 		if ( !fsm._ddm.empty( ) )
 		{
-			uint8_t player = ( fsm._ddm.size( ) > 1 ) ? fsm._ddm[ 1 ].player : fsm._ddm[ 0 ].player;
-			fsm._gamePtr->playboard()->ledStripe()->set(LedStripes::Mode::ON, player);
+			//uint8_t player = ( fsm._ddm.size( ) > 1 ) ? fsm._ddm[ 1 ].player : fsm._ddm[ 0 ].player;
+			uint8_t player = fsm._ddm.front( ).player;
 			notThisClient = !(static_cast<uint8_t>(fsm._gamePtr->clientColors( ) ) & player);
 		}
 		return notThisClient;

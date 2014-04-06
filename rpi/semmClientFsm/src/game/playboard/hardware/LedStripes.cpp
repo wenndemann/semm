@@ -3,6 +3,8 @@
 LedStripes::LedStripes(uint8_t i2cAddr) {
 	std::cout << "    creating led stripe" << std::endl;
 	setI2cAddr(i2cAddr);
+	for(uint32_t i = 0 ; i < 8 ; i++)
+		_data[i] = 0;
 }
 
 LedStripes::~LedStripes() {
@@ -52,7 +54,7 @@ int LedStripes::set(uint8_t mode, uint8_t color, uint8_t corner) {
 }
 
 int LedStripes::set(uint8_t mode, uint8_t color) {
-	set(mode, color, color);
+	return set(mode, color, color);
 }
 
 int LedStripes::setAllOff() {
@@ -60,5 +62,17 @@ int LedStripes::setAllOff() {
 }
 
 int LedStripes::set() {
-	return I2c::write(_data[0], &_data[1], 7);
+	cout << "   set LEDs "
+			 << static_cast<int32_t> (_data[0]) << " "
+			 << static_cast<int32_t> (_data[1]) << " "
+			 << static_cast<int32_t> (_data[2]) << " "
+			 << static_cast<int32_t> (_data[3]) << " "
+			 << static_cast<int32_t> (_data[4]) << " "
+			 << static_cast<int32_t> (_data[5]) << " "
+			 << static_cast<int32_t> (_data[6]) << " "
+			 << static_cast<int32_t> (_data[7]) << " " << endl;
+
+	int ret = this->write(_data, 8);
+	usleep(50000);
+	return ret;
 }

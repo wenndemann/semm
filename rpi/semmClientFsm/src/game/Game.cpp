@@ -66,8 +66,9 @@ void Game::parseCmd( uint8_t* buf, int32_t nR )
 		break;
 
 	case TCP_CMD_SHOW_DIE_SC:
-		//if( _mainFSM->_currDD.player & _clientColors)
-			_mainFSM->process_event(fsm::evShowDice( buf[ 1 ] ));
+		std::cout << "deque_show_dice.push_back( " << static_cast<int32_t>(buf[1]) << " )" << std::endl;
+		_mainFSM->_deque_show_dice.push_back( buf[ 1 ] );
+		_mainFSM->process_event( fsm::evWaitForShowDiceAgain( ) );
 		break;
 
 	case TCP_CMD_DICE_SC: {
@@ -90,8 +91,11 @@ void Game::parseCmd( uint8_t* buf, int32_t nR )
 
 	case TCP_CMD_PLAYER_IN_HOME_SC: {
 		Playboard::DisplayMapIt dp = _playboard->displays().find(static_cast<int32_t>(buf[1]));
-		dp->second->setPictures(I2C_DBEN_PIC_WIN);
-		_playboard->displays().erase(dp);
+		if ( dp != _playboard->displays().end() )
+		{
+			dp->second->setPictures(I2C_DBEN_PIC_WIN);
+			_playboard->displays().erase(dp);
+		}
 	}
 		break;
 
