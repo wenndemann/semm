@@ -57,10 +57,8 @@ namespace fsm // Concrete FSM implementation
 	struct SelectColorFSM_ : public msm::front::state_machine_def<SelectColorFSM_>
     {
 		SelectColorFSM_( int32_t color_id,
-				         boost::shared_ptr< Game > gamePtr,
-				         boost::shared_ptr< pimpl > gui )
+				         boost::shared_ptr< Game > gamePtr )
 		: _gamePtr( gamePtr )
-		, _gui( gui )
 		, _color_id( color_id )
 		, _ready( false )
 		{ }
@@ -122,28 +120,6 @@ namespace fsm // Concrete FSM implementation
 
 				while( !fsm._gamePtr->playboard()->addPlayer( static_cast<int32_t>(fsm._color_id) ) )
 				{ boost::this_thread::sleep( boost::posix_time::seconds( 1 ) ); }
-
-				// add player to visualization
-				Playboard::PlayerMapIt playerIt =
-					fsm._gamePtr->playboard()->players( ).find( static_cast<int32_t>( fsm._color_id ) );
-				std::cout << "playerIt created!" << std::endl;
-				if ( playerIt != fsm._gamePtr->playboard()->players( ).end( ) )
-				{
-					const MeepleVec& vecMeeples = playerIt->second->meeples( );
-					std::cout << "meeplesVec got!" << std::endl;
-					std::map< uint16_t, uint8_t > meepleTagFieldIdMap;
-					for ( uint32_t i = 0; i < vecMeeples.size( ); i++ )
-					{
-						meepleTagFieldIdMap[ vecMeeples[ i ]->tag( ) ] =
-							static_cast<uint8_t>(vecMeeples[ i ]->fieldId( ) );
-					}
-					std::cout << "meepleTagFieldIdMap filled!" << std::endl;
-					if ( fsm._gui )
-					{
-						fsm._gui->addMeeples( fsm._color_id, meepleTagFieldIdMap );
-						std::cout << "meeples added to Vis!" << std::endl;
-					}
-				}
 
 				//if ( !fsm._gamePtr->playboard()->addPlayer( fsm._color_id ) )
 				//	fsm._gamePtr->mainFSM()->_tcpIp->sendDelColor( fsm._color_id );
@@ -398,7 +374,6 @@ namespace fsm // Concrete FSM implementation
 		> {};
 
 		boost::shared_ptr< Game > _gamePtr;
-		boost::shared_ptr< pimpl > _gui;
 
 		int32_t _color_id;
 		bool _ready;

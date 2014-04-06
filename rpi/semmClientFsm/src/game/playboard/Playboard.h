@@ -53,6 +53,7 @@ public:
 	virtual ~Playboard( );
 
 	bool addPlayer( int32_t );
+	void addPlayerToVis( int32_t colorId );
 	bool delPlayer( int32_t );
 	bool readPlayersMeepleAtStart( int32_t colorId, std::vector< uint16_t >& tags );
 	bool reconfigurePlayersMeeple( int32_t colorId, const std::vector< uint16_t >& tags );
@@ -90,6 +91,7 @@ public:
 	uint8_t getFieldIdFromXY( uint8_t x, uint8_t y);
 
 private:
+	fsm::GameFSM_* _mainFsm;
 	DisplayMap _displays;
 	LedRingPtr _ledRing;
 	LedStripesPtr _ledStripe;

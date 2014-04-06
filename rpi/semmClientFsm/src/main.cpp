@@ -41,33 +41,22 @@ void test( fsm::gameFSM& stateMachine )
 			stateMachine._ssms->at( i )->process_event( fsm::scmEvGetReady( ) );
 		}
 	}
-	boost::this_thread::sleep( boost::posix_time::seconds( 2 ) );
 
+	boost::this_thread::sleep( boost::posix_time::seconds( 2 ) );
+	stateMachine._gui->delMeeples( 4 );
+
+	boost::this_thread::sleep( boost::posix_time::seconds( 2 ) );
 	stateMachine.process_event( fsm::evInitGame( ) );
 
-	uint16_t tag;
-
-	tag = stateMachine._gamePtr->playboard( )->getMeepleFromFieldId( 41 )->tag( );
-	if ( stateMachine._gui )
-		stateMachine._gui->setMeeplePos( 1, tag, 24 );
 	stateMachine._gamePtr->playboard( )->setMeepleMove( 41, 24 );
 	boost::this_thread::sleep( boost::posix_time::seconds( 2 ) );
 
-	tag = stateMachine._gamePtr->playboard( )->getMeepleFromFieldId( 38 )->tag( );
-	if ( stateMachine._gui )
-		stateMachine._gui->setMeeplePos( 2, tag, 16 );
 	stateMachine._gamePtr->playboard( )->setMeepleMove( 38, 16 );
 	boost::this_thread::sleep( boost::posix_time::seconds( 2 ) );
 
-	tag = stateMachine._gamePtr->playboard( )->getMeepleFromFieldId( 35 )->tag( );
-	if ( stateMachine._gui )
-		stateMachine._gui->setMeeplePos( 4, tag, 8 );
 	stateMachine._gamePtr->playboard( )->setMeepleMove( 35, 8 );
 	boost::this_thread::sleep( boost::posix_time::seconds( 2 ) );
 
-	tag = stateMachine._gamePtr->playboard( )->getMeepleFromFieldId( 32 )->tag( );
-	if ( stateMachine._gui )
-		stateMachine._gui->setMeeplePos( 8, tag, 0 );
 	stateMachine._gamePtr->playboard( )->setMeepleMove( 32, 0 );
 	boost::this_thread::sleep( boost::posix_time::seconds( 2 ) );
 

@@ -122,17 +122,6 @@ struct meepleMoved {
 	void operator()(EVT const&, FSM& fsm, SourceState& src, TargetState& target) {
 		std::cout << "transition with event:" << typeid(EVT).name() << std::endl;
 
-		if ( fsm._gui )
-		{
-			// visualization
-			uint8_t color = fsm._currDD.player;
-			if ( fsm._gamePtr->playboard( )->getMeepleFromFieldId( src._from ) )
-			{
-				uint16_t tag = fsm._gamePtr->playboard( )->getMeepleFromFieldId( src._from )->tag( );
-				fsm._gui->setMeeplePos( color, tag, src._to );
-			}
-		}
-
 		fsm._gamePtr->playboard( )->setMeepleMove( src._from, src._to );
 	}
 };

@@ -105,7 +105,6 @@ namespace fsm // Concrete FSM implementation
         std::deque<DiceData> _ddm;
         std::deque<uint8_t> _deque_show_dice;
         DiceData _currDD;
-        boost::mutex _mutex_deque_show_dice;
     };
     // Pick a back-end
     typedef msm::back::state_machine< GameFSM_ > gameFSM;

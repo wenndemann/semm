@@ -52,6 +52,13 @@ void pimpl::addMeeples( uint8_t color, std::map< uint16_t, uint8_t > tagsFields 
                                Q_ARG( semmVis::mapTagField, tagsFields ) );
 }
 
+void pimpl::delMeeples( uint8_t color )
+{
+    QMetaObject::invokeMethod( _mainWindow->view( )->scene( ), "delMeeples",
+                               Qt::QueuedConnection,
+                               Q_ARG( uint8_t, color ) );
+}
+
 void pimpl::setMeeplePos( uint8_t color, uint16_t tag, uint8_t toFieldId )
 {
 

@@ -54,7 +54,7 @@ int I2c::write(void* data, uint8_t length) {
 }
 
 int I2c::write(uint8_t i2cCmd, void* data, uint8_t length) {
-//	return 0;
+	//return 0;
 	uint8_t buf[length + 1];
 
 	buf[0] = i2cCmd;
@@ -63,8 +63,8 @@ int I2c::write(uint8_t i2cCmd, void* data, uint8_t length) {
 }
 
 int I2c::read(void* data, uint8_t length) {
-	int nR = 0;
 	//return 0;
+	int nR = 0;
 
 	if(!fd) open(I2C_DEV_NAME);
 	i2cMutex.lock();
@@ -85,6 +85,7 @@ int I2c::read(void* data, uint8_t length) {
 }
 
 int I2c::read(uint8_t i2cCmd, void* data, uint8_t length) {
+	//return 0;
 	write(&i2cCmd, 1);
 	usleep(10000);
 	return read(data, length);

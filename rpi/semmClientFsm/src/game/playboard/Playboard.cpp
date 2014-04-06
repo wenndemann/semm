@@ -9,6 +9,7 @@
 #include "../../fsm/mainFsm.h"
 
 Playboard::Playboard( fsm::gameFSM* gameFsmPtr ) :
+	_mainFsm( gameFsmPtr ),
 	_displays({
 		{1, DisplayPtr(new Display(I2C_DBEN_ADDR_0, Display::updateInterval, gameFsmPtr))},
 		{2, DisplayPtr(new Display(I2C_DBEN_ADDR_1, Display::updateInterval, gameFsmPtr))},
@@ -107,8 +108,41 @@ bool Playboard::addPlayer( int32_t colorId) {
 	}
 
 	_players[colorId]->addMeeples( tags );
+
+	// add player to visualization
+	if ( _mainFsm->_gui )
+	{
+		addPlayerToVis( colorId );
+	}
+
 	cout << ss.str( ) << " successful!" << std::endl;
 	return true;
+}
+
+void Playboard::addPlayerToVis( int32_t colorId )
+{
+	if ( _mainFsm->_gui )
+	{
+		Playboard::PlayerMapIt playerIt = _players.find( static_cast<int32_t>( colorId ) );
+		std::cout << "playerIt created!" << std::endl;
+		if ( playerIt != _players.end( ) )
+		{
+			const MeepleVec& vecMeeples = playerIt->second->meeples( );
+			std::cout << "meeplesVec got!" << std::endl;
+			std::map< uint16_t, uint8_t > meepleTagFieldIdMap;
+			std::stringstream ss; ss << "adding tags";
+			for ( uint32_t i = 0; i < vecMeeples.size( ); i++ )
+			{
+				meepleTagFieldIdMap[ vecMeeples[ i ]->tag( ) ] =
+					static_cast<uint8_t>(vecMeeples[ i ]->fieldId( ) );
+				ss << " " << vecMeeples[ i ]->tag( );
+			}
+			std::cout << ss.str( ) << " to meepleTagFieldIdMap." << std::endl;
+			//std::cout << "meepleTagFieldIdMap filled!" << std::endl;
+
+			_mainFsm->_gui->addMeeples( colorId, meepleTagFieldIdMap );
+		}
+	}
 }
 
 bool Playboard::delPlayer( int32_t colorId )
@@ -118,6 +152,12 @@ bool Playboard::delPlayer( int32_t colorId )
 	if ( it != _players.end( ) )
 	{
 		_players.erase( it );
+
+		if ( _mainFsm->_gui )
+		{
+			_mainFsm->_gui->delMeeples( colorId );
+		}
+
 		return true;
 	}
 	return false;
@@ -154,8 +194,14 @@ bool Playboard::reconfigurePlayersMeeple( int32_t colorId, const std::vector< ui
 
 	for ( uint32_t i = 0; i < tags.size( ); i++ )
 	{
-		meeples.at( i )->fieldId( static_cast<uint16_t>(tags.at( i )) );
+		meeples.at( i )->tag( static_cast<uint16_t>(tags.at( i )) );
 		meeples.at( i )->fieldId( static_cast<int32_t>(startAreaPos.at( i )) );
+	}
+
+	if ( _mainFsm->_gui )
+	{
+		_mainFsm->_gui->delMeeples( colorId );
+		addPlayerToVis( colorId );
 	}
 
 	return true;
@@ -228,6 +274,11 @@ uint16_t Playboard::readId(uint32_t fieldId ) {
 	_XYDrive->liftMagnet(false);
 	_XYDrive->moveCarriage(x);//static_cast<uint8_t>((10-static_cast<int32_t>(x)) * 172 + 250));
 //	_ledStripe->set(LedStripes::OFF, color);
+
+	// vis test
+	//static uint16_t randomId = 1;
+	//return randomId++;
+
 	uint16_t tag;
 	for ( uint32_t i = 0; i < _num_readId_attempts; i++ )
 	{
@@ -235,7 +286,6 @@ uint16_t Playboard::readId(uint32_t fieldId ) {
 		if ( tag ) { return tag; }
 	}
 	return 0;
-	//return rand( ) % 100 + 1;
 }
 
 uint8_t Playboard::checkMovedMeeple( uint8_t color )
@@ -299,6 +349,13 @@ bool Playboard::setMeepleMove( uint8_t from, uint8_t to )
 					  << " from " << static_cast<int32_t>(from)
 					  << " to " << static_cast<int32_t>(to)
 					  << std::endl;
+
+			if ( _mainFsm->_gui )
+			{
+				uint16_t tag = meeples[i]->tag( );
+				_mainFsm->_gui->setMeeplePos( color, tag, to );
+			}
+
 			return true;
 		}
 	}

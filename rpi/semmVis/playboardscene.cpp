@@ -174,13 +174,33 @@ void PlayboardScene::addMeeples( uint8_t color, semmVis::mapTagField tagsPoint2D
     }
 }
 
+void PlayboardScene::delMeeples( uint8_t color )
+{
+    std::map< uint8_t, std::map< uint16_t, QGraphicsPixmapItem* > >::iterator itPlayer =
+        _mapPlayerToMeepleItems.find( color );
+    if ( itPlayer != _mapPlayerToMeepleItems.end( ) )
+    {
+        std::map< uint16_t, QGraphicsPixmapItem* >::iterator itItem = itPlayer->second.begin( );
+        for ( ; itItem != itPlayer->second.end( ); ++itItem )
+        {
+            _groupMeeples->removeFromGroup( itItem->second );
+            this->removeItem( itItem->second );
+            std::cout << "removing a meeple graphic" << std::endl;
+            // TODO test: delete itItem->second
+        }
+        this->update( );
+        itPlayer->second.clear( );
+        _mapPlayerToMeepleItems.erase( itPlayer );
+    }
+}
+
 void PlayboardScene::setMeeplePos( uint8_t color, uint16_t tag, uint8_t toFieldId )
 {
-    assert( color == 1 || color == 2 || color == 4 || color == 8 );
-    assert( _fields.find( toFieldId ) != _fields.end( ) );
-    assert( _mapPlayerToMeepleItems.find( color ) != _mapPlayerToMeepleItems.end( ) );
-    assert( _mapPlayerToMeepleItems.find( color )->second.find( tag ) !=
-            _mapPlayerToMeepleItems.find( color )->second.end( ) );
+    if ( !(color == 1 || color == 2 || color == 4 || color == 8) ) return;
+    if ( _fields.find( toFieldId ) == _fields.end( ) ) return;
+    if (_mapPlayerToMeepleItems.find( color ) == _mapPlayerToMeepleItems.end( ) ) return;
+    if( _mapPlayerToMeepleItems.find( color )->second.find( tag ) ==
+            _mapPlayerToMeepleItems.find( color )->second.end( ) ) return;
 
     const Point2D& pos = _fields[ toFieldId ];
     _mapPlayerToMeepleItems[ color ][ tag ]->setOffset( _offsetX + _factorX * pos.x, _offsetY + _factorY * pos.y );

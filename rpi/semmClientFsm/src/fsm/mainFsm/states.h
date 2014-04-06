@@ -69,7 +69,7 @@ struct SelectColorMode : public msm::front::state<>
 		std::cout << "-> SelectColorMode" << std::endl;
 
 		for ( int32_t i = 0; i < fsm._ssms->size( ); i++ )
-		{	fsm._ssms->at( i ).reset( new fsm::selectColorFSM( pow(2,i), fsm._gamePtr, fsm._gui ) );	}
+		{	fsm._ssms->at( i ).reset( new fsm::selectColorFSM( pow(2,i), fsm._gamePtr ) );	}
 		std::cout << "   subFSMs created!" << std::endl;
 
 		Playboard::DisplayMap displayMap = fsm._gamePtr->playboard()->displays( );
@@ -223,12 +223,6 @@ struct GmMoveMeeple : public msm::front::state<>
 		uint16_t tag = 0;
 		MeeplePtr miep = fsm._gamePtr->playboard( )->getMeepleFromFieldId( ev._from );
 		if ( miep ){ tag = miep->tag( ); }
-
-		// visualization
-		if ( fsm._gui )
-		{
-			fsm._gui->setMeeplePos( color, tag, ev._to );
-		}
 
 		if ( ev._from == ev._to )
 		{
@@ -454,7 +448,7 @@ struct GmReconfigureMeepleIDs: public msm::front::state<>
 		{
 			// save the new "to" field to the missing's meeple's "to" field, to move the meeples
 			// to the correct position in the next state when moving them from the starting position
-			fsm._gamePtr->playboard( )->getMeepleFromFieldId( static_cast<int32_t>(_from) )->fieldId( static_cast<int32_t>(_to) );
+			fsm._gamePtr->playboard( )->setMeepleMove( _from, _to );
 
 			// saving all "to" fields
 			Playboard::PlayerMapIt playerIt =
