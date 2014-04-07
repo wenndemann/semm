@@ -113,6 +113,8 @@ struct GmMoveDone : public msm::front::state<>
 	void on_entry(Event const&, FSM& fsm) {
 		std::cout << "-> GmMoveDone" << std::endl;
 
+		if ( !fsm._gameStarted ){ fsm._gameStarted = true; }
+
 
 //		for ( uint8_t i = 0; i < 4; i++ )
 //		{ fsm._gamePtr->playboard( )->ledStripe( )->set(LedStripes::OFF, static_cast<uint8_t>(1<<i)); }
@@ -128,7 +130,13 @@ struct GmMoveDone : public msm::front::state<>
 
 		// if the dice data for the next turn has been sent already
 		// do the dice event to start the next turn
-		if ( fsm.get_deferred_queue( ).size( ) == 0 && fsm._ddm.size() > 0 )
+		if ( !fsm._movesAtBeginning.empty( ) )
+		{
+			fsm::evMove moveAtBeginning = fsm._movesAtBeginning.front( );
+			fsm._movesAtBeginning.pop_front();
+			fsm.process_event( moveAtBeginning );
+		}
+		else if ( /*fsm.get_deferred_queue( ).size( ) == 0 &&*/ fsm._ddm.size() > 0 )
 		{
 			fsm.process_event( fsm::evDice( ) );
 		}

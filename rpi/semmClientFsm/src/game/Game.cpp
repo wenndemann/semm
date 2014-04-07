@@ -62,7 +62,10 @@ void Game::parseCmd( uint8_t* buf, int32_t nR )
 		break;
 
 	case TCP_CMD_MOVE_SC:
-		_mainFSM->process_event(fsm::evMove( buf[1]-1, buf[2]-1 ));
+		if ( _mainFSM->_gameStarted )
+		{ _mainFSM->process_event(fsm::evMove( buf[1]-1, buf[2]-1 )); }
+		else
+		{ _mainFSM->_movesAtBeginning.push_back( fsm::evMove( buf[1]-1, buf[2]-1 ) ); }
 		break;
 
 	case TCP_CMD_SHOW_DIE_SC:

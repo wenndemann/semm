@@ -50,6 +50,7 @@ namespace fsm // Concrete FSM implementation
     {
     	GameFSM_( TcpIp* tcpIp, bool guiEnabled )
     	: _tcpIp( tcpIp )
+    	, _gameStarted( false )
     	{
     		if ( guiEnabled ){ _gui = boost::shared_ptr< pimpl >( new pimpl( ) ); }
     	}
@@ -95,6 +96,8 @@ namespace fsm // Concrete FSM implementation
         boost::shared_ptr< pimpl > _gui;
         boost::shared_ptr< Game > _gamePtr;
         SsmsVecPtr _ssms;
+        bool _gameStarted;
+        std::deque< fsm::evMove > _movesAtBeginning;
 
         struct DiceData
         {
