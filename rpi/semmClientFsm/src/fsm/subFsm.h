@@ -212,6 +212,8 @@ namespace fsm // Concrete FSM implementation
 
 				if ( everyoneReady ) // is ready, start the game
 				{
+					fsm._gamePtr->mainFSM()->_gameStarted = true;
+
 					std::cout << "\teveryone is ready" << std::endl;
 					if(fsm._gamePtr->mode() == Game::SelectColor)
 						fsm._gamePtr->mainFSM( )->_tcpIp->sendStartGame( static_cast<uint8_t>(fsm._color_id) );

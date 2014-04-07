@@ -39,12 +39,9 @@ void Display::disableSubFSMEvents( )
 
 int Display::setPictures(uint8_t number) {
 	if(m_actPicNumber == number || m_blocked) return 0;
-//	while((m_actPicNumber >= I2C_DBEN_PIC_DICE_1) && (m_actPicNumber <= I2C_DBEN_PIC_DICE_6) && !m_encoder)
-//		usleep(250000);
 	m_actPicNumber = number;
 	I2c::write(I2C_DBEN_PICTURE, &number, sizeof number);
-	//if(m_cliDisplay != NULL) m_cliDisplay->callPicture(number);
-//	std::cout << "set display " << pow(2,static_cast<int32_t>(getI2cAddr())-80) << " to pic " << static_cast<int32_t>(number) << std::endl;
+	usleep(100000);
 	return 0;
 }
 

@@ -113,7 +113,7 @@ struct GmMoveDone : public msm::front::state<>
 	void on_entry(Event const&, FSM& fsm) {
 		std::cout << "-> GmMoveDone" << std::endl;
 
-		if ( !fsm._gameStarted ){ fsm._gameStarted = true; }
+//		if ( !fsm._gameStarted ){ fsm._gameStarted = true; }
 
 
 //		for ( uint8_t i = 0; i < 4; i++ )
@@ -227,7 +227,7 @@ struct GmMoveMeeple : public msm::front::state<>
 	void on_entry(Event const& ev, FSM& fsm) {
 		std::cout << "-> GmMoveMeeple" << std::endl;
 
-		uint8_t color = fsm._gamePtr->playboard( )->getColorFromFieldId( ev._from );
+//		uint8_t color = fsm._gamePtr->playboard( )->getColorFromFieldId( ev._from );
 		uint16_t tag = 0;
 		MeeplePtr miep = fsm._gamePtr->playboard( )->getMeepleFromFieldId( ev._from );
 		if ( miep ){ tag = miep->tag( ); }
